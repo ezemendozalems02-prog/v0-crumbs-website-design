@@ -74,11 +74,13 @@ export function Cart() {
         onClick={() => setIsCartOpen(false)}
       />
 
-      {/* Cart Panel */}
-      <div className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-card z-50 shadow-2xl flex flex-col animate-slide-in-right">
-
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-primary/10">
+      {/* Cart Panel — uses 100dvh so mobile browser chrome is never included */}
+      <div
+        className="fixed top-0 right-0 w-full max-w-md bg-card z-50 shadow-2xl flex flex-col animate-slide-in-right"
+        style={{ height: "100dvh" }}
+      >
+        {/* Header — fixed at top */}
+        <div className="flex-none flex items-center justify-between p-6 border-b border-primary/10">
           <div className="flex items-center gap-3">
             <ShoppingBag className="w-6 h-6 text-primary" />
             <h2 className="font-[family-name:var(--font-dm-serif)] text-xl text-primary">
@@ -99,8 +101,8 @@ export function Cart() {
           </button>
         </div>
 
-        {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto">
+        {/* Scrollable body — takes all remaining space between header and footer */}
+        <div className="flex-1 overflow-y-auto overscroll-contain">
 
           {/* Cart Items */}
           <div className="p-6">
@@ -229,9 +231,12 @@ export function Cart() {
           )}
         </div>
 
-        {/* Fixed Footer */}
+        {/* Sticky footer — always visible, respects safe area on notched phones */}
         {items.length > 0 && (
-          <div className="p-6 border-t border-primary/10 space-y-4 bg-card">
+          <div
+            className="flex-none border-t border-primary/10 bg-card px-6 pt-5 space-y-4"
+            style={{ paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
+          >
             <div className="flex items-center justify-between">
               <span className="text-foreground/70">Total</span>
               <span className="font-[family-name:var(--font-dm-serif)] text-2xl text-primary">
@@ -242,9 +247,10 @@ export function Cart() {
             <button
               onClick={handleFinalize}
               disabled={!canCheckout}
-              className={`w-full py-4 rounded-full font-medium transition-all duration-300 flex items-center justify-center gap-3 ${
+              style={{ minHeight: "54px", touchAction: "manipulation" }}
+              className={`w-full rounded-full font-medium transition-all duration-300 flex items-center justify-center gap-3 relative z-10 ${
                 canCheckout
-                  ? "bg-[#25D366] text-white hover:bg-[#20BD5A] shadow-md hover:shadow-lg"
+                  ? "bg-[#25D366] text-white hover:bg-[#20BD5A] active:bg-[#1aab50] shadow-md hover:shadow-lg"
                   : "bg-foreground/10 text-foreground/30 cursor-not-allowed"
               }`}
             >
