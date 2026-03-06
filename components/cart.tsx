@@ -1,27 +1,52 @@
 "use client"
 
 import { useCart } from "@/lib/cart-context"
-import { X, Plus, Minus, ShoppingBag, MessageCircle } from "lucide-react"
+import { X, Plus, Minus, ShoppingBag, MessageCircle, User, MapPin, Check } from "lucide-react"
 import { useState } from "react"
+
+const WHATSAPP_NUMBER = "5491136634236"
 
 export function Cart() {
   const { items, totalItems, totalPrice, isCartOpen, setIsCartOpen, updateQuantity, removeItem, clearCart } = useCart()
-  const [isCheckingOut, setIsCheckingOut] = useState(false)
 
-  const handleWhatsAppOrder = () => {
-    const phoneNumber = "5491112345678" // Replace with actual phone number
-    
+  const [nombre, setNombre] = useState("")
+  const [direccion, setDireccion] = useState("")
+  const [errors, setErrors] = useState<{ nombre?: string; direccion?: string }>({})
+
+  const nombreCompleto = nombre.trim().length > 0
+  const direccionCompleta = direccion.trim().length > 0
+  const canCheckout = items.length > 0 && nombreCompleto && direccionCompleta
+
+  const handleFinalize = () => {
+    const newErrors: { nombre?: string; direccion?: string } = {}
+    if (!nombreCompleto) newErrors.nombre = "Completá tu nombre"
+    if (!direccionCompleta) newErrors.direccion = "Completá tu dirección"
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+
+    setErrors({})
+
     const itemsList = items
-      .map((item) => `${item.quantity}x ${item.name}`)
+      .map(
+        (item) =>
+          `- ${item.name} x ${item.quantity} — $${(item.price * item.quantity).toLocaleString("es-AR")}`
+      )
       .join("\n")
-    
-    const message = encodeURIComponent(
-      `Hola! Quiero hacer un pedido de CRUMBS.\n\nPedido:\n${itemsList}\n\nTotal: $${totalPrice.toLocaleString("es-AR")}`
-    )
-    
-    window.open(`https://wa.me/${phoneNumber}?text=${message}`, "_blank")
+
+    const message =
+      `Hola Crumbs, quiero hacer este pedido:\n` +
+      `Nombre: ${nombre.trim()}\n` +
+      `Dirección: ${direccion.trim()}\n\n` +
+      `Pedido:\n${itemsList}\n\n` +
+      `Total: $${totalPrice.toLocaleString("es-AR")}`
+
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, "_blank")
     clearCart()
-    setIsCheckingOut(false)
+    setNombre("")
+    setDireccion("")
   }
 
   if (!isCartOpen) {
@@ -51,6 +76,7 @@ export function Cart() {
 
       {/* Cart Panel */}
       <div className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-card z-50 shadow-2xl flex flex-col animate-slide-in-right">
+
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-primary/10">
           <div className="flex items-center gap-3">
@@ -73,119 +99,166 @@ export function Cart() {
           </button>
         </div>
 
-        {/* Cart Items */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <ShoppingBag className="w-16 h-16 text-foreground/20 mb-4" />
-              <p className="text-foreground/60">Tu carrito está vacío</p>
-              <p className="text-sm text-foreground/40 mt-2">
-                Agregá productos para hacer tu pedido
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-4 p-4 bg-background rounded-xl transition-all duration-300 hover:shadow-md"
-                >
-                  <div className="flex-1">
-                    <h4 className="font-medium text-foreground">{item.name}</h4>
-                    <p className="text-sm text-accent">
-                      ${item.price.toLocaleString("es-AR")}
-                    </p>
-                  </div>
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto">
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
-                      aria-label="Disminuir cantidad"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <span className="w-8 text-center font-medium">{item.quantity}</span>
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
-                      aria-label="Aumentar cantidad"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={() => removeItem(item.id)}
-                    className="p-2 text-foreground/40 hover:text-destructive transition-colors"
-                    aria-label="Eliminar producto"
+          {/* Cart Items */}
+          <div className="p-6">
+            {items.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <ShoppingBag className="w-16 h-16 text-foreground/20 mb-4" />
+                <p className="text-foreground/60">Tu carrito está vacío</p>
+                <p className="text-sm text-foreground/40 mt-2">
+                  Agregá productos para hacer tu pedido
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-4 p-4 bg-background rounded-xl transition-all duration-300 hover:shadow-md"
                   >
-                    <X className="w-4 h-4" />
-                  </button>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-foreground text-sm leading-tight">{item.name}</h4>
+                      <p className="text-sm text-accent mt-0.5">
+                        ${item.price.toLocaleString("es-AR")}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
+                        aria-label="Disminuir cantidad"
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
+                      <span className="w-6 text-center font-medium text-sm">{item.quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
+                        aria-label="Aumentar cantidad"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={() => removeItem(item.id)}
+                      className="p-1.5 text-foreground/40 hover:text-destructive transition-colors shrink-0"
+                      aria-label="Eliminar producto"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Delivery Data Form */}
+          {items.length > 0 && (
+            <div className="px-6 pb-6">
+              <div className="border-t border-primary/10 pt-6">
+                <p className="font-[family-name:var(--font-dm-serif)] text-base text-primary mb-4">
+                  Datos para la entrega
+                </p>
+
+                <div className="space-y-3">
+                  {/* Nombre */}
+                  <div>
+                    <div className="relative flex items-center">
+                      <User className="absolute left-3.5 w-4 h-4 text-foreground/40 pointer-events-none" />
+                      <input
+                        type="text"
+                        value={nombre}
+                        onChange={(e) => {
+                          setNombre(e.target.value)
+                          if (e.target.value.trim()) setErrors((prev) => ({ ...prev, nombre: undefined }))
+                        }}
+                        placeholder="Escribí tu nombre"
+                        className={`w-full pl-10 pr-10 py-3 bg-background border rounded-xl text-sm text-foreground placeholder:text-foreground/40 outline-none transition-colors duration-200 focus:border-primary/60 ${
+                          errors.nombre
+                            ? "border-red-400"
+                            : nombreCompleto
+                            ? "border-primary/30"
+                            : "border-primary/15"
+                        }`}
+                      />
+                      {nombreCompleto && (
+                        <Check className="absolute right-3.5 w-4 h-4 text-emerald-500 pointer-events-none" />
+                      )}
+                    </div>
+                    {errors.nombre && (
+                      <p className="text-xs text-red-400 mt-1.5 pl-1">{errors.nombre}</p>
+                    )}
+                  </div>
+
+                  {/* Dirección */}
+                  <div>
+                    <div className="relative flex items-center">
+                      <MapPin className="absolute left-3.5 w-4 h-4 text-foreground/40 pointer-events-none" />
+                      <input
+                        type="text"
+                        value={direccion}
+                        onChange={(e) => {
+                          setDireccion(e.target.value)
+                          if (e.target.value.trim()) setErrors((prev) => ({ ...prev, direccion: undefined }))
+                        }}
+                        placeholder="Escribí tu dirección"
+                        className={`w-full pl-10 pr-10 py-3 bg-background border rounded-xl text-sm text-foreground placeholder:text-foreground/40 outline-none transition-colors duration-200 focus:border-primary/60 ${
+                          errors.direccion
+                            ? "border-red-400"
+                            : direccionCompleta
+                            ? "border-primary/30"
+                            : "border-primary/15"
+                        }`}
+                      />
+                      {direccionCompleta && (
+                        <Check className="absolute right-3.5 w-4 h-4 text-emerald-500 pointer-events-none" />
+                      )}
+                    </div>
+                    {errors.direccion && (
+                      <p className="text-xs text-red-400 mt-1.5 pl-1">{errors.direccion}</p>
+                    )}
+                  </div>
                 </div>
-              ))}
+              </div>
             </div>
           )}
         </div>
 
-        {/* Footer */}
+        {/* Fixed Footer */}
         {items.length > 0 && (
-          <div className="p-6 border-t border-primary/10 space-y-4">
-            {!isCheckingOut ? (
-              <>
-                <div className="flex items-center justify-between">
-                  <span className="text-foreground/70">Total</span>
-                  <span className="font-[family-name:var(--font-dm-serif)] text-2xl text-primary">
-                    ${totalPrice.toLocaleString("es-AR")}
-                  </span>
-                </div>
-                <button
-                  onClick={() => setIsCheckingOut(true)}
-                  className="w-full bg-primary text-primary-foreground py-4 rounded-full font-medium hover:bg-secondary transition-colors duration-300"
-                >
-                  FINALIZAR PEDIDO
-                </button>
-              </>
-            ) : (
-              <>
-                <div className="text-center mb-4">
-                  <p className="text-sm text-foreground/70 mb-2">
-                    Tu pedido será enviado por WhatsApp
-                  </p>
-                  <div className="flex items-center justify-between py-3 border-t border-b border-primary/10">
-                    <span className="text-foreground/70">Total a pagar</span>
-                    <span className="font-[family-name:var(--font-dm-serif)] text-2xl text-primary">
-                      ${totalPrice.toLocaleString("es-AR")}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={handleWhatsAppOrder}
-                  className="w-full bg-[#25D366] text-white py-4 rounded-full font-medium hover:bg-[#20BD5A] transition-colors duration-300 flex items-center justify-center gap-3"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  PEDIR POR WHATSAPP
-                </button>
-                <button
-                  onClick={() => setIsCheckingOut(false)}
-                  className="w-full bg-transparent text-foreground/60 py-2 font-medium hover:text-foreground transition-colors"
-                >
-                  Volver al carrito
-                </button>
-              </>
-            )}
+          <div className="p-6 border-t border-primary/10 space-y-4 bg-card">
+            <div className="flex items-center justify-between">
+              <span className="text-foreground/70">Total</span>
+              <span className="font-[family-name:var(--font-dm-serif)] text-2xl text-primary">
+                ${totalPrice.toLocaleString("es-AR")}
+              </span>
+            </div>
+
+            <button
+              onClick={handleFinalize}
+              disabled={!canCheckout}
+              className={`w-full py-4 rounded-full font-medium transition-all duration-300 flex items-center justify-center gap-3 ${
+                canCheckout
+                  ? "bg-[#25D366] text-white hover:bg-[#20BD5A] shadow-md hover:shadow-lg"
+                  : "bg-foreground/10 text-foreground/30 cursor-not-allowed"
+              }`}
+            >
+              <MessageCircle className="w-5 h-5" />
+              FINALIZAR PEDIDO
+            </button>
           </div>
         )}
       </div>
 
       <style jsx>{`
         @keyframes slideInRight {
-          from {
-            transform: translateX(100%);
-          }
-          to {
-            transform: translateX(0);
-          }
+          from { transform: translateX(100%); }
+          to   { transform: translateX(0); }
         }
         .animate-slide-in-right {
           animation: slideInRight 0.3s ease-out;
