@@ -1,15 +1,14 @@
 "use client"
 
 import { MessageCircle } from "lucide-react"
+import { whatsappUrl } from "@/lib/whatsapp"
 
 export function WhatsAppButton() {
-  const phoneNumber = "5491112345678" // Replace with actual phone number
-  const message = encodeURIComponent("Hola! Me gustaría hacer una consulta sobre CRUMBS.")
-  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`
+  const url = whatsappUrl("Hola! Me gustaría hacer una consulta sobre CRUMBS.")
 
   return (
     <a
-      href={whatsappUrl}
+      href={url}
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-6 right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 group"

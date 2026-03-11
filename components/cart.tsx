@@ -3,8 +3,7 @@
 import { useCart } from "@/lib/cart-context"
 import { X, Plus, Minus, ShoppingBag, MessageCircle, User, MapPin, Check } from "lucide-react"
 import { useState } from "react"
-
-const WHATSAPP_NUMBER = "5491136634236"
+import { whatsappUrl } from "@/lib/whatsapp"
 
 export function Cart() {
   const { items, totalItems, totalPrice, isCartOpen, setIsCartOpen, updateQuantity, removeItem, clearCart } = useCart()
@@ -43,7 +42,7 @@ export function Cart() {
       `Pedido:\n${itemsList}\n\n` +
       `Total: $${totalPrice.toLocaleString("es-AR")}`
 
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, "_blank")
+    window.open(whatsappUrl(message), "_blank")
     clearCart()
     setNombre("")
     setDireccion("")

@@ -6,6 +6,7 @@ import { Footer } from "@/components/footer"
 import { WhatsAppButton } from "@/components/whatsapp-button"
 import { MapPin, Clock, Phone, Instagram, MessageCircle } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import { whatsappUrl } from "@/lib/whatsapp"
 
 function useInView(threshold = 0.1) {
   const ref = useRef<HTMLDivElement>(null)
@@ -167,7 +168,7 @@ export default function ContactoPage() {
 
               {/* WhatsApp CTA */}
               <a
-                href="https://wa.me/5491112345678"
+                href={whatsappUrl("Hola! Me gustaría hacer una consulta sobre CRUMBS.")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-3 bg-[#25D366] text-white px-8 py-4 rounded-full font-medium hover:bg-[#20BD5A] transition-colors duration-300 w-full"
