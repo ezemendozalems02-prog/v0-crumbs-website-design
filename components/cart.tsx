@@ -17,32 +17,46 @@ export function Cart() {
   const canCheckout = items.length > 0 && nombreCompleto && direccionCompleta
 
   const handleFinalize = () => {
+    // Read values from local variables immediately — never from stale React state
+    const trimmedNombre = nombre.trim()
+    const trimmedDireccion = direccion.trim()
+    const snapshot = [...items]
+
+    // Validate synchronously before any state mutation
     const newErrors: { nombre?: string; direccion?: string } = {}
-    if (!nombreCompleto) newErrors.nombre = "Completá tu nombre"
-    if (!direccionCompleta) newErrors.direccion = "Completá tu dirección"
+    if (!trimmedNombre) newErrors.nombre = "Completá tu nombre"
+    if (!trimmedDireccion) newErrors.direccion = "Completá tu dirección"
+    if (snapshot.length === 0) return
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
       return
     }
 
-    setErrors({})
-
-    const itemsList = items
+    // Build the full message before touching any state
+    const itemsList = snapshot
       .map(
         (item) =>
           `- ${item.name} x ${item.quantity} — $${(item.price * item.quantity).toLocaleString("es-AR")}`
       )
       .join("\n")
 
+    const orderTotal = snapshot.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
     const message =
       `Hola Crumbs, quiero hacer este pedido:\n` +
-      `Nombre: ${nombre.trim()}\n` +
-      `Dirección: ${direccion.trim()}\n\n` +
+      `Nombre: ${trimmedNombre}\n` +
+      `Dirección: ${trimmedDireccion}\n\n` +
       `Pedido:\n${itemsList}\n\n` +
-      `Total: $${totalPrice.toLocaleString("es-AR")}`
+      `Total: $${orderTotal.toLocaleString("es-AR")}`
 
-    window.open(whatsappUrl(message), "_blank")
+    // Use location.href so Safari iOS never blocks it as a popup.
+    // This must happen before any setState call to stay within the user gesture.
+    const url = `https://wa.me/5491136634236?text=${encodeURIComponent(message)}`
+    window.location.href = url
+
+    // State cleanup after navigation is triggered
+    setErrors({})
     clearCart()
     setNombre("")
     setDireccion("")
