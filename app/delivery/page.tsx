@@ -3,7 +3,6 @@
 import Image from "next/image"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
-import { WhatsAppButton } from "@/components/whatsapp-button"
 import { Cart } from "@/components/cart"
 import { CartProvider, useCart } from "@/lib/cart-context"
 import { Plus, Check } from "lucide-react"
@@ -365,7 +364,6 @@ function DeliveryContent() {
 
       <Footer />
       <Cart />
-      <WhatsAppButton />
     </main>
   )
 }
