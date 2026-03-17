@@ -1,6 +1,6 @@
 "use client"
 
-import { CalendarDays, Clock, Users, User, Phone, FileText, CheckCircle2 } from "lucide-react"
+import { CalendarDays, Clock, Users, User, Phone, FileText, CheckCircle2, Armchair } from "lucide-react"
 import type { TableOption } from "@/app/reservas/page"
 
 interface ReservationSummaryProps {
@@ -39,7 +39,7 @@ export function ReservationSummary({
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <SummaryRow icon={<span className="text-base">🪑</span>} label="Mesa" value={table.label} />
+        <SummaryRow icon={<Armchair className="w-4 h-4" />} label="Mesa" value={table.label} />
         <SummaryRow icon={<Users className="w-4 h-4" />} label="Personas" value={`${personas} persona${personas > 1 ? "s" : ""}`} />
         <SummaryRow icon={<CalendarDays className="w-4 h-4" />} label="Fecha" value={fechaStr} />
         <SummaryRow icon={<Clock className="w-4 h-4" />} label="Horario" value={time} />

@@ -34,7 +34,7 @@ export function TableSelector({ options, selected, onSelect, error }: TableSelec
                   alt={opt.label}
                   fill
                   className={`object-cover transition-transform duration-500 ${
-                    isActive ? "scale-105" : "group-hover:scale-103"
+                    isActive ? "scale-105" : "group-hover:scale-105"
                   }`}
                   sizes="(max-width: 768px) 50vw, 25vw"
                 />

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import Image from "next/image"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
@@ -81,7 +81,7 @@ export default function ReservasPage() {
   const [nombre, setNombre] = useState("")
   const [telefono, setTelefono] = useState("")
   const [requerimiento, setRequerimiento] = useState("")
-  const [tolerancia, setToleranc] = useState(false)
+  const [tolerancia, setTolerancia] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const dateKey = selectedDate
@@ -218,7 +218,7 @@ export default function ReservasPage() {
             onNombreChange={(v) => { setNombre(v); setErrors((e) => ({ ...e, nombre: "" })) }}
             onTelefonoChange={(v) => { setTelefono(v); setErrors((e) => ({ ...e, telefono: "" })) }}
             onRequerimientoChange={setRequerimiento}
-            onToleranciaChange={(v) => { setToleranc(v); setErrors((e) => ({ ...e, tolerancia: "" })) }}
+            onToleranciaChange={(v) => { setTolerancia(v); setErrors((e) => ({ ...e, tolerancia: "" })) }}
             errors={errors}
           />
         </section>
