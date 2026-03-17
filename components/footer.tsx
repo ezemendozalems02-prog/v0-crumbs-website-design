@@ -24,7 +24,10 @@ export function Footer() {
             <h4 className="font-[family-name:var(--font-dm-serif)] text-lg">Navegación</h4>
             <nav className="flex flex-col gap-2">
               <Link href="/" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
-                Home
+                Inicio
+              </Link>
+              <Link href="/nosotros" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                Nosotros
               </Link>
               <Link href="/cafeteria" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                 Desayunos & Cafetería
@@ -34,6 +37,12 @@ export function Footer() {
               </Link>
               <Link href="/delivery" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                 Pedido Delivery
+              </Link>
+              <Link href="/reservas" className="text-sm text-primary-foreground font-medium hover:text-accent transition-colors">
+                Reservas
+              </Link>
+              <Link href="/contacto" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                Contacto
               </Link>
             </nav>
           </div>

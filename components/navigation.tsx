@@ -5,11 +5,10 @@ import { useState } from "react"
 import { Menu, X } from "lucide-react"
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/cafeteria", label: "Desayunos & Cafetería" },
-  { href: "/cocina", label: "Almuerzos & Cenas" },
-  { href: "/delivery", label: "Pedido Delivery" },
-  { href: "/nosotros", label: "Sobre Nosotros" },
+  { href: "/", label: "Inicio" },
+  { href: "/nosotros", label: "Nosotros" },
+  { href: "/delivery", label: "Delivery" },
+  { href: "/reservas", label: "Reservas", highlight: true },
   { href: "/contacto", label: "Contacto" },
 ]
 
@@ -36,7 +35,11 @@ export function Navigation() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm text-foreground/80 hover:text-primary transition-colors duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-primary hover:after:w-full after:transition-all after:duration-300"
+                className={`text-sm transition-colors duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-primary hover:after:w-full after:transition-all after:duration-300 ${
+                  link.highlight
+                    ? "text-primary font-semibold"
+                    : "text-foreground/80 hover:text-primary"
+                }`}
               >
                 {link.label}
               </Link>
