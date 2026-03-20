@@ -1,7 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import Image from "next/image"
+import { useState, useEffect, useTransition } from "react"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { WhatsAppButton } from "@/components/whatsapp-button"
@@ -12,6 +11,7 @@ import { TimeSelector } from "@/components/reservas/time-selector"
 import { ReservationForm } from "@/components/reservas/reservation-form"
 import { ReservationSummary } from "@/components/reservas/reservation-summary"
 import { AvailabilityBadge } from "@/components/reservas/availability-badge"
+import { getDisponibilidad, crearReserva } from "@/lib/reservas"
 
 export type TableOption = {
   id: "2" | "4" | "6" | "8+"
@@ -21,26 +21,29 @@ export type TableOption = {
   maxPersons: number
   minPersons: number
   image: string
+  tipoMesa: string // Para la base de datos
 }
 
 export const TABLE_OPTIONS: TableOption[] = [
   {
     id: "2",
     label: "Mesa para 2",
-    description: "Ideal para encuentros íntimos o charlas tranquilas",
+    description: "Ideal para encuentros intimos o charlas tranquilas",
     capacity: "Hasta 2 personas",
     maxPersons: 2,
     minPersons: 1,
     image: "/images/mesa-2.jpg",
+    tipoMesa: "mesa_2",
   },
   {
     id: "4",
     label: "Mesa para 4",
-    description: "Ideal para grupos pequeños",
+    description: "Ideal para grupos pequenos",
     capacity: "Hasta 4 personas",
     maxPersons: 4,
     minPersons: 3,
     image: "/images/mesa-4.jpg",
+    tipoMesa: "mesa_4",
   },
   {
     id: "6",
@@ -50,15 +53,17 @@ export const TABLE_OPTIONS: TableOption[] = [
     maxPersons: 6,
     minPersons: 5,
     image: "/images/mesa-6.jpg",
+    tipoMesa: "mesa_6",
   },
   {
     id: "8+",
-    label: "Mesa para 8 o más",
+    label: "Mesa para 8 o mas",
     description: "Ideal para celebraciones o grupos grandes",
     capacity: "De 8 a 15 personas",
     maxPersons: 15,
     minPersons: 8,
     image: "/images/mesa-8.jpg",
+    tipoMesa: "mesa_8_plus",
   },
 ]
 
@@ -68,10 +73,6 @@ export const HORARIOS = [
 ]
 
 export const STOCK_TOTAL = 100
-
-// Simulated reserved covers per date (key: "YYYY-MM-DD")
-// In production this comes from the database
-const MOCK_RESERVED: Record<string, number> = {}
 
 export default function ReservasPage() {
   const [selectedTable, setSelectedTable] = useState<TableOption | null>(null)
@@ -84,62 +85,111 @@ export default function ReservasPage() {
   const [tolerancia, setTolerancia] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  // Disponibilidad desde Supabase
+  const [availableCovers, setAvailableCovers] = useState<number>(STOCK_TOTAL)
+  const [loadingDisponibilidad, setLoadingDisponibilidad] = useState(false)
+
+  // Para manejar el estado de envío
+  const [isPending, startTransition] = useTransition()
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [submitSuccess, setSubmitSuccess] = useState(false)
+
   const dateKey = selectedDate
     ? selectedDate.toISOString().split("T")[0]
     : null
 
-  const reservedCovers = dateKey ? (MOCK_RESERVED[dateKey] ?? 0) : 0
-  const availableCovers = STOCK_TOTAL - reservedCovers
+  // Cargar disponibilidad cuando cambia la fecha
+  useEffect(() => {
+    if (!dateKey) {
+      setAvailableCovers(STOCK_TOTAL)
+      return
+    }
+
+    setLoadingDisponibilidad(true)
+    getDisponibilidad(dateKey)
+      .then((data) => {
+        setAvailableCovers(data.cubiertos_disponibles)
+      })
+      .catch(() => {
+        setAvailableCovers(STOCK_TOTAL)
+      })
+      .finally(() => {
+        setLoadingDisponibilidad(false)
+      })
+  }, [dateKey])
 
   function validate(): boolean {
     const e: Record<string, string> = {}
-    if (!selectedTable) e.table = "Elegí un tipo de mesa"
-    if (!selectedDate) e.date = "Seleccioná una fecha"
-    if (!selectedTime) e.time = "Elegí un horario"
-    if (!personas || personas < 1) e.personas = "Indicá la cantidad de personas"
+    if (!selectedTable) e.table = "Elegi un tipo de mesa"
+    if (!selectedDate) e.date = "Selecciona una fecha"
+    if (!selectedTime) e.time = "Elegi un horario"
+    if (!personas || personas < 1) e.personas = "Indica la cantidad de personas"
     if (selectedTable && personas > selectedTable.maxPersons)
-      e.personas = `Máximo ${selectedTable.maxPersons} personas para esta mesa`
+      e.personas = `Maximo ${selectedTable.maxPersons} personas para esta mesa`
     if (selectedTable && personas < selectedTable.minPersons)
-      e.personas = `Mínimo ${selectedTable.minPersons} personas para esta mesa`
+      e.personas = `Minimo ${selectedTable.minPersons} personas para esta mesa`
     if (selectedTable?.id === "8+" && personas > 15)
-      e.personas = "Máximo 15 personas"
-    if (!nombre.trim()) e.nombre = "Completá tu nombre y apellido"
-    if (!telefono.trim()) e.telefono = "Completá tu teléfono"
+      e.personas = "Maximo 15 personas"
+    if (!nombre.trim()) e.nombre = "Completa tu nombre y apellido"
+    if (!telefono.trim()) e.telefono = "Completa tu telefono"
     if (!/^[\d\s\+\-\(\)]{6,}$/.test(telefono.trim()))
-      e.telefono = "Ingresá un teléfono válido"
-    if (!tolerancia) e.tolerancia = "Debés aceptar el tiempo de tolerancia"
+      e.telefono = "Ingresa un telefono valido"
+    if (!tolerancia) e.tolerancia = "Debes aceptar el tiempo de tolerancia"
     if (personas > availableCovers)
       e.stock = `No hay cubiertos suficientes para esta fecha. Disponibles: ${availableCovers}`
     setErrors(e)
     return Object.keys(e).length === 0
   }
 
-  function handleReservar() {
+  async function handleReservar() {
     if (!validate()) return
 
-    const fechaStr = selectedDate!.toLocaleDateString("es-AR", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+    setSubmitError(null)
+
+    startTransition(async () => {
+      // Primero guardar en Supabase
+      const result = await crearReserva({
+        nombre: nombre.trim(),
+        telefono: telefono.trim(),
+        fecha: dateKey!,
+        horario: selectedTime,
+        tipoMesa: selectedTable!.tipoMesa,
+        cantidadPersonas: personas,
+        requerimiento: requerimiento.trim() || undefined,
+        tolerancia,
+      })
+
+      if (!result.success) {
+        setSubmitError(result.error || "Error al crear la reserva")
+        return
+      }
+
+      // Si se guardo correctamente, abrir WhatsApp
+      const fechaStr = selectedDate!.toLocaleDateString("es-AR", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+
+      const req = requerimiento.trim() || "Sin requerimientos especiales"
+
+      const message =
+        `Hola CRUMBS, quiero hacer una reserva.\n\n` +
+        `Datos de mi reserva:\n` +
+        `Nombre: ${nombre.trim()}\n` +
+        `Telefono: ${telefono.trim()}\n` +
+        `Mesa: ${selectedTable!.label}\n` +
+        `Cantidad de personas: ${personas}\n` +
+        `Fecha: ${fechaStr}\n` +
+        `Horario: ${selectedTime}\n` +
+        `Requerimiento especial: ${req}\n\n` +
+        `Confirmo que lei y acepto el tiempo de tolerancia de la reserva.\n\n` +
+        `Por favor, confirmen disponibilidad. Gracias.`
+
+      setSubmitSuccess(true)
+      window.location.href = `https://wa.me/5491136634236?text=${encodeURIComponent(message)}`
     })
-
-    const req = requerimiento.trim() || "Sin requerimientos especiales"
-
-    const message =
-      `Hola CRUMBS, quiero hacer una reserva.\n\n` +
-      `Datos de mi reserva:\n` +
-      `Nombre: ${nombre.trim()}\n` +
-      `Teléfono: ${telefono.trim()}\n` +
-      `Mesa: ${selectedTable!.label}\n` +
-      `Cantidad de personas: ${personas}\n` +
-      `Fecha: ${fechaStr}\n` +
-      `Horario: ${selectedTime}\n` +
-      `Requerimiento especial: ${req}\n\n` +
-      `Confirmo que leí y acepto el tiempo de tolerancia de la reserva.\n\n` +
-      `Por favor, confirmen disponibilidad. Gracias.`
-
-    window.location.href = `https://wa.me/5491136634236?text=${encodeURIComponent(message)}`
   }
 
   const isFormReady =
@@ -154,9 +204,9 @@ export default function ReservasPage() {
 
       <div className="max-w-4xl mx-auto px-6 pb-24 space-y-16">
 
-        {/* 1 — Selector de mesa */}
+        {/* 1 - Selector de mesa */}
         <section>
-          <SectionLabel number="01" title="Elegí tu mesa" />
+          <SectionLabel number="01" title="Elegi tu mesa" />
           <TableSelector
             options={TABLE_OPTIONS}
             selected={selectedTable}
@@ -169,9 +219,9 @@ export default function ReservasPage() {
           />
         </section>
 
-        {/* 2 — Fecha y disponibilidad */}
+        {/* 2 - Fecha y disponibilidad */}
         <section>
-          <SectionLabel number="02" title="Seleccioná la fecha" />
+          <SectionLabel number="02" title="Selecciona la fecha" />
           <DateSelector
             selected={selectedDate}
             onSelect={(d) => {
@@ -182,7 +232,14 @@ export default function ReservasPage() {
           />
           {selectedDate && (
             <div className="mt-4">
-              <AvailabilityBadge available={availableCovers} total={STOCK_TOTAL} />
+              {loadingDisponibilidad ? (
+                <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary/5 border border-primary/20 text-primary">
+                  <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  <span className="text-sm">Consultando disponibilidad...</span>
+                </div>
+              ) : (
+                <AvailabilityBadge available={availableCovers} total={STOCK_TOTAL} />
+              )}
             </div>
           )}
           {errors.stock && (
@@ -190,9 +247,9 @@ export default function ReservasPage() {
           )}
         </section>
 
-        {/* 3 — Horario */}
+        {/* 3 - Horario */}
         <section>
-          <SectionLabel number="03" title="Elegí un horario" />
+          <SectionLabel number="03" title="Elegi un horario" />
           <TimeSelector
             horarios={HORARIOS}
             selected={selectedTime}
@@ -204,9 +261,9 @@ export default function ReservasPage() {
           />
         </section>
 
-        {/* 4 — Formulario */}
+        {/* 4 - Formulario */}
         <section>
-          <SectionLabel number="04" title="Completá tus datos" />
+          <SectionLabel number="04" title="Completa tus datos" />
           <ReservationForm
             table={selectedTable}
             personas={personas}
@@ -223,10 +280,17 @@ export default function ReservasPage() {
           />
         </section>
 
-        {/* 5 — Resumen + botón */}
+        {/* Error de envío */}
+        {submitError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl text-center">
+            {submitError}
+          </div>
+        )}
+
+        {/* 5 - Resumen + boton */}
         {isFormReady && (
           <section>
-            <SectionLabel number="05" title="Confirmá tu reserva" />
+            <SectionLabel number="05" title="Confirma tu reserva" />
             <ReservationSummary
               table={selectedTable!}
               personas={personas}
@@ -236,11 +300,12 @@ export default function ReservasPage() {
               telefono={telefono}
               requerimiento={requerimiento}
               onReservar={handleReservar}
+              isLoading={isPending}
             />
           </section>
         )}
 
-        {/* Botón siempre visible al final */}
+        {/* Boton siempre visible al final */}
         {!isFormReady && (
           <div className="flex justify-center">
             <button

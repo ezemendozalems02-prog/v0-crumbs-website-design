@@ -12,6 +12,7 @@ interface ReservationSummaryProps {
   telefono: string
   requerimiento: string
   onReservar: () => void
+  isLoading?: boolean
 }
 
 export function ReservationSummary({
@@ -23,6 +24,7 @@ export function ReservationSummary({
   telefono,
   requerimiento,
   onReservar,
+  isLoading = false,
 }: ReservationSummaryProps) {
   const fechaStr = date.toLocaleDateString("es-AR", {
     weekday: "long",
@@ -65,11 +67,25 @@ export function ReservationSummary({
 
       <button
         onClick={onReservar}
+        disabled={isLoading}
         style={{ touchAction: "manipulation", minHeight: "56px" }}
-        className="w-full flex items-center justify-center gap-3 bg-[#25D366] text-white rounded-full font-semibold text-base hover:bg-[#20BD5A] active:bg-[#1aab50] transition-all duration-300 shadow-lg hover:shadow-xl px-8"
+        className={`w-full flex items-center justify-center gap-3 rounded-full font-semibold text-base transition-all duration-300 shadow-lg px-8 ${
+          isLoading
+            ? "bg-[#25D366]/60 text-white/80 cursor-wait"
+            : "bg-[#25D366] text-white hover:bg-[#20BD5A] active:bg-[#1aab50] hover:shadow-xl"
+        }`}
       >
-        <WhatsAppIcon />
-        Reservar por WhatsApp
+        {isLoading ? (
+          <>
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            Guardando reserva...
+          </>
+        ) : (
+          <>
+            <WhatsAppIcon />
+            Reservar por WhatsApp
+          </>
+        )}
       </button>
 
       <p className="text-center text-xs text-primary-foreground/40 mt-4">
