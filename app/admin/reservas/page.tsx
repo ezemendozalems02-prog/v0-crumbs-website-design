@@ -19,7 +19,8 @@ import { FiltrosAdmin as FiltrosPanel } from "@/components/admin/filtros-admin"
 import { TablaReservas } from "@/components/admin/tabla-reservas"
 import { DetalleModal } from "@/components/admin/detalle-modal"
 import { ReservasQuickList } from "@/components/admin/reservas-quick-list"
-import { RefreshCw, LayoutDashboard } from "lucide-react"
+import { RefreshCw, LayoutDashboard, LogOut } from "lucide-react"
+import { AdminLogoutButton } from "@/components/admin/logout-button"
 
 const today = () => new Date().toISOString().split("T")[0]
 
@@ -122,6 +123,7 @@ export default function AdminReservasPage() {
               <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
               <span className="hidden sm:inline">Actualizar</span>
             </button>
+            <AdminLogoutButton />
           </div>
         </div>
       </header>
