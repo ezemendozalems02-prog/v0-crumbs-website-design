@@ -7,6 +7,7 @@ export type EstadoReserva = "pendiente" | "confirmada" | "cancelada"
 export interface Reserva {
   id: string
   created_at: string
+  updated_at: string
   nombre: string
   telefono: string
   fecha_reserva: string

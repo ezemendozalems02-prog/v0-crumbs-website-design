@@ -52,74 +52,53 @@ export default function AdminReservasPage() {
   }
 
   const loadData = useCallback(() => {
+    console.log("[v0] Iniciando carga de datos con filtros:", filtros)
     startTransition(async () => {
-      const [r, m, d, pr, pe, co] = await Promise.all([
-        getReservasAdmin(filtros),
-        getMetricasAdmin(filtros.fecha ?? today()),
-        getDisponibilidadAdmin(filtros.fecha ?? today()),
-        getProximasReservas(5),
-        getReservasPendientes(),
-        getReservasConfirmadas(10),
-      ])
-      setReservas(r)
-      setMetricas(m)
-      setDisponibilidad(d)
-      setProximas(pr)
-      setPendientes(pe)
-      setConfirmadas(co)
-      setLastRefresh(new Date())
+      try {
+        const [r, m, d, pr, pe, co] = await Promise.all([
+          getReservasAdmin(filtros),
+          getMetricasAdmin(filtros.fecha ?? today()),
+          getDisponibilidadAdmin(filtros.fecha ?? today()),
+          getProximasReservas(5),
+          getReservasPendientes(),
+          getReservasConfirmadas(10),
+        ])
+        
+        console.log("[v0] Datos cargados:", {
+          reservas: r.length,
+          pendientes: pe.length,
+          confirmadas: co.length,
+          proximas: pr.length,
+        })
+        
+        setReservas(r)
+        setMetricas(m)
+        setDisponibilidad(d)
+        setProximas(pr)
+        setPendientes(pe)
+        setConfirmadas(co)
+        setLastRefresh(new Date())
+      } catch (error) {
+        console.error("[v0] Error cargando datos:", error)
+      }
     })
   }, [filtros])
 
   useEffect(() => { loadData() }, [loadData])
 
   const handleConfirmar = async (id: string) => {
+    console.log("[v0] Confirmando reserva:", id)
     setLoadingId(id)
     
-    // Actualización optimista: busca la reserva en el estado actual
-    const reservaAActualizar = reservas.find(r => r.id === id) || detalle
-    if (!reservaAActualizar) {
-      setLoadingId(null)
-      addToast("No se encontró la reserva", "error")
-      return
-    }
-
     const result = await actualizarEstadoReserva(id, "confirmada")
+    console.log("[v0] Resultado de confirmación:", result)
     
     if (result.success && result.reserva) {
-      // Actualización optimista inmediata en el estado local
-      const reservaActualizada = result.reserva
-      
-      // Actualizar el array de reservas
-      setReservas(prev => 
-        prev.map(r => r.id === id ? reservaActualizada : r)
-      )
-      
-      // Actualizar el modal si está abierto
-      if (detalle?.id === id) {
-        setDetalle(reservaActualizada)
-      }
-      
-      // Actualizar listas quick
-      setPendientes(prev => prev.filter(r => r.id !== id))
-      setProximas(prev => 
-        prev.map(r => r.id === id ? reservaActualizada : r)
-      )
-      setConfirmadas(prev => [...prev, reservaActualizada].sort((a, b) => 
-        new Date(a.fecha_reserva).getTime() - new Date(b.fecha_reserva).getTime()
-      ).slice(0, 10))
-      
-      // Actualizar métricas localmente
-      setMetricas(prev => ({
-        ...prev,
-        pendientes: Math.max(0, prev.pendientes - 1),
-        confirmadas: prev.confirmadas + 1,
-      }))
-      
+      console.log("[v0] Reserva confirmada exitosamente, refrescando datos...")
       addToast("Reserva confirmada correctamente", "success")
       
-      // Refetch completo después de 500ms para sincronizar
-      setTimeout(() => loadData(), 500)
+      // Refetch inmediato para sincronizar TODO
+      await loadData()
     } else {
       addToast(result.error ?? "Error al actualizar la reserva", "error")
     }
@@ -128,44 +107,18 @@ export default function AdminReservasPage() {
   }
 
   const handleCancelar = async (id: string) => {
+    console.log("[v0] Cancelando reserva:", id)
     setLoadingId(id)
-    
-    const reservaAActualizar = reservas.find(r => r.id === id) || detalle
-    if (!reservaAActualizar) {
-      setLoadingId(null)
-      addToast("No se encontró la reserva", "error")
-      return
-    }
 
     const result = await actualizarEstadoReserva(id, "cancelada")
+    console.log("[v0] Resultado de cancelación:", result)
     
     if (result.success && result.reserva) {
-      const reservaActualizada = result.reserva
-      
-      setReservas(prev => 
-        prev.map(r => r.id === id ? reservaActualizada : r)
-      )
-      
-      if (detalle?.id === id) {
-        setDetalle(reservaActualizada)
-      }
-      
-      setPendientes(prev => prev.filter(r => r.id !== id))
-      setProximas(prev => prev.filter(r => r.id !== id))
-      setConfirmadas(prev => prev.filter(r => r.id !== id))
-      
-      setMetricas(prev => ({
-        ...prev,
-        pendientes: Math.max(0, prev.pendientes - (reservaAActualizar.estado === "pendiente" ? 1 : 0)),
-        confirmadas: Math.max(0, prev.confirmadas - (reservaAActualizar.estado === "confirmada" ? 1 : 0)),
-        canceladas: prev.canceladas + 1,
-        cubiertos_ocupados: Math.max(0, prev.cubiertos_ocupados - reservaAActualizar.cubiertos_consumidos),
-        cubiertos_disponibles: prev.cubiertos_disponibles + reservaAActualizar.cubiertos_consumidos,
-      }))
-      
+      console.log("[v0] Reserva cancelada exitosamente, refrescando datos...")
       addToast("Reserva cancelada correctamente", "success")
       
-      setTimeout(() => loadData(), 500)
+      // Refetch inmediato para sincronizar TODO
+      await loadData()
     } else {
       addToast(result.error ?? "Error al actualizar la reserva", "error")
     }
