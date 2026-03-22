@@ -1,14 +1,11 @@
 "use client"
 
-import { useState, useEffect, useTransition, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import {
   getReservasAdmin,
   getMetricasAdmin,
   getDisponibilidadAdmin,
-  actualizarEstadoReserva,
-  getProximasReservas,
-  getReservasPendientes,
-  getReservasConfirmadas,
+  eliminarReserva,
   type Reserva,
   type FiltrosAdmin,
   type MetricasAdmin,
@@ -16,11 +13,7 @@ import {
 } from "@/lib/admin-reservas"
 import { MetricasCards } from "@/components/admin/metricas-cards"
 import { DisponibilidadCard } from "@/components/admin/disponibilidad-card"
-import { FiltrosAdmin as FiltrosPanel } from "@/components/admin/filtros-admin"
-import { TablaReservas } from "@/components/admin/tabla-reservas"
-import { DetalleModal } from "@/components/admin/detalle-modal"
-import { ReservasQuickList } from "@/components/admin/reservas-quick-list"
-import { RefreshCw, LayoutDashboard, LogOut } from "lucide-react"
+import { RefreshCw, Trash2, Eye } from "lucide-react"
 import { AdminLogoutButton } from "@/components/admin/logout-button"
 
 const today = () => new Date().toISOString().split("T")[0]
@@ -28,194 +21,225 @@ const today = () => new Date().toISOString().split("T")[0]
 type Toast = { id: number; message: string; type: "success" | "error" }
 
 export default function AdminReservasPage() {
-  const [filtros, setFiltros] = useState<FiltrosAdmin>({ fecha: today(), estado: "todos" })
+  const [fecha, setFecha] = useState(today())
   const [reservas, setReservas] = useState<Reserva[]>([])
   const [metricas, setMetricas] = useState<MetricasAdmin>({
-    total: 0, pendientes: 0, confirmadas: 0, canceladas: 0, cubiertos_ocupados: 0, cubiertos_disponibles: 100,
+    total: 0,
+    cubiertos_ocupados: 0,
+    cubiertos_disponibles: 100,
   })
   const [disponibilidad, setDisponibilidad] = useState<DisponibilidadAdmin>({
-    cubiertos_usados: 0, cubiertos_disponibles: 100, porcentaje_ocupacion: 0, fecha: today(),
+    cubiertos_usados: 0,
+    cubiertos_disponibles: 100,
+    porcentaje_ocupacion: 0,
+    fecha: today(),
   })
-  const [proximas, setProximas] = useState<Reserva[]>([])
-  const [pendientes, setPendientes] = useState<Reserva[]>([])
-  const [confirmadas, setConfirmadas] = useState<Reserva[]>([])
-  const [detalle, setDetalle] = useState<Reserva | null>(null)
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [toasts, setToasts] = useState<Toast[]>([])
-  const [lastRefresh, setLastRefresh] = useState(new Date())
+  const [detalleId, setDetalleId] = useState<string | null>(null)
 
   const addToast = (message: string, type: "success" | "error") => {
     const id = Date.now()
     setToasts((prev) => [...prev, { id, message, type }])
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 4000)
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3000)
   }
 
   const loadData = useCallback(async () => {
     setIsRefreshing(true)
     try {
-      const [r, m, d, pr, pe] = await Promise.all([
-        getReservasPendientes(),
-        getMetricasAdmin(filtros.fecha ?? today()),
-        getDisponibilidadAdmin(filtros.fecha ?? today()),
-        getProximasReservas(5),
-        getReservasPendientes(),
+      const [r, m, d] = await Promise.all([
+        getReservasAdmin({ fecha }),
+        getMetricasAdmin(fecha),
+        getDisponibilidadAdmin(fecha),
       ])
-      
+
       setReservas(r)
       setMetricas(m)
       setDisponibilidad(d)
-      setProximas(pr)
-      setPendientes(r)
-      setLastRefresh(new Date())
     } catch (error) {
-      console.error("[v0] Error cargando datos:", error)
+      console.error("Error loading data:", error)
+      addToast("Error al cargar datos", "error")
     } finally {
       setIsRefreshing(false)
     }
-  }, [filtros])
+  }, [fecha])
 
-  useEffect(() => { loadData() }, [loadData])
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
-  const handleConfirmar = async (id: string) => {
+  const handleEliminar = async (id: string) => {
+    if (!confirm("¿Eliminar esta reserva?")) return
+
     setLoadingId(id)
-    
-    const result = await actualizarEstadoReserva(id, "confirmada")
-    
+    const result = await eliminarReserva(id)
+
     if (result.success) {
-      addToast("Reserva aceptada", "success")
-      setDetalle(null)
+      addToast("Reserva eliminada", "success")
+      setDetalleId(null)
       await loadData()
     } else {
-      addToast(result.error ?? "Error al actualizar la reserva", "error")
+      addToast(result.error ?? "Error al eliminar", "error")
     }
-    
+
     setLoadingId(null)
   }
 
-  const handleCancelar = async (id: string) => {
-    setLoadingId(id)
+  const detalle = reservas.find((r) => r.id === detalleId) || null
 
-    const result = await actualizarEstadoReserva(id, "cancelada")
-    
-    if (result.success) {
-      addToast("Reserva cancelada", "success")
-      setDetalle(null)
-      await loadData()
-    } else {
-      addToast(result.error ?? "Error al actualizar la reserva", "error")
-    }
-    
-    setLoadingId(null)
-  }
+  // Agrupar por horario
+  const gruposHorario = useMemo(() => {
+    const grupos: Record<string, Reserva[]> = {}
+    reservas.forEach((r) => {
+      if (!grupos[r.horario]) grupos[r.horario] = []
+      grupos[r.horario].push(r)
+    })
+    return grupos
+  }, [reservas])
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground sticky top-0 z-30 border-b border-primary-foreground/10">
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 bg-background border-b border-border/40 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary-foreground/10 rounded-xl">
-              <LayoutDashboard className="w-5 h-5" />
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-lg">
+              🍽️
             </div>
             <div>
-              <h1 className="font-[family-name:var(--font-serif)] text-xl leading-tight">Panel de Reservas</h1>
-              <p className="text-xs text-primary-foreground/60 hidden sm:block">
-                Gestioná reservas, disponibilidad y estados en tiempo real
-              </p>
+              <h1 className="text-xl font-bold text-foreground">Panel de Reservas</h1>
+              <p className="text-xs text-foreground/60">Gestiona todas tus reservas</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-primary-foreground/50 hidden md:block">
-              Actualizado: {lastRefresh.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
-            </span>
             <button
               onClick={loadData}
               disabled={isRefreshing}
-              className="flex items-center gap-2 px-3 py-2 bg-primary-foreground/10 rounded-xl text-sm hover:bg-primary-foreground/20 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-3 py-2 bg-primary/10 rounded-xl text-sm hover:bg-primary/20 transition-colors disabled:opacity-50"
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
-              <span className="hidden sm:inline">Actualizar</span>
             </button>
             <AdminLogoutButton />
           </div>
         </div>
       </header>
 
-      <main className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      {/* Main content */}
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Selector de fecha */}
+        <div className="mb-6 flex items-center gap-4">
+          <label className="text-sm font-medium text-foreground/60">Fecha:</label>
+          <input
+            type="date"
+            value={fecha}
+            onChange={(e) => setFecha(e.target.value)}
+            className="px-4 py-2 bg-background border border-border/40 rounded-xl text-sm"
+          />
+        </div>
 
-        {/* Metricas */}
-        <MetricasCards metricas={metricas} fecha={filtros.fecha ?? today()} />
+        {/* Métricas */}
+        <MetricasCards metricas={metricas} />
 
-        {/* Main grid: filters + table | sidebar */}
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6">
+        {/* Disponibilidad */}
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            {/* Listado de reservas */}
+            <div className="bg-card rounded-2xl border border-border/40 p-6">
+              <h2 className="text-lg font-semibold text-foreground mb-4">Reservas del {fecha}</h2>
 
-          {/* Left: filters + table */}
-          <div className="space-y-5 min-w-0">
-            <FiltrosPanel filtros={filtros} onChange={setFiltros} />
-
-            {/* Result count */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-foreground/60">
-                {isRefreshing ? "Cargando reservas…" : (
-                  reservas.length === 0
-                    ? "No hay reservas para estos filtros"
-                    : `${reservas.length} reserva${reservas.length !== 1 ? "s" : ""}`
-                )}
-              </p>
+              {reservas.length === 0 ? (
+                <p className="text-center text-foreground/40 py-8">No hay reservas para este día</p>
+              ) : (
+                <div className="space-y-4">
+                  {Object.entries(gruposHorario).map(([horario, grupo]) => (
+                    <div key={horario} className="border-t border-border/20 pt-4 first:border-t-0 first:pt-0">
+                      <div className="text-sm font-medium text-foreground/60 mb-3">{horario}</div>
+                      <div className="space-y-2">
+                        {grupo.map((r) => (
+                          <div
+                            key={r.id}
+                            className={`p-3 rounded-xl border transition-all cursor-pointer ${
+                              detalleId === r.id
+                                ? "bg-primary/10 border-primary/40"
+                                : "bg-background border-border/40 hover:border-border/60"
+                            }`}
+                            onClick={() => setDetalleId(r.id)}
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-foreground">{r.nombre}</div>
+                                <div className="text-xs text-foreground/60 mt-1 flex gap-3">
+                                  <span>{r.cantidad_personas} personas</span>
+                                  <span>{r.tipo_mesa}</span>
+                                  {r.requerimiento_especial && <span>⭐ {r.requerimiento_especial}</span>}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleEliminar(r.id)
+                                  }}
+                                  disabled={loadingId === r.id}
+                                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                                  title="Eliminar reserva"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-
-            {isRefreshing ? (
-              <div className="bg-card rounded-2xl border border-border/40 p-16 flex items-center justify-center gap-3 text-foreground/40">
-                <RefreshCw className="w-5 h-5 animate-spin" />
-                <span className="text-sm">Cargando reservas…</span>
-              </div>
-            ) : (
-              <TablaReservas
-                reservas={reservas}
-                onConfirmar={handleConfirmar}
-                onCancelar={handleCancelar}
-                onDetalle={setDetalle}
-                loadingId={loadingId}
-              />
-            )}
           </div>
 
-          {/* Right sidebar */}
-          <div className="space-y-5">
+          {/* Sidebar derecho */}
+          <div className="space-y-6">
             <DisponibilidadCard disponibilidad={disponibilidad} />
-            <ReservasQuickList
-              reservas={pendientes.slice(0, 5)}
-              titulo="Pendientes de confirmar"
-              subtitulo="Actuá rápido antes del servicio"
-              onDetalle={setDetalle}
-            />
-            <ReservasQuickList
-              reservas={confirmadas.slice(0, 5)}
-              titulo="Reservas aceptadas"
-              subtitulo="Las últimas confirmadas"
-              onDetalle={setDetalle}
-            />
-            <ReservasQuickList
-              reservas={proximas}
-              titulo="Proximas reservas"
-              subtitulo="Las siguientes 5 por fecha y horario"
-              onDetalle={setDetalle}
-            />
+
+            {/* Detalle */}
+            {detalle && (
+              <div className="bg-card rounded-2xl border border-border/40 p-6">
+                <h3 className="font-semibold text-foreground mb-4">Detalles</h3>
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <div className="text-foreground/60">Nombre</div>
+                    <div className="font-medium text-foreground">{detalle.nombre}</div>
+                  </div>
+                  <div>
+                    <div className="text-foreground/60">Teléfono</div>
+                    <div className="font-medium text-foreground">{detalle.telefono}</div>
+                  </div>
+                  <div>
+                    <div className="text-foreground/60">Hora</div>
+                    <div className="font-medium text-foreground">{detalle.horario}</div>
+                  </div>
+                  <div>
+                    <div className="text-foreground/60">Personas</div>
+                    <div className="font-medium text-foreground">{detalle.cantidad_personas}</div>
+                  </div>
+                  <div>
+                    <div className="text-foreground/60">Mesa</div>
+                    <div className="font-medium text-foreground">{detalle.tipo_mesa}</div>
+                  </div>
+                  {detalle.requerimiento_especial && (
+                    <div>
+                      <div className="text-foreground/60">Requerimiento</div>
+                      <div className="font-medium text-foreground">{detalle.requerimiento_especial}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>
-
-      {/* Detail modal */}
-      {detalle && (
-        <DetalleModal
-          reserva={detalle}
-          onClose={() => setDetalle(null)}
-          onConfirmar={handleConfirmar}
-          onCancelar={handleCancelar}
-          loadingId={loadingId}
-        />
-      )}
 
       {/* Toast notifications */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-col gap-2 z-50 pointer-events-none">
