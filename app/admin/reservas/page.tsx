@@ -159,7 +159,7 @@ export default function AdminReservasPage() {
             {/* Result count */}
             <div className="flex items-center justify-between">
               <p className="text-sm text-foreground/60">
-                {isLoading ? "Cargando reservas…" : (
+                {isRefreshing ? "Cargando reservas…" : (
                   reservas.length === 0
                     ? "No hay reservas para estos filtros"
                     : `${reservas.length} reserva${reservas.length !== 1 ? "s" : ""}`
@@ -167,7 +167,7 @@ export default function AdminReservasPage() {
               </p>
             </div>
 
-            {isLoading ? (
+            {isRefreshing ? (
               <div className="bg-card rounded-2xl border border-border/40 p-16 flex items-center justify-center gap-3 text-foreground/40">
                 <RefreshCw className="w-5 h-5 animate-spin" />
                 <span className="text-sm">Cargando reservas…</span>
