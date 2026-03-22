@@ -8,6 +8,7 @@ import {
   actualizarEstadoReserva,
   getProximasReservas,
   getReservasPendientes,
+  getReservasConfirmadas,
   type Reserva,
   type FiltrosAdmin,
   type MetricasAdmin,
@@ -37,6 +38,7 @@ export default function AdminReservasPage() {
   })
   const [proximas, setProximas] = useState<Reserva[]>([])
   const [pendientes, setPendientes] = useState<Reserva[]>([])
+  const [confirmadas, setConfirmadas] = useState<Reserva[]>([])
   const [detalle, setDetalle] = useState<Reserva | null>(null)
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [isLoading, startTransition] = useTransition()
@@ -51,18 +53,20 @@ export default function AdminReservasPage() {
 
   const loadData = useCallback(() => {
     startTransition(async () => {
-      const [r, m, d, pr, pe] = await Promise.all([
+      const [r, m, d, pr, pe, co] = await Promise.all([
         getReservasAdmin(filtros),
         getMetricasAdmin(filtros.fecha ?? today()),
         getDisponibilidadAdmin(filtros.fecha ?? today()),
         getProximasReservas(5),
         getReservasPendientes(),
+        getReservasConfirmadas(10),
       ])
       setReservas(r)
       setMetricas(m)
       setDisponibilidad(d)
       setProximas(pr)
       setPendientes(pe)
+      setConfirmadas(co)
       setLastRefresh(new Date())
     })
   }, [filtros])
@@ -101,6 +105,9 @@ export default function AdminReservasPage() {
       setProximas(prev => 
         prev.map(r => r.id === id ? reservaActualizada : r)
       )
+      setConfirmadas(prev => [...prev, reservaActualizada].sort((a, b) => 
+        new Date(a.fecha_reserva).getTime() - new Date(b.fecha_reserva).getTime()
+      ).slice(0, 10))
       
       // Actualizar métricas localmente
       setMetricas(prev => ({
@@ -145,6 +152,7 @@ export default function AdminReservasPage() {
       
       setPendientes(prev => prev.filter(r => r.id !== id))
       setProximas(prev => prev.filter(r => r.id !== id))
+      setConfirmadas(prev => prev.filter(r => r.id !== id))
       
       setMetricas(prev => ({
         ...prev,
@@ -244,6 +252,12 @@ export default function AdminReservasPage() {
               reservas={pendientes.slice(0, 5)}
               titulo="Pendientes de confirmar"
               subtitulo="Actuá rápido antes del servicio"
+              onDetalle={setDetalle}
+            />
+            <ReservasQuickList
+              reservas={confirmadas.slice(0, 5)}
+              titulo="Reservas aceptadas"
+              subtitulo="Las últimas confirmadas"
               onDetalle={setDetalle}
             />
             <ReservasQuickList

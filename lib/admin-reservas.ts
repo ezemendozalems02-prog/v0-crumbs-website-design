@@ -132,34 +132,40 @@ export async function actualizarEstadoReserva(
   id: string,
   nuevoEstado: EstadoReserva
 ): Promise<{ success: boolean; error?: string; reserva?: Reserva }> {
-  const supabase = await createClient()
+  try {
+    const supabase = await createClient()
 
-  // Primero obtenemos la reserva actual para tener los datos completos
-  const { data: reservaActual, error: fetchError } = await supabase
-    .from("reservas")
-    .select("*")
-    .eq("id", id)
-    .single()
+    // Primero obtenemos la reserva actual para tener los datos completos
+    const { data: reservaActual, error: fetchError } = await supabase
+      .from("reservas")
+      .select("*")
+      .eq("id", id)
+      .single()
 
-  if (fetchError || !reservaActual) {
-    return { success: false, error: "No se encontró la reserva." }
+    if (fetchError || !reservaActual) {
+      console.error("[v0] Error fetching reserva:", fetchError)
+      return { success: false, error: "No se encontró la reserva." }
+    }
+
+    // Actualizamos el estado
+    const { error: updateError } = await supabase
+      .from("reservas")
+      .update({ estado: nuevoEstado, updated_at: new Date().toISOString() })
+      .eq("id", id)
+
+    if (updateError) {
+      console.error("[v0] Error updating reserva:", updateError)
+      return { success: false, error: "Error al actualizar la reserva: " + updateError.message }
+    }
+
+    // Retornamos la reserva actualizada para que el cliente pueda actualizar su estado local
+    const reservaActualizada: Reserva = { ...reservaActual, estado: nuevoEstado }
+    
+    return { success: true, reserva: reservaActualizada }
+  } catch (error) {
+    console.error("[v0] Unexpected error in actualizarEstadoReserva:", error)
+    return { success: false, error: "Error inesperado al actualizar la reserva." }
   }
-
-  // Actualizamos el estado
-  const { error: updateError } = await supabase
-    .from("reservas")
-    .update({ estado: nuevoEstado, updated_at: new Date().toISOString() })
-    .eq("id", id)
-
-  if (updateError) {
-    console.error("Error updating reserva:", updateError)
-    return { success: false, error: "Error al actualizar la reserva." }
-  }
-
-  // Retornamos la reserva actualizada para que el cliente pueda actualizar su estado local
-  const reservaActualizada: Reserva = { ...reservaActual, estado: nuevoEstado }
-  
-  return { success: true, reserva: reservaActualizada }
 }
 
 export async function getProximasReservas(limite: number = 5): Promise<Reserva[]> {
@@ -194,5 +200,26 @@ export async function getReservasPendientes(): Promise<Reserva[]> {
     .order("horario", { ascending: true })
 
   if (error) return []
+  return (data ?? []) as Reserva[]
+}
+
+export async function getReservasConfirmadas(limite: number = 10): Promise<Reserva[]> {
+  const supabase = await createClient()
+
+  const hoy = new Date().toISOString().split("T")[0]
+
+  const { data, error } = await supabase
+    .from("reservas")
+    .select("*")
+    .gte("fecha_reserva", hoy)
+    .eq("estado", "confirmada")
+    .order("fecha_reserva", { ascending: true })
+    .order("horario", { ascending: true })
+    .limit(limite)
+
+  if (error) {
+    console.error("[v0] Error fetching confirmadas:", error)
+    return []
+  }
   return (data ?? []) as Reserva[]
 }
