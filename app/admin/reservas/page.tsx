@@ -108,9 +108,6 @@ export default function AdminReservasPage() {
     
     setLoadingId(null)
   }
-    
-    setLoadingId(null)
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -232,7 +229,6 @@ export default function AdminReservasPage() {
             {t.message}
           </div>
         ))}
-      </div>
       </div>
     </div>
   )
