@@ -41,7 +41,7 @@ export default function AdminReservasPage() {
   const [confirmadas, setConfirmadas] = useState<Reserva[]>([])
   const [detalle, setDetalle] = useState<Reserva | null>(null)
   const [loadingId, setLoadingId] = useState<string | null>(null)
-  const [isLoading, startTransition] = useTransition()
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [toasts, setToasts] = useState<Toast[]>([])
   const [lastRefresh, setLastRefresh] = useState(new Date())
 
@@ -51,53 +51,42 @@ export default function AdminReservasPage() {
     setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 4000)
   }
 
-  const loadData = useCallback(() => {
-    console.log("[v0] Iniciando carga de datos con filtros:", filtros)
-    startTransition(async () => {
-      try {
-        const [r, m, d, pr, pe, co] = await Promise.all([
-          getReservasAdmin(filtros),
-          getMetricasAdmin(filtros.fecha ?? today()),
-          getDisponibilidadAdmin(filtros.fecha ?? today()),
-          getProximasReservas(5),
-          getReservasPendientes(),
-          getReservasConfirmadas(10),
-        ])
-        
-        console.log("[v0] Datos cargados:", {
-          reservas: r.length,
-          pendientes: pe.length,
-          confirmadas: co.length,
-          proximas: pr.length,
-        })
-        
-        setReservas(r)
-        setMetricas(m)
-        setDisponibilidad(d)
-        setProximas(pr)
-        setPendientes(pe)
-        setConfirmadas(co)
-        setLastRefresh(new Date())
-      } catch (error) {
-        console.error("[v0] Error cargando datos:", error)
-      }
-    })
+  const loadData = useCallback(async () => {
+    setIsRefreshing(true)
+    try {
+      const [r, m, d, pr, pe, co] = await Promise.all([
+        getReservasAdmin(filtros),
+        getMetricasAdmin(filtros.fecha ?? today()),
+        getDisponibilidadAdmin(filtros.fecha ?? today()),
+        getProximasReservas(5),
+        getReservasPendientes(),
+        getReservasConfirmadas(10),
+      ])
+      
+      setReservas(r)
+      setMetricas(m)
+      setDisponibilidad(d)
+      setProximas(pr)
+      setPendientes(pe)
+      setConfirmadas(co)
+      setLastRefresh(new Date())
+    } catch (error) {
+      console.error("[v0] Error cargando datos:", error)
+    } finally {
+      setIsRefreshing(false)
+    }
   }, [filtros])
 
   useEffect(() => { loadData() }, [loadData])
 
   const handleConfirmar = async (id: string) => {
-    console.log("[v0] Confirmando reserva:", id)
     setLoadingId(id)
     
     const result = await actualizarEstadoReserva(id, "confirmada")
-    console.log("[v0] Resultado de confirmación:", result)
     
-    if (result.success && result.reserva) {
-      console.log("[v0] Reserva confirmada exitosamente, refrescando datos...")
+    if (result.success) {
       addToast("Reserva confirmada correctamente", "success")
-      
-      // Refetch inmediato para sincronizar TODO
+      setDetalle(null)
       await loadData()
     } else {
       addToast(result.error ?? "Error al actualizar la reserva", "error")
@@ -107,17 +96,13 @@ export default function AdminReservasPage() {
   }
 
   const handleCancelar = async (id: string) => {
-    console.log("[v0] Cancelando reserva:", id)
     setLoadingId(id)
 
     const result = await actualizarEstadoReserva(id, "cancelada")
-    console.log("[v0] Resultado de cancelación:", result)
     
-    if (result.success && result.reserva) {
-      console.log("[v0] Reserva cancelada exitosamente, refrescando datos...")
+    if (result.success) {
       addToast("Reserva cancelada correctamente", "success")
-      
-      // Refetch inmediato para sincronizar TODO
+      setDetalle(null)
       await loadData()
     } else {
       addToast(result.error ?? "Error al actualizar la reserva", "error")
@@ -148,10 +133,10 @@ export default function AdminReservasPage() {
             </span>
             <button
               onClick={loadData}
-              disabled={isLoading}
+              disabled={isRefreshing}
               className="flex items-center gap-2 px-3 py-2 bg-primary-foreground/10 rounded-xl text-sm hover:bg-primary-foreground/20 transition-colors disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
               <span className="hidden sm:inline">Actualizar</span>
             </button>
             <AdminLogoutButton />

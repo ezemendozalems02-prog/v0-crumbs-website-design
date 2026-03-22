@@ -136,7 +136,6 @@ export async function actualizarEstadoReserva(
   try {
     const supabase = await createClient()
 
-    // Primero obtenemos la reserva actual para tener los datos completos
     const { data: reservaActual, error: fetchError } = await supabase
       .from("reservas")
       .select("*")
@@ -144,27 +143,21 @@ export async function actualizarEstadoReserva(
       .single()
 
     if (fetchError || !reservaActual) {
-      console.error("[v0] Error fetching reserva:", fetchError)
       return { success: false, error: "No se encontró la reserva." }
     }
 
-    // Actualizamos el estado
     const { error: updateError } = await supabase
       .from("reservas")
       .update({ estado: nuevoEstado, updated_at: new Date().toISOString() })
       .eq("id", id)
 
     if (updateError) {
-      console.error("[v0] Error updating reserva:", updateError)
       return { success: false, error: "Error al actualizar la reserva: " + updateError.message }
     }
 
-    // Retornamos la reserva actualizada para que el cliente pueda actualizar su estado local
     const reservaActualizada: Reserva = { ...reservaActual, estado: nuevoEstado }
-    
     return { success: true, reserva: reservaActualizada }
   } catch (error) {
-    console.error("[v0] Unexpected error in actualizarEstadoReserva:", error)
     return { success: false, error: "Error inesperado al actualizar la reserva." }
   }
 }
@@ -218,9 +211,6 @@ export async function getReservasConfirmadas(limite: number = 10): Promise<Reser
     .order("horario", { ascending: true })
     .limit(limite)
 
-  if (error) {
-    console.error("[v0] Error fetching confirmadas:", error)
-    return []
-  }
+  if (error) return []
   return (data ?? []) as Reserva[]
 }
