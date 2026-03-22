@@ -97,14 +97,31 @@ export default function AdminReservasPage() {
   const handleEliminar = async (id: string) => {
     if (!confirm("¿Eliminar esta reserva?")) return
 
+    console.log("[v0] Eliminando reserva:", id)
     setLoadingId(id)
     const result = await eliminarReserva(id)
+    console.log("[v0] Resultado delete:", result.success, result.error)
 
     if (result.success) {
-      addToast("Reserva eliminada", "success")
+      console.log("[v0] Delete exitoso, refrescando datos...")
+      // Remover la reserva del estado local inmediatamente
+      setReservas(prev => {
+        const actualizado = prev.filter(r => r.id !== id)
+        console.log("[v0] Reservas antes:", prev.length, "después:", actualizado.length)
+        return actualizado
+      })
+      setUltimasReservas(prev => prev.filter(r => r.id !== id))
       setDetalleId(null)
-      await loadData()
+      
+      addToast("Reserva eliminada correctamente", "success")
+      
+      // Refetch completo después de 200ms para sincronizar métricas
+      setTimeout(() => {
+        console.log("[v0] Haciendo refetch completo...")
+        loadData()
+      }, 200)
     } else {
+      console.log("[v0] Error al eliminar:", result.error)
       addToast(result.error ?? "Error al eliminar", "error")
     }
 
