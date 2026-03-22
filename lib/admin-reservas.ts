@@ -143,21 +143,30 @@ export async function actualizarEstadoReserva(
       .single()
 
     if (fetchError || !reservaActual) {
+      console.log("[v0] Reserva no encontrada:", id, fetchError)
       return { success: false, error: "No se encontró la reserva." }
     }
 
-    const { error: updateError } = await supabase
+    console.log("[v0] Actualizando reserva", id, "de", reservaActual.estado, "a", nuevoEstado)
+
+    const { error: updateError, data: updateData } = await supabase
       .from("reservas")
       .update({ estado: nuevoEstado, updated_at: new Date().toISOString() })
       .eq("id", id)
+      .select()
+      .single()
 
     if (updateError) {
+      console.log("[v0] Error al actualizar:", updateError)
       return { success: false, error: "Error al actualizar la reserva: " + updateError.message }
     }
 
-    const reservaActualizada: Reserva = { ...reservaActual, estado: nuevoEstado }
+    console.log("[v0] Reserva actualizada exitosamente:", updateData)
+
+    const reservaActualizada: Reserva = { ...reservaActual, estado: nuevoEstado, updated_at: new Date().toISOString() }
     return { success: true, reserva: reservaActualizada }
   } catch (error) {
+    console.log("[v0] Error inesperado:", error)
     return { success: false, error: "Error inesperado al actualizar la reserva." }
   }
 }

@@ -9,7 +9,7 @@ const CONFIG: Record<EstadoReserva, { label: string; classes: string; dot: strin
     dot: "bg-amber-500",
   },
   confirmada: {
-    label: "Confirmada",
+    label: "Aceptada",
     classes: "bg-emerald-100 text-emerald-800 border-emerald-200",
     dot: "bg-emerald-500",
   },
