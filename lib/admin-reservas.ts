@@ -128,26 +128,19 @@ export async function getUltimasReservas(limite: number = 5): Promise<Reserva[]>
 
 export async function eliminarReserva(id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    console.log("[v0-server] Iniciando eliminación de reserva:", id)
     const supabase = await createClient()
 
-    const { error, data } = await supabase
+    const { error } = await supabase
       .from("reservas")
       .delete()
       .eq("id", id)
-      .select()
-
-    console.log("[v0-server] Delete response:", { error, data })
 
     if (error) {
-      console.log("[v0-server] Error en delete:", error)
       return { success: false, error: "Error al eliminar la reserva: " + error.message }
     }
 
-    console.log("[v0-server] Reserva eliminada exitosamente")
     return { success: true }
   } catch (error) {
-    console.log("[v0-server] Error inesperado:", error)
     return { success: false, error: "Error inesperado al eliminar la reserva." }
   }
 }
