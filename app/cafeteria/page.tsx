@@ -1,187 +1,51 @@
-"use client"
-
 import Image from "next/image"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { WhatsAppButton } from "@/components/whatsapp-button"
-import { useEffect, useRef, useState } from "react"
+import { getMenuByTipo } from "@/lib/menu-publico"
+import { MenuCategorySection } from "@/components/menu-category-section"
+import type { MenuCategory } from "@/lib/menu-publico"
 
-interface MenuItem {
-  name: string
-  price: number
-  description?: string
-}
-
-interface MenuCategory {
-  name: string
-  items: MenuItem[]
-}
-
-const menuData: MenuCategory[] = [
+// Static fallback used if Supabase returns no data yet
+const staticMenuData: MenuCategory[] = [
   {
-    name: "Cafés Clásicos",
-    items: [
-      { name: "Espresso", price: 2800 },
-      { name: "Lungo", price: 2800 },
-      { name: "Cortado", price: 2800 },
-      { name: "Americano", price: 3900 },
-      { name: "Flat White", price: 4600 },
-      { name: "Latte", price: 5000 },
-      { name: "Capuccino", price: 4600 },
-      { name: "Mocaccino", price: 5300 },
+    id: "static-1", nombre: "Cafés Clásicos", slug: "cafes-clasicos", tipo_menu: "desayuno",
+    productos: [
+      { id: "s1", nombre: "Espresso", precio: 2800, disponible: true, destacado: false, orden: 0, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
+      { id: "s2", nombre: "Lungo", precio: 2800, disponible: true, destacado: false, orden: 1, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
+      { id: "s3", nombre: "Cortado", precio: 2800, disponible: true, destacado: false, orden: 2, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
+      { id: "s4", nombre: "Americano", precio: 3900, disponible: true, destacado: false, orden: 3, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
+      { id: "s5", nombre: "Flat White", precio: 4600, disponible: true, destacado: false, orden: 4, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
+      { id: "s6", nombre: "Latte", precio: 5000, disponible: true, destacado: false, orden: 5, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
+      { id: "s7", nombre: "Capuccino", precio: 4600, disponible: true, destacado: false, orden: 6, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
+      { id: "s8", nombre: "Mocaccino", precio: 5300, disponible: true, destacado: false, orden: 7, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
     ],
   },
   {
-    name: "Cafés Especiales",
-    items: [
-      { name: "Latte Vainilla", price: 5800 },
-      { name: "Latte Caramelo", price: 5800 },
-      { name: "Latte Avellana", price: 5800 },
-      { name: "Dirty Chai", price: 6200 },
-      { name: "Affogato", price: 6500 },
-      { name: "Irish Coffee", price: 8500 },
+    id: "static-2", nombre: "Cafés Especiales", slug: "cafes-especiales", tipo_menu: "desayuno",
+    productos: [
+      { id: "s9", nombre: "Latte Vainilla", precio: 5800, disponible: true, destacado: false, orden: 0, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
+      { id: "s10", nombre: "Latte Caramelo", precio: 5800, disponible: true, destacado: false, orden: 1, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
+      { id: "s11", nombre: "Dirty Chai", precio: 6200, disponible: true, destacado: false, orden: 2, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
+      { id: "s12", nombre: "Affogato", precio: 6500, disponible: true, destacado: false, orden: 3, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
+      { id: "s13", nombre: "Irish Coffee", precio: 8500, disponible: true, destacado: false, orden: 4, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
     ],
   },
   {
-    name: "Cafés Fríos",
-    items: [
-      { name: "Iced Latte", price: 5400 },
-      { name: "Iced Americano", price: 4200 },
-      { name: "Cold Brew", price: 5000 },
-      { name: "Frapuccino Café", price: 6800 },
-      { name: "Frapuccino Mocca", price: 7200 },
-    ],
-  },
-  {
-    name: "Sin Café",
-    items: [
-      { name: "Chocolate Caliente", price: 5000 },
-      { name: "Submarino", price: 5500 },
-      { name: "Matcha Latte", price: 5800 },
-      { name: "Golden Milk", price: 5200 },
-      { name: "Chai Latte", price: 5000 },
-    ],
-  },
-  {
-    name: "Té en Hebras",
-    items: [
-      { name: "English Breakfast", price: 3800 },
-      { name: "Earl Grey", price: 3800 },
-      { name: "Green Tea", price: 3800 },
-      { name: "Chamomile", price: 3800 },
-      { name: "Mint", price: 3800 },
-      { name: "Frutos Rojos", price: 4200 },
-    ],
-  },
-  {
-    name: "Frappuccinos",
-    items: [
-      { name: "Frapuccino Clásico", price: 6500 },
-      { name: "Frapuccino Dulce de Leche", price: 7000 },
-      { name: "Frapuccino Oreo", price: 7200 },
-      { name: "Frapuccino Berries", price: 7000 },
-    ],
-  },
-  {
-    name: "Licuados",
-    items: [
-      { name: "Banana", price: 5500 },
-      { name: "Frutilla", price: 5800 },
-      { name: "Mixto", price: 6000 },
-      { name: "Tropical", price: 6200, description: "Mango, ananá, naranja" },
-      { name: "Verde", price: 6500, description: "Espinaca, manzana, jengibre" },
-    ],
-  },
-  {
-    name: "Milkshakes",
-    items: [
-      { name: "Vainilla", price: 6800 },
-      { name: "Chocolate", price: 6800 },
-      { name: "Frutilla", price: 6800 },
-      { name: "Oreo", price: 7200 },
-      { name: "Dulce de Leche", price: 7200 },
-    ],
-  },
-  {
-    name: "Bebidas",
-    items: [
-      { name: "Agua Mineral", price: 2500 },
-      { name: "Agua con Gas", price: 2500 },
-      { name: "Jugo de Naranja", price: 4500 },
-      { name: "Limonada", price: 4200 },
-      { name: "Limonada con Jengibre", price: 4800 },
-      { name: "Gaseosas", price: 3200 },
+    id: "static-3", nombre: "Sin Café", slug: "sin-cafe", tipo_menu: "desayuno",
+    productos: [
+      { id: "s14", nombre: "Chocolate Caliente", precio: 5000, disponible: true, destacado: false, orden: 0, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
+      { id: "s15", nombre: "Matcha Latte", precio: 5800, disponible: true, destacado: false, orden: 1, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
+      { id: "s16", nombre: "Chai Latte", precio: 5000, disponible: true, destacado: false, orden: 2, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
+      { id: "s17", nombre: "Golden Milk", precio: 5200, disponible: true, destacado: false, orden: 3, categoria_id: "", etiquetas: [], created_at: "", updated_at: "", imagen_url: null, descripcion: null },
     ],
   },
 ]
 
-function useInView(threshold = 0.1) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [isInView, setIsInView] = useState(false)
+export default async function CafeteriaPage() {
+  const liveMenu = await getMenuByTipo("desayuno")
+  const menuData = liveMenu.length > 0 ? liveMenu : staticMenuData
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true)
-          observer.disconnect()
-        }
-      },
-      { threshold }
-    )
-
-    if (ref.current) {
-      observer.observe(ref.current)
-    }
-
-    return () => observer.disconnect()
-  }, [threshold])
-
-  return { ref, isInView }
-}
-
-function MenuCategorySection({ category, index }: { category: MenuCategory; index: number }) {
-  const sectionRef = useInView()
-
-  return (
-    <div
-      ref={sectionRef.ref}
-      className={`transition-all duration-700 ${
-        sectionRef.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-      }`}
-      style={{ transitionDelay: `${(index % 3) * 100}ms` }}
-    >
-      <h3 className="font-[family-name:var(--font-dm-serif)] text-2xl text-primary mb-6 pb-3 border-b border-primary/20">
-        {category.name}
-      </h3>
-      <div className="space-y-4">
-        {category.items.map((item, itemIndex) => (
-          <div
-            key={itemIndex}
-            className="group flex items-start justify-between gap-4 py-3 hover:bg-background/50 rounded-lg px-3 -mx-3 transition-colors duration-300"
-          >
-            <div className="flex-1">
-              <div className="flex items-baseline gap-2">
-                <span className="font-medium text-foreground group-hover:text-primary transition-colors">
-                  {item.name}
-                </span>
-                <span className="flex-1 border-b border-dotted border-foreground/20" />
-              </div>
-              {item.description && (
-                <p className="text-sm text-foreground/60 mt-1">{item.description}</p>
-              )}
-            </div>
-            <span className="font-medium text-accent whitespace-nowrap">
-              ${item.price.toLocaleString("es-AR")}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-export default function CafeteriaPage() {
   return (
     <main className="min-h-screen">
       <Navigation />
@@ -224,7 +88,7 @@ export default function CafeteriaPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             {menuData.map((category, index) => (
-              <MenuCategorySection key={index} category={category} index={index} />
+              <MenuCategorySection key={category.id} category={category} index={index} />
             ))}
           </div>
 
