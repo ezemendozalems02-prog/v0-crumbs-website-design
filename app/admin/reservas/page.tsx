@@ -222,18 +222,20 @@ export default function AdminReservasPage() {
 
       {/* Toast notifications */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-col gap-2 z-50 pointer-events-none">
-        {toasts.map((t) => (
-          <div
-            key={t.id}
-            className={`px-5 py-3 rounded-2xl text-sm font-medium shadow-lg animate-fade-in-up pointer-events-auto ${
-              t.type === "success"
-                ? "bg-emerald-600 text-white"
-                : "bg-red-600 text-white"
-            }`}
-          >
-            {t.message}
-          </div>
-        ))}
+        {toasts.map((t) => {
+          const toastClass = t.type === "success" 
+            ? "bg-emerald-600 text-white"
+            : "bg-red-600 text-white"
+          
+          return (
+            <div
+              key={t.id}
+              className={`px-5 py-3 rounded-2xl text-sm font-medium shadow-lg animate-fade-in-up pointer-events-auto ${toastClass}`}
+            >
+              {t.message}
+            </div>
+          )
+        })}
       </div>
     </div>
   )
