@@ -71,28 +71,98 @@ export default function AdminReservasPage() {
 
   const handleConfirmar = async (id: string) => {
     setLoadingId(id)
+    
+    // Actualización optimista: busca la reserva en el estado actual
+    const reservaAActualizar = reservas.find(r => r.id === id) || detalle
+    if (!reservaAActualizar) {
+      setLoadingId(null)
+      addToast("No se encontró la reserva", "error")
+      return
+    }
+
     const result = await actualizarEstadoReserva(id, "confirmada")
-    setLoadingId(null)
-    if (result.success) {
+    
+    if (result.success && result.reserva) {
+      // Actualización optimista inmediata en el estado local
+      const reservaActualizada = result.reserva
+      
+      // Actualizar el array de reservas
+      setReservas(prev => 
+        prev.map(r => r.id === id ? reservaActualizada : r)
+      )
+      
+      // Actualizar el modal si está abierto
+      if (detalle?.id === id) {
+        setDetalle(reservaActualizada)
+      }
+      
+      // Actualizar listas quick
+      setPendientes(prev => prev.filter(r => r.id !== id))
+      setProximas(prev => 
+        prev.map(r => r.id === id ? reservaActualizada : r)
+      )
+      
+      // Actualizar métricas localmente
+      setMetricas(prev => ({
+        ...prev,
+        pendientes: Math.max(0, prev.pendientes - 1),
+        confirmadas: prev.confirmadas + 1,
+      }))
+      
       addToast("Reserva confirmada correctamente", "success")
-      if (detalle?.id === id) setDetalle((prev) => prev ? { ...prev, estado: "confirmada" } : null)
-      loadData()
+      
+      // Refetch completo después de 500ms para sincronizar
+      setTimeout(() => loadData(), 500)
     } else {
       addToast(result.error ?? "Error al actualizar la reserva", "error")
     }
+    
+    setLoadingId(null)
   }
 
   const handleCancelar = async (id: string) => {
     setLoadingId(id)
+    
+    const reservaAActualizar = reservas.find(r => r.id === id) || detalle
+    if (!reservaAActualizar) {
+      setLoadingId(null)
+      addToast("No se encontró la reserva", "error")
+      return
+    }
+
     const result = await actualizarEstadoReserva(id, "cancelada")
-    setLoadingId(null)
-    if (result.success) {
+    
+    if (result.success && result.reserva) {
+      const reservaActualizada = result.reserva
+      
+      setReservas(prev => 
+        prev.map(r => r.id === id ? reservaActualizada : r)
+      )
+      
+      if (detalle?.id === id) {
+        setDetalle(reservaActualizada)
+      }
+      
+      setPendientes(prev => prev.filter(r => r.id !== id))
+      setProximas(prev => prev.filter(r => r.id !== id))
+      
+      setMetricas(prev => ({
+        ...prev,
+        pendientes: Math.max(0, prev.pendientes - (reservaAActualizar.estado === "pendiente" ? 1 : 0)),
+        confirmadas: Math.max(0, prev.confirmadas - (reservaAActualizar.estado === "confirmada" ? 1 : 0)),
+        canceladas: prev.canceladas + 1,
+        cubiertos_ocupados: Math.max(0, prev.cubiertos_ocupados - reservaAActualizar.cubiertos_consumidos),
+        cubiertos_disponibles: prev.cubiertos_disponibles + reservaAActualizar.cubiertos_consumidos,
+      }))
+      
       addToast("Reserva cancelada correctamente", "success")
-      if (detalle?.id === id) setDetalle((prev) => prev ? { ...prev, estado: "cancelada" } : null)
-      loadData()
+      
+      setTimeout(() => loadData(), 500)
     } else {
       addToast(result.error ?? "Error al actualizar la reserva", "error")
     }
+    
+    setLoadingId(null)
   }
 
   return (

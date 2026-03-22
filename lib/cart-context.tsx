@@ -42,7 +42,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       
       return [...currentItems, { ...newItem, quantity: 1 }]
     })
-    setIsCartOpen(true)
+    // No abrimos el carrito automáticamente — solo agregamos el producto
+    // El usuario debe hacer clic en el botón del carrito para verlo
   }, [])
 
   const removeItem = useCallback((id: string) => {

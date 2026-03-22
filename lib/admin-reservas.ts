@@ -131,20 +131,35 @@ export async function getDisponibilidadAdmin(fecha: string): Promise<Disponibili
 export async function actualizarEstadoReserva(
   id: string,
   nuevoEstado: EstadoReserva
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; reserva?: Reserva }> {
   const supabase = await createClient()
 
-  const { error } = await supabase
+  // Primero obtenemos la reserva actual para tener los datos completos
+  const { data: reservaActual, error: fetchError } = await supabase
     .from("reservas")
-    .update({ estado: nuevoEstado })
+    .select("*")
+    .eq("id", id)
+    .single()
+
+  if (fetchError || !reservaActual) {
+    return { success: false, error: "No se encontró la reserva." }
+  }
+
+  // Actualizamos el estado
+  const { error: updateError } = await supabase
+    .from("reservas")
+    .update({ estado: nuevoEstado, updated_at: new Date().toISOString() })
     .eq("id", id)
 
-  if (error) {
-    console.error("Error updating reserva:", error)
+  if (updateError) {
+    console.error("Error updating reserva:", updateError)
     return { success: false, error: "Error al actualizar la reserva." }
   }
 
-  return { success: true }
+  // Retornamos la reserva actualizada para que el cliente pueda actualizar su estado local
+  const reservaActualizada: Reserva = { ...reservaActual, estado: nuevoEstado }
+  
+  return { success: true, reserva: reservaActualizada }
 }
 
 export async function getProximasReservas(limite: number = 5): Promise<Reserva[]> {
