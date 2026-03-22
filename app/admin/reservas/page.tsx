@@ -6,6 +6,7 @@ import {
   getMetricasAdmin,
   getDisponibilidadAdmin,
   eliminarReserva,
+  getUltimasReservas,
   type Reserva,
   type FiltrosAdmin,
   type MetricasAdmin,
@@ -13,7 +14,7 @@ import {
 } from "@/lib/admin-reservas"
 import { MetricasCards } from "@/components/admin/metricas-cards"
 import { DisponibilidadCard } from "@/components/admin/disponibilidad-card"
-import { RefreshCw, Trash2, Eye } from "lucide-react"
+import { RefreshCw, Trash2, Search, X } from "lucide-react"
 import { AdminLogoutButton } from "@/components/admin/logout-button"
 
 const today = () => new Date().toISOString().split("T")[0]
@@ -21,8 +22,14 @@ const today = () => new Date().toISOString().split("T")[0]
 type Toast = { id: number; message: string; type: "success" | "error" }
 
 export default function AdminReservasPage() {
+  // Filtros
   const [fecha, setFecha] = useState(today())
+  const [busqueda, setBusqueda] = useState("")
+  const [horarioFiltro, setHorarioFiltro] = useState("")
+
+  // Datos
   const [reservas, setReservas] = useState<Reserva[]>([])
+  const [ultimasReservas, setUltimasReservas] = useState<Reserva[]>([])
   const [metricas, setMetricas] = useState<MetricasAdmin>({
     total: 0,
     cubiertos_ocupados: 0,
@@ -34,6 +41,8 @@ export default function AdminReservasPage() {
     porcentaje_ocupacion: 0,
     fecha: today(),
   })
+
+  // UI
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [toasts, setToasts] = useState<Toast[]>([])
@@ -48,22 +57,38 @@ export default function AdminReservasPage() {
   const loadData = useCallback(async () => {
     setIsRefreshing(true)
     try {
-      const [r, m, d] = await Promise.all([
-        getReservasAdmin({ fecha }),
+      // Construir filtros dinámicos
+      const filtros: FiltrosAdmin = { fecha }
+      if (horarioFiltro) filtros.horario = horarioFiltro
+
+      // Si hay búsqueda, intenta primero por nombre, si no encuentra por teléfono
+      if (busqueda) {
+        const esNumero = /^\d+$/.test(busqueda)
+        if (esNumero) {
+          filtros.telefono = busqueda
+        } else {
+          filtros.nombre = busqueda
+        }
+      }
+
+      const [r, m, d, u] = await Promise.all([
+        getReservasAdmin(filtros),
         getMetricasAdmin(fecha),
         getDisponibilidadAdmin(fecha),
+        getUltimasReservas(5),
       ])
 
       setReservas(r)
       setMetricas(m)
       setDisponibilidad(d)
+      setUltimasReservas(u)
     } catch (error) {
       console.error("Error loading data:", error)
       addToast("Error al cargar datos", "error")
     } finally {
       setIsRefreshing(false)
     }
-  }, [fecha])
+  }, [fecha, horarioFiltro, busqueda])
 
   useEffect(() => {
     loadData()
@@ -98,13 +123,26 @@ export default function AdminReservasPage() {
     return grupos
   }, [reservas])
 
+  // Obtener horarios únicos para el select
+  const horariosUnicos = useMemo(() => {
+    const horarios = new Set(ultimasReservas.map((r) => r.horario))
+    return Array.from(horarios).sort()
+  }, [ultimasReservas])
+
+  // Formatear fecha para mostrar
+  const fechaFormato = new Date(fecha + "T12:00:00").toLocaleDateString("es-AR", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  })
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-background border-b border-border/40 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-lg">
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
               🍽️
             </div>
             <div>
@@ -112,7 +150,7 @@ export default function AdminReservasPage() {
               <p className="text-xs text-foreground/60">Gestiona todas tus reservas</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={loadData}
               disabled={isRefreshing}
@@ -127,29 +165,85 @@ export default function AdminReservasPage() {
 
       {/* Main content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Selector de fecha */}
-        <div className="mb-6 flex items-center gap-4">
-          <label className="text-sm font-medium text-foreground/60">Fecha:</label>
-          <input
-            type="date"
-            value={fecha}
-            onChange={(e) => setFecha(e.target.value)}
-            className="px-4 py-2 bg-background border border-border/40 rounded-xl text-sm"
-          />
-        </div>
-
         {/* Métricas */}
         <MetricasCards metricas={metricas} />
 
-        {/* Disponibilidad */}
+        {/* Filtros */}
+        <div className="mt-6 bg-card rounded-2xl border border-border/40 p-6">
+          <h2 className="text-sm font-semibold text-foreground mb-4">Filtros</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Fecha */}
+            <div>
+              <label className="text-xs font-medium text-foreground/60 block mb-2">Fecha</label>
+              <input
+                type="date"
+                value={fecha}
+                onChange={(e) => setFecha(e.target.value)}
+                className="w-full px-3 py-2 bg-background border border-border/40 rounded-lg text-sm focus:outline-none focus:border-primary/60"
+              />
+            </div>
+
+            {/* Horario */}
+            <div>
+              <label className="text-xs font-medium text-foreground/60 block mb-2">Horario</label>
+              <select
+                value={horarioFiltro}
+                onChange={(e) => setHorarioFiltro(e.target.value)}
+                className="w-full px-3 py-2 bg-background border border-border/40 rounded-lg text-sm focus:outline-none focus:border-primary/60"
+              >
+                <option value="">Todos los horarios</option>
+                {horariosUnicos.map((h) => (
+                  <option key={h} value={h}>
+                    {h}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Buscador */}
+            <div className="md:col-span-2 lg:col-span-2">
+              <label className="text-xs font-medium text-foreground/60 block mb-2">Buscar (nombre o teléfono)</label>
+              <div className="relative">
+                <Search className="w-4 h-4 absolute left-3 top-3 text-foreground/40" />
+                <input
+                  type="text"
+                  placeholder="Juan, 1131101739..."
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-background border border-border/40 rounded-lg text-sm focus:outline-none focus:border-primary/60"
+                />
+                {busqueda && (
+                  <button
+                    onClick={() => setBusqueda("")}
+                    className="absolute right-3 top-3 text-foreground/40 hover:text-foreground/60"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Contenido principal */}
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            {/* Listado de reservas */}
+          {/* Listado principal */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Disponibilidad */}
+            <DisponibilidadCard disponibilidad={disponibilidad} />
+
+            {/* Reservas filtradas */}
             <div className="bg-card rounded-2xl border border-border/40 p-6">
-              <h2 className="text-lg font-semibold text-foreground mb-4">Reservas del {fecha}</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-4">
+                Reservas del {fechaFormato}
+                {busqueda && <span className="text-sm font-normal text-foreground/60"> • "{busqueda}"</span>}
+                {horarioFiltro && <span className="text-sm font-normal text-foreground/60"> • {horarioFiltro}</span>}
+              </h2>
 
               {reservas.length === 0 ? (
-                <p className="text-center text-foreground/40 py-8">No hay reservas para este día</p>
+                <div className="text-center py-8 text-foreground/40">
+                  <p>No hay reservas que coincidan con los filtros</p>
+                </div>
               ) : (
                 <div className="space-y-4">
                   {Object.entries(gruposHorario).map(([horario, grupo]) => (
@@ -169,25 +263,23 @@ export default function AdminReservasPage() {
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1 min-w-0">
                                 <div className="font-medium text-foreground">{r.nombre}</div>
-                                <div className="text-xs text-foreground/60 mt-1 flex gap-3">
+                                <div className="text-xs text-foreground/60 mt-1 flex gap-3 flex-wrap">
                                   <span>{r.cantidad_personas} personas</span>
                                   <span>{r.tipo_mesa}</span>
                                   {r.requerimiento_especial && <span>⭐ {r.requerimiento_especial}</span>}
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleEliminar(r.id)
-                                  }}
-                                  disabled={loadingId === r.id}
-                                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                                  title="Eliminar reserva"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleEliminar(r.id)
+                                }}
+                                disabled={loadingId === r.id}
+                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 flex-shrink-0"
+                                title="Eliminar reserva"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
                             </div>
                           </div>
                         ))}
@@ -201,9 +293,7 @@ export default function AdminReservasPage() {
 
           {/* Sidebar derecho */}
           <div className="space-y-6">
-            <DisponibilidadCard disponibilidad={disponibilidad} />
-
-            {/* Detalle */}
+            {/* Detalles */}
             {detalle && (
               <div className="bg-card rounded-2xl border border-border/40 p-6">
                 <h3 className="font-semibold text-foreground mb-4">Detalles</h3>
@@ -234,9 +324,49 @@ export default function AdminReservasPage() {
                       <div className="font-medium text-foreground">{detalle.requerimiento_especial}</div>
                     </div>
                   )}
+                  {detalle.tolerancia_aceptada && (
+                    <div className="pt-2 border-t border-border/20">
+                      <div className="text-xs text-emerald-600 font-medium">✓ Tolerancia aceptada</div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
+
+            {/* Últimas reservas */}
+            <div className="bg-card rounded-2xl border border-border/40 p-6">
+              <h3 className="font-semibold text-foreground mb-4">Últimas reservas</h3>
+              {ultimasReservas.length === 0 ? (
+                <p className="text-sm text-foreground/40">No hay reservas aún</p>
+              ) : (
+                <div className="space-y-3">
+                  {ultimasReservas.map((r) => {
+                    const fechaRes = new Date(r.fecha_reserva + "T12:00:00").toLocaleDateString("es-AR", {
+                      month: "short",
+                      day: "numeric",
+                    })
+                    return (
+                      <div
+                        key={r.id}
+                        className="p-3 bg-background border border-border/20 rounded-lg cursor-pointer hover:border-border/40 transition-colors"
+                        onClick={() => {
+                          setFecha(r.fecha_reserva)
+                          setDetalleId(r.id)
+                        }}
+                      >
+                        <div className="font-medium text-foreground text-sm">{r.nombre}</div>
+                        <div className="text-xs text-foreground/60 mt-1 flex justify-between">
+                          <span>
+                            {fechaRes} • {r.horario}
+                          </span>
+                          <span>{r.cantidad_personas} pers.</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </main>

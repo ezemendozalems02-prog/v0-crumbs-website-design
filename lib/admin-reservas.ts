@@ -22,6 +22,7 @@ export interface FiltrosAdmin {
   fecha?: string
   nombre?: string
   telefono?: string
+  horario?: string
 }
 
 export interface MetricasAdmin {
@@ -51,6 +52,9 @@ export async function getReservasAdmin(filtros: FiltrosAdmin = {}): Promise<Rese
 
   if (filtros.fecha) {
     query = query.eq("fecha_reserva", filtros.fecha)
+  }
+  if (filtros.horario) {
+    query = query.eq("horario", filtros.horario)
   }
   if (filtros.nombre) {
     query = query.ilike("nombre", `%${filtros.nombre}%`)
@@ -108,7 +112,19 @@ export async function getDisponibilidadAdmin(fecha: string): Promise<Disponibili
   }
 }
 
-export async function eliminarReserva(id: string): Promise<{ success: boolean; error?: string }> {
+
+export async function getUltimasReservas(limite: number = 5): Promise<Reserva[]> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("reservas")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limite)
+
+  if (error) return []
+  return (data ?? []) as Reserva[]
+}
   try {
     const supabase = await createClient()
 
