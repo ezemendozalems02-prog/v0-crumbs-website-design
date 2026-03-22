@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { createProducto, updateProducto, type Producto, type Categoria, type VarianteInput } from "@/lib/admin-productos"
+import { ImageUploadField } from "./image-upload-field"
 import { X, Plus, Trash2, Star, GripVertical } from "lucide-react"
 
 interface Props {
@@ -138,7 +139,7 @@ export function ProductoFormModal({ producto, categorias, onClose, onSaved }: Pr
             />
           </div>
 
-          {/* Precio + URL imagen */}
+          {/* Precio + Imagen */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground/60 uppercase tracking-wide">Precio base (ARS) *</label>
@@ -154,17 +155,14 @@ export function ProductoFormModal({ producto, categorias, onClose, onSaved }: Pr
                 />
               </div>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground/60 uppercase tracking-wide">URL de imagen</label>
-              <input
-                type="url"
-                value={imagenUrl}
-                onChange={(e) => setImagenUrl(e.target.value)}
-                placeholder="https://..."
-                className="w-full px-4 py-3 bg-background border border-border/40 rounded-xl text-sm text-foreground placeholder:text-foreground/30 outline-none focus:border-primary/60 transition-colors"
-              />
-            </div>
           </div>
+
+          {/* Imagen */}
+          <ImageUploadField 
+            value={imagenUrl} 
+            onChange={setImagenUrl}
+            label="Imagen del producto"
+          />
 
           {/* Switches */}
           <div className="flex items-center gap-6">
