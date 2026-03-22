@@ -125,6 +125,8 @@ export async function getUltimasReservas(limite: number = 5): Promise<Reserva[]>
   if (error) return []
   return (data ?? []) as Reserva[]
 }
+
+export async function eliminarReserva(id: string): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = await createClient()
 
