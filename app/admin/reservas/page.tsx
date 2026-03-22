@@ -55,6 +55,7 @@ export default function AdminReservasPage() {
   }
 
   const loadData = useCallback(async () => {
+    console.log("[ADMIN UI] Iniciando loadData con filtros:", { fecha, horarioFiltro, busqueda })
     setIsRefreshing(true)
     try {
       // Construir filtros dinámicos
@@ -78,46 +79,81 @@ export default function AdminReservasPage() {
         getUltimasReservas(5),
       ])
 
+      console.log("[ADMIN UI] Datos cargados - Reservas:", r.length, "Últimas:", u.length)
+
       setReservas(r)
       setMetricas(m)
       setDisponibilidad(d)
       setUltimasReservas(u)
     } catch (error) {
-      console.error("Error loading data:", error)
+      console.error("[ADMIN UI] Error loading data:", error)
       addToast("Error al cargar datos", "error")
     } finally {
       setIsRefreshing(false)
     }
-  }, [fecha, horarioFiltro, busqueda])
+  }, [fecha, horarioFiltro, busqueda, addToast])
 
-  // Initial load on mount
+  // Initial load on mount ONLY
   useEffect(() => {
+    console.log("[ADMIN UI] Initial load on mount")
     loadData()
-  }, []) // Empty dependency array - solo una vez en mount
+  }, []) // IMPORTANTE: Empty array - solo ejecutar una vez en mount
 
-  // Recargar cuando cambian los filtros
+  // Recargar SOLO cuando cambian los FILTROS (no cuando loadData se recrea)
   useEffect(() => {
+    console.log("[ADMIN UI] Filtros cambiaron, recargando...")
     loadData()
-  }, [fecha, horarioFiltro, busqueda])
+  }, [fecha, horarioFiltro, busqueda]) // Nota: NO incluir loadData aquí
 
   const handleEliminar = async (id: string) => {
     if (!confirm("¿Eliminar esta reserva?")) return
 
+    console.log("[ADMIN UI] handleEliminar iniciado para ID:", id)
     setLoadingId(id)
-    const result = await eliminarReserva(id)
+    
+    try {
+      const result = await eliminarReserva(id)
+      console.log("[ADMIN UI] Resultado de eliminarReserva:", result.success, result.error)
 
-    if (result.success) {
-      // Remover la reserva del estado local inmediatamente
-      setReservas(prev => prev.filter(r => r.id !== id))
-      setUltimasReservas(prev => prev.filter(r => r.id !== id))
-      setDetalleId(null)
-      
-      addToast("Reserva eliminada correctamente", "success")
-    } else {
-      addToast(result.error ?? "Error al eliminar", "error")
+      if (result.success) {
+        console.log("[ADMIN UI] DELETE exitoso, removiendo del estado local...")
+        
+        // Remover de reservas
+        setReservas(prev => {
+          const nueva = prev.filter(r => r.id !== id)
+          console.log("[ADMIN UI] Reservas: antes", prev.length, "después", nueva.length)
+          return nueva
+        })
+        
+        // Remover de últimas reservas
+        setUltimasReservas(prev => {
+          const nueva = prev.filter(r => r.id !== id)
+          console.log("[ADMIN UI] Últimas: antes", prev.length, "después", nueva.length)
+          return nueva
+        })
+        
+        // Cerrar detalle
+        setDetalleId(null)
+        
+        // Actualizar métricas inmediatamente
+        setMetricas(prev => ({
+          ...prev,
+          total: Math.max(0, prev.total - 1),
+        }))
+        
+        addToast("✓ Reserva eliminada correctamente", "success")
+        console.log("[ADMIN UI] Toast mostrado")
+      } else {
+        console.error("[ADMIN UI] Error en delete:", result.error)
+        addToast("✗ " + (result.error ?? "Error al eliminar"), "error")
+      }
+    } catch (error) {
+      console.error("[ADMIN UI] Error inesperado en handleEliminar:", error)
+      addToast("✗ Error inesperado: " + String(error), "error")
+    } finally {
+      setLoadingId(null)
+      console.log("[ADMIN UI] handleEliminar completado")
     }
-
-    setLoadingId(null)
   }
 
   const detalle = reservas.find((r) => r.id === detalleId) || null

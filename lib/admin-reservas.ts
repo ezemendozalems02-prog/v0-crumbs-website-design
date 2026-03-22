@@ -128,20 +128,59 @@ export async function getUltimasReservas(limite: number = 5): Promise<Reserva[]>
 
 export async function eliminarReserva(id: string): Promise<{ success: boolean; error?: string }> {
   try {
+    console.log("[ADMIN DELETE] Iniciando eliminación de reserva ID:", id)
     const supabase = await createClient()
 
-    const { error } = await supabase
+    // Primero verificar que la reserva existe
+    const { data: existe, error: checkError } = await supabase
+      .from("reservas")
+      .select("id")
+      .eq("id", id)
+      .single()
+
+    if (checkError || !existe) {
+      console.log("[ADMIN DELETE] Reserva no encontrada:", id, checkError)
+      return { success: false, error: "Reserva no encontrada" }
+    }
+
+    console.log("[ADMIN DELETE] Reserva encontrada, procediendo a eliminar...")
+
+    // Ejecutar delete con verificación
+    const { error, count } = await supabase
       .from("reservas")
       .delete()
       .eq("id", id)
 
+    console.log("[ADMIN DELETE] Respuesta DELETE - Error:", error, "Rows affected:", count)
+
     if (error) {
-      return { success: false, error: "Error al eliminar la reserva: " + error.message }
+      console.error("[ADMIN DELETE] Error en DELETE:", error.code, error.message)
+      return { 
+        success: false, 
+        error: `Error al eliminar: ${error.message} (${error.code})`
+      }
     }
 
+    // Verificar que se eliminó realmente
+    const { data: verificacion, error: verifyError } = await supabase
+      .from("reservas")
+      .select("id")
+      .eq("id", id)
+      .single()
+
+    if (!verifyError && verificacion) {
+      console.error("[ADMIN DELETE] FALLO: La reserva aún existe después del delete")
+      return { 
+        success: false, 
+        error: "La reserva no se eliminó realmente. Verifique permisos RLS"
+      }
+    }
+
+    console.log("[ADMIN DELETE] Eliminación verificada. Reserva eliminada exitosamente")
     return { success: true }
   } catch (error) {
-    return { success: false, error: "Error inesperado al eliminar la reserva." }
+    console.error("[ADMIN DELETE] Error inesperado:", error)
+    return { success: false, error: `Error inesperado: ${String(error)}` }
   }
 }
 
