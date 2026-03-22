@@ -296,7 +296,17 @@ export default function AdminReservasPage() {
             {/* Detalles */}
             {detalle && (
               <div className="bg-card rounded-2xl border border-border/40 p-6">
-                <h3 className="font-semibold text-foreground mb-4">Detalles</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-foreground">Detalles</h3>
+                  <button
+                    onClick={() => handleEliminar(detalle.id)}
+                    disabled={loadingId === detalle.id}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                    title="Eliminar reserva"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
                 <div className="space-y-3 text-sm">
                   <div>
                     <div className="text-foreground/60">Nombre</div>
