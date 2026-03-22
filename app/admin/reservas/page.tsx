@@ -52,27 +52,21 @@ export default function AdminReservasPage() {
   }
 
   const loadData = useCallback(async () => {
-    console.log("[v0] loadData() iniciado con filtros:", filtros)
     setIsRefreshing(true)
     try {
-      const [r, m, d, pr, pe, co] = await Promise.all([
-        getReservasAdmin(filtros),
+      const [r, m, d, pr, pe] = await Promise.all([
+        getReservasPendientes(),
         getMetricasAdmin(filtros.fecha ?? today()),
         getDisponibilidadAdmin(filtros.fecha ?? today()),
         getProximasReservas(5),
         getReservasPendientes(),
-        getReservasConfirmadas(10),
       ])
-      
-      console.log("[v0] Datos traídos - Total:", r.length, "Pendientes:", pe.length, "Confirmadas:", co.length)
-      console.log("[v0] Estados en tabla:", r.map(x => ({ id: x.id.slice(0, 8), estado: x.estado })))
       
       setReservas(r)
       setMetricas(m)
       setDisponibilidad(d)
       setProximas(pr)
-      setPendientes(pe)
-      setConfirmadas(co)
+      setPendientes(r)
       setLastRefresh(new Date())
     } catch (error) {
       console.error("[v0] Error cargando datos:", error)
@@ -84,18 +78,14 @@ export default function AdminReservasPage() {
   useEffect(() => { loadData() }, [loadData])
 
   const handleConfirmar = async (id: string) => {
-    console.log("[v0] Click en Confirmar para:", id)
     setLoadingId(id)
     
     const result = await actualizarEstadoReserva(id, "confirmada")
-    console.log("[v0] Resultado de update:", result.success, result.error)
     
     if (result.success) {
-      addToast("Reserva confirmada correctamente", "success")
+      addToast("Reserva aceptada", "success")
       setDetalle(null)
-      console.log("[v0] Iniciando loadData() después de confirmar...")
       await loadData()
-      console.log("[v0] loadData() completado, reservas actuales:", reservas.length)
     } else {
       addToast(result.error ?? "Error al actualizar la reserva", "error")
     }
@@ -109,12 +99,15 @@ export default function AdminReservasPage() {
     const result = await actualizarEstadoReserva(id, "cancelada")
     
     if (result.success) {
-      addToast("Reserva cancelada correctamente", "success")
+      addToast("Reserva cancelada", "success")
       setDetalle(null)
       await loadData()
     } else {
       addToast(result.error ?? "Error al actualizar la reserva", "error")
     }
+    
+    setLoadingId(null)
+  }
     
     setLoadingId(null)
   }
