@@ -1,3 +1,5 @@
+'use client'
+
 import { AdminSidebar, AdminMobileNav } from "@/components/admin/admin-sidebar"
 import { AdminLogoutButton } from "@/components/admin/logout-button"
 import { LayoutDashboard } from "lucide-react"
