@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       tieneCVUrl: !!body.cvUrl,
     })
 
-    const { nombre, telefono, email, puesto, mensaje, cvUrl, cvPathname, cvNombreArchivo } = body
+    const { nombre, telefono, email, puesto, mensaje, cvUrl, cvNombreArchivo } = body
 
     // Validar campos
     if (!nombre || !telefono || !email || !puesto) {
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       email,
       puesto,
       mensaje,
-      cvPathname,
+      cvUrl,
       cvNombreArchivo,
     })
 
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
                   <div class="field"><div class="label">Email</div><div class="value">${email}</div></div>
                   <div class="field"><div class="label">Puesto</div><div class="value">${puesto}</div></div>
                   ${mensaje ? `<div class="field"><div class="label">Mensaje</div><div class="value">${mensaje.replace(/\n/g, '<br>')}</div></div>` : ''}
-                  ${cvPathname ? `<div class="field"><a href="/api/descargar-cv?pathname=${encodeURIComponent(cvPathname)}" class="button">Descargar CV</a></div>` : ''}
+                  ${cvUrl ? `<div class="field"><a href="${cvUrl}" class="button">Descargar CV</a></div>` : ''}
                 </div>
               </div>
             </body>
