@@ -16,7 +16,6 @@ import { MetricasCards } from "@/components/admin/metricas-cards"
 import { DisponibilidadCard } from "@/components/admin/disponibilidad-card"
 import { DateRangeSelector } from "@/components/admin/date-range-selector"
 import { RefreshCw, Trash2, Search, X } from "lucide-react"
-import { AdminLogoutButton } from "@/components/admin/logout-button"
 
 const today = () => new Date().toISOString().split("T")[0]
 
