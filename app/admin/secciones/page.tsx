@@ -5,8 +5,6 @@ import { getSecciones, deleteSeccion, toggleSeccionActiva, type Seccion } from "
 import { SeccionFormModal } from "@/components/admin/seccion-form-modal"
 import { Plus, Search, RefreshCw, Layout, Pencil, Trash2, ToggleLeft, ToggleRight } from "lucide-react"
 
-export const dynamic = 'force-dynamic'
-
 type Toast = { id: number; message: string; type: "success" | "error" }
 
 export default function AdminSeccionesPage() {
