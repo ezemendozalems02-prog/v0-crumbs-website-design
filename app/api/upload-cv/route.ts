@@ -36,21 +36,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "El archivo no puede superar los 5MB" }, { status: 400 })
     }
 
-    console.log('[UPLOAD CV] Validaciones pasadas, subiendo a Blob...')
+    console.log('[UPLOAD CV] Validaciones pasadas, subiendo a Blob (PRIVATE)...')
 
     // Generar nombre único con timestamp
     const timestamp = Date.now()
     const filename = `cvs/${timestamp}-${file.name}`
 
-    // Subir a Vercel Blob con acceso público
+    // Subir a Vercel Blob con acceso PRIVADO (el store está configurado en modo privado)
     const blob = await put(filename, file, {
-      access: "public",
+      access: "private",
     })
 
-    console.log('[UPLOAD CV] ✓ Archivo subido exitosamente:', blob.url)
+    console.log('[UPLOAD CV] ✓ Archivo subido exitosamente:', blob.pathname)
 
+    // Retornar pathname para servir a través de endpoint privado
     return NextResponse.json({ 
-      url: blob.url, 
+      pathname: blob.pathname,
       fileName: file.name, 
       size: file.size 
     })

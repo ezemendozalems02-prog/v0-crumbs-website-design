@@ -90,8 +90,8 @@ export default function TrabajaConNosotrosPage() {
       }
 
       const uploadData = await uploadRes.json()
-      console.log('[FORM] ✓ CV subido:', uploadData.url)
-      const cvUrl = uploadData.url
+      console.log('[FORM] ✓ CV subido:', uploadData.pathname)
+      const cvPathname = uploadData.pathname
 
       // Paso 2: Enviar el email con todos los datos
       console.log('[FORM] Paso 2: Enviando datos...')
@@ -100,7 +100,7 @@ export default function TrabajaConNosotrosPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          cvUrl,
+          cvPathname,
           cvNombreArchivo: archivo.name,
         }),
       })

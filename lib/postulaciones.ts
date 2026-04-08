@@ -10,7 +10,7 @@ export interface Postulacion {
   email: string
   puesto: string
   mensaje?: string
-  cv_url?: string
+  cv_pathname?: string
   cv_nombre_archivo?: string
   estado: string
 }
@@ -21,7 +21,7 @@ export async function guardarPostulacion(data: {
   email: string
   puesto: string
   mensaje?: string
-  cvUrl?: string
+  cvPathname?: string
   cvNombreArchivo?: string
 }): Promise<{ success: boolean; error?: string; id?: string }> {
   console.log('[DB postulaciones] ===== INICIO GUARDADO =====')
@@ -31,7 +31,7 @@ export async function guardarPostulacion(data: {
     email: data.email,
     puesto: data.puesto,
     tieneMensaje: !!data.mensaje,
-    tieneCVUrl: !!data.cvUrl,
+    tieneCVPathname: !!data.cvPathname,
   })
 
   try {
@@ -44,7 +44,7 @@ export async function guardarPostulacion(data: {
       email: data.email,
       puesto: data.puesto,
       mensaje: data.mensaje || null,
-      cv_url: data.cvUrl || null,
+      cv_pathname: data.cvPathname || null,
       cv_nombre_archivo: data.cvNombreArchivo || null,
       estado: 'nueva',
     }
