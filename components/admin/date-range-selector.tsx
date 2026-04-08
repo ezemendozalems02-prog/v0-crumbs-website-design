@@ -2,8 +2,6 @@
 
 import { useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { format, addDays, startOfMonth, endOfMonth, eachDayOfInterval, isBefore, isAfter, isSameDay, isWithinInterval } from "date-fns"
-import { es } from "date-fns/locale"
 
 interface DateRangeSelectorProps {
   startDate: Date | null
@@ -13,55 +11,89 @@ interface DateRangeSelectorProps {
 
 export function DateRangeSelector({ startDate, endDate, onRangeChange }: DateRangeSelectorProps) {
   const [viewMonth, setViewMonth] = useState(new Date())
-  const [isSelecting, setIsSelecting] = useState(false)
 
-  const monthStart = startOfMonth(viewMonth)
-  const monthEnd = endOfMonth(viewMonth)
-  const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd })
+  const monthStart = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1)
+  const monthEnd = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0)
+  
+  const getDaysInMonth = (date: Date) => {
+    const days = []
+    const start = new Date(date.getFullYear(), date.getMonth(), 1)
+    const end = new Date(date.getFullYear(), date.getMonth() + 1, 0)
+    
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      days.push(new Date(d))
+    }
+    return days
+  }
 
   const handleDayClick = (day: Date) => {
+    const clickedDate = new Date(day)
+    
     if (!startDate || (startDate && endDate)) {
       // Iniciar nueva selección
-      onRangeChange(day, null)
-      setIsSelecting(true)
+      onRangeChange(clickedDate, null)
     } else if (startDate && !endDate) {
       // Completar rango
-      if (isBefore(day, startDate)) {
-        onRangeChange(day, startDate)
+      if (clickedDate < startDate) {
+        onRangeChange(clickedDate, startDate)
       } else {
-        onRangeChange(startDate, day)
+        onRangeChange(startDate, clickedDate)
       }
-      setIsSelecting(false)
     }
   }
 
   const handleClear = () => {
     onRangeChange(null, null)
-    setIsSelecting(false)
   }
 
-  // Obtener días antes del mes para llenar la grilla
+  const handlePrevMonth = () => {
+    setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1))
+  }
+
+  const handleNextMonth = () => {
+    setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1))
+  }
+
+  const daysInMonth = getDaysInMonth(viewMonth)
   const firstDayOfWeek = monthStart.getDay()
-  const previousMonthEnd = addDays(monthStart, -1)
-  const daysFromPreviousMonth = Array.from({ length: firstDayOfWeek }, (_, i) => 
-    addDays(previousMonthEnd, i - firstDayOfWeek + 1)
-  )
-
-  // Obtener días después del mes
-  const lastDayOfWeek = monthEnd.getDay()
-  const daysFromNextMonth = Array.from({ length: 6 - lastDayOfWeek }, (_, i) => 
-    addDays(monthEnd, i + 1)
-  )
-
-  const allDays = [...daysFromPreviousMonth, ...daysInMonth, ...daysFromNextMonth]
-
-  const isInRange = (day: Date) => {
-    if (!startDate || !endDate) return false
-    return isWithinInterval(day, { start: startDate, end: endDate })
+  
+  // Obtener días del mes anterior para llenar
+  const prevMonthEnd = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 0)
+  const daysFromPrevMonth = []
+  for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+    daysFromPrevMonth.unshift(new Date(prevMonthEnd.getFullYear(), prevMonthEnd.getMonth(), prevMonthEnd.getDate() - i))
   }
 
-  const isStartDay = (day: Date) => startDate && isSameDay(day, startDate)
-  const isEndDay = (day: Date) => endDate && isSameDay(day, endDate)
+  // Obtener días del mes siguiente
+  const lastDayOfWeek = monthEnd.getDay()
+  const daysFromNextMonth = []
+  for (let i = 1; i < 7 - lastDayOfWeek; i++) {
+    daysFromNextMonth.push(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, i))
+  }
+
+  const allDays = [...daysFromPrevMonth, ...daysInMonth, ...daysFromNextMonth]
+
+  const isInRange = (day: Date): boolean => {
+    if (!startDate || !endDate) return false
+    return day >= startDate && day <= endDate
+  }
+
+  const isSameDay = (d1: Date, d2: Date): boolean => {
+    return d1.getFullYear() === d2.getFullYear() &&
+           d1.getMonth() === d2.getMonth() &&
+           d1.getDate() === d2.getDate()
+  }
+
+  const isStartDay = (day: Date): boolean => startDate ? isSameDay(day, startDate) : false
+  const isEndDay = (day: Date): boolean => endDate ? isSameDay(day, endDate) : false
+
+  const formatDate = (date: Date): string => {
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    return `${day}/${month}`
+  }
+
+  const monthName = viewMonth.toLocaleString('es-ES', { month: 'long', year: 'numeric' })
 
   return (
     <div className="bg-card rounded-2xl border border-border/40 p-6">
@@ -81,19 +113,19 @@ export function DateRangeSelector({ startDate, endDate, onRangeChange }: DateRan
 
         {/* Rango seleccionado */}
         {startDate && (
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-sm flex-wrap">
             <span className="inline-block px-3 py-1.5 bg-primary/10 text-primary rounded-lg font-medium">
-              {format(startDate, "dd MMM", { locale: es })}
+              {formatDate(startDate)}
             </span>
             {endDate && (
               <>
                 <span className="text-foreground/40">→</span>
                 <span className="inline-block px-3 py-1.5 bg-primary/10 text-primary rounded-lg font-medium">
-                  {format(endDate, "dd MMM", { locale: es })}
+                  {formatDate(endDate)}
                 </span>
               </>
             )}
-            {!endDate && <span className="text-foreground/60">selecciona fecha final...</span>}
+            {!endDate && <span className="text-foreground/60 text-xs">selecciona fecha final...</span>}
           </div>
         )}
 
@@ -102,16 +134,14 @@ export function DateRangeSelector({ startDate, endDate, onRangeChange }: DateRan
           {/* Navegación mes */}
           <div className="flex items-center justify-between mb-4">
             <button
-              onClick={() => setViewMonth(addDays(viewMonth, -32))}
+              onClick={handlePrevMonth}
               className="p-1.5 rounded-lg text-foreground/60 hover:bg-background/80 transition-colors"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <h4 className="font-semibold text-sm">
-              {format(viewMonth, "MMMM yyyy", { locale: es })}
-            </h4>
+            <h4 className="font-semibold text-sm capitalize">{monthName}</h4>
             <button
-              onClick={() => setViewMonth(addDays(viewMonth, 32))}
+              onClick={handleNextMonth}
               className="p-1.5 rounded-lg text-foreground/60 hover:bg-background/80 transition-colors"
             >
               <ChevronRight className="w-5 h-5" />
@@ -142,14 +172,14 @@ export function DateRangeSelector({ startDate, endDate, onRangeChange }: DateRan
                   onClick={() => handleDayClick(day)}
                   className={`
                     aspect-square rounded-lg text-xs font-medium transition-all
-                    ${!isCurrentMonth ? "text-foreground/30 bg-transparent" : ""}
-                    ${isCurrentMonth && !isStart && !isEnd && !inRange ? "text-foreground hover:bg-background/60" : ""}
+                    ${!isCurrentMonth ? "text-foreground/30 bg-transparent cursor-default" : ""}
+                    ${isCurrentMonth && !isStart && !isEnd && !inRange ? "text-foreground hover:bg-background/60 cursor-pointer" : ""}
                     ${inRange && !isStart && !isEnd ? "bg-primary/20 text-primary" : ""}
                     ${(isStart || isEnd) ? "bg-primary text-primary-foreground" : ""}
                     ${isToday && !isStart && !isEnd ? "border border-primary" : ""}
                   `}
                 >
-                  {format(day, "d")}
+                  {day.getDate()}
                 </button>
               )
             })}
