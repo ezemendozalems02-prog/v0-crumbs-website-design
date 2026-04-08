@@ -14,8 +14,8 @@ import {
 } from "@/lib/admin-reservas"
 import { MetricasCards } from "@/components/admin/metricas-cards"
 import { DisponibilidadCard } from "@/components/admin/disponibilidad-card"
-import { DateRangeSelector } from "@/components/admin/date-range-selector"
 import { RefreshCw, Trash2, Search, X } from "lucide-react"
+import { AdminLogoutButton } from "@/components/admin/logout-button"
 
 const today = () => new Date().toISOString().split("T")[0]
 
@@ -24,8 +24,6 @@ type Toast = { id: number; message: string; type: "success" | "error" }
 export default function AdminReservasPage() {
   // Filtros
   const [fecha, setFecha] = useState(today())
-  const [startDate, setStartDate] = useState<Date | null>(null)
-  const [endDate, setEndDate] = useState<Date | null>(null)
   const [busqueda, setBusqueda] = useState("")
   const [horarioFiltro, setHorarioFiltro] = useState("")
 
@@ -216,60 +214,57 @@ export default function AdminReservasPage() {
         <MetricasCards metricas={metricas} />
 
         {/* Filtros */}
-        <div className="mt-6 space-y-6">
-          {/* Selector de rango de fechas */}
-          <DateRangeSelector 
-            startDate={startDate}
-            endDate={endDate}
-            onRangeChange={(start, end) => {
-              setStartDate(start)
-              setEndDate(end)
-              if (start) setFecha(start.toISOString().split('T')[0])
-            }}
-          />
+        <div className="mt-6 bg-card rounded-2xl border border-border/40 p-6">
+          <h2 className="text-sm font-semibold text-foreground mb-4">Filtros</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Fecha */}
+            <div>
+              <label className="text-xs font-medium text-foreground/60 block mb-2">Fecha</label>
+              <input
+                type="date"
+                value={fecha}
+                onChange={(e) => setFecha(e.target.value)}
+                className="w-full px-3 py-2 bg-background border border-border/40 rounded-lg text-sm focus:outline-none focus:border-primary/60"
+              />
+            </div>
 
-          {/* Filtros adicionales */}
-          <div className="bg-card rounded-2xl border border-border/40 p-6">
-            <h2 className="text-sm font-semibold text-foreground mb-4">Filtros adicionales</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-              {/* Horario */}
-              <div>
-                <label className="text-xs font-medium text-foreground/60 block mb-2">Horario</label>
-                <select
-                  value={horarioFiltro}
-                  onChange={(e) => setHorarioFiltro(e.target.value)}
-                  className="w-full px-3 py-2 bg-background border border-border/40 rounded-lg text-sm focus:outline-none focus:border-primary/60"
-                >
-                  <option value="">Todos los horarios</option>
-                  {horariosUnicos.map((h) => (
-                    <option key={h} value={h}>
-                      {h}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            {/* Horario */}
+            <div>
+              <label className="text-xs font-medium text-foreground/60 block mb-2">Horario</label>
+              <select
+                value={horarioFiltro}
+                onChange={(e) => setHorarioFiltro(e.target.value)}
+                className="w-full px-3 py-2 bg-background border border-border/40 rounded-lg text-sm focus:outline-none focus:border-primary/60"
+              >
+                <option value="">Todos los horarios</option>
+                {horariosUnicos.map((h) => (
+                  <option key={h} value={h}>
+                    {h}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-              {/* Buscador */}
-              <div>
-                <label className="text-xs font-medium text-foreground/60 block mb-2">Buscar (nombre o teléfono)</label>
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-3 text-foreground/40" />
-                  <input
-                    type="text"
-                    placeholder="Juan, 1131101739..."
-                    value={busqueda}
-                    onChange={(e) => setBusqueda(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 bg-background border border-border/40 rounded-lg text-sm focus:outline-none focus:border-primary/60"
-                  />
-                  {busqueda && (
-                    <button
-                      onClick={() => setBusqueda("")}
-                      className="absolute right-3 top-3 text-foreground/40 hover:text-foreground/60"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
+            {/* Buscador */}
+            <div className="md:col-span-2 lg:col-span-2">
+              <label className="text-xs font-medium text-foreground/60 block mb-2">Buscar (nombre o teléfono)</label>
+              <div className="relative">
+                <Search className="w-4 h-4 absolute left-3 top-3 text-foreground/40" />
+                <input
+                  type="text"
+                  placeholder="Juan, 1131101739..."
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-background border border-border/40 rounded-lg text-sm focus:outline-none focus:border-primary/60"
+                />
+                {busqueda && (
+                  <button
+                    onClick={() => setBusqueda("")}
+                    className="absolute right-3 top-3 text-foreground/40 hover:text-foreground/60"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
           </div>

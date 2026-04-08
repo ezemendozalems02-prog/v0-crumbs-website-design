@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react'
 import { getPostulaciones, cambiarEstadoPostulacion, eliminarPostulacion } from '@/lib/postulaciones'
 import type { Postulacion } from '@/lib/postulaciones'
-
-export const dynamic = 'force-dynamic'
 import { Download, Trash2, CheckCircle2, Clock } from 'lucide-react'
 
 export default function PostulacionesAdmin() {

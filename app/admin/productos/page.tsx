@@ -8,8 +8,6 @@ import {
 import { ProductoFormModal } from "@/components/admin/producto-form-modal"
 import { Plus, Search, RefreshCw, UtensilsCrossed, ToggleLeft, ToggleRight, Pencil, Trash2, Star } from "lucide-react"
 
-export const dynamic = 'force-dynamic'
-
 const TIPO_LABEL: Record<string, string> = {
   desayuno: "Desayunos",
   almuerzo_cena: "Almuerzo & Cenas",

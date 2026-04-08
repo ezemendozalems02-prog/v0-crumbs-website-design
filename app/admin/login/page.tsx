@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Lock, AlertCircle } from 'lucide-react'
-import { loginAdmin } from '@/app/admin/actions'
+import { validateAdminPassword, createAdminSession } from '@/lib/admin-auth'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -17,16 +17,15 @@ export default function AdminLoginPage() {
     setIsLoading(true)
 
     try {
-      const result = await loginAdmin(password)
-      
-      if (!result.success) {
-        setError(result.error || 'Error al iniciar sesión')
+      const isValid = await validateAdminPassword(password)
+      if (!isValid) {
+        setError('Contraseña incorrecta')
         setIsLoading(false)
         return
       }
 
+      await createAdminSession()
       router.push('/admin/reservas')
-      router.refresh()
     } catch (err) {
       setError('Error al iniciar sesión')
       console.error('[v0] Login error:', err)
