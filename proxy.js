@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
-export function middleware(request: NextRequest) {
+export function proxy(request) {
   const { pathname } = request.nextUrl
 
   // Proteger rutas admin (excepto /admin/login)
