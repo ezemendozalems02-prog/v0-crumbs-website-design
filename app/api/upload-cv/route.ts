@@ -10,16 +10,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No se proporcionó ningún archivo" }, { status: 400 })
     }
 
-    // Validar tipo de archivo
-    const allowedTypes = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ]
-
-    if (!allowedTypes.includes(file.type)) {
+    // Validar que sea PDF
+    if (!file.type.includes("pdf")) {
       return NextResponse.json(
-        { error: "Tipo de archivo no permitido. Solo PDF, DOC o DOCX" },
+        { error: "Solo se aceptan archivos PDF" },
         { status: 400 }
       )
     }
@@ -40,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     console.log("[CV UPLOAD] Archivo subido exitosamente:", blob.url)
 
-    return NextResponse.json({ url: blob.url, pathname: blob.pathname })
+    return NextResponse.json({ url: blob.url, fileName: file.name, size: file.size })
   } catch (error) {
     console.error("[CV UPLOAD] Error al subir archivo:", error)
     return NextResponse.json({ error: "Error al subir el archivo" }, { status: 500 })
