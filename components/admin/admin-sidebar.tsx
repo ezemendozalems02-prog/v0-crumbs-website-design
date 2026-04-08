@@ -2,14 +2,13 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, UtensilsCrossed, BookOpen, Tag, CalendarCheck, Briefcase, Image, Layout } from "lucide-react"
+import { LayoutDashboard, UtensilsCrossed, BookOpen, Tag, CalendarCheck, Briefcase } from "lucide-react"
+import { AdminLogoutButton } from "@/components/admin/logout-button"
 
 const navItems = [
   { href: "/admin/reservas",  label: "Reservas",   icon: CalendarCheck },
   { href: "/admin/productos", label: "Productos",   icon: UtensilsCrossed },
   { href: "/admin/categorias",label: "Categorías",  icon: Tag },
-  { href: "/admin/banners",   label: "Banners",     icon: Image },
-  { href: "/admin/secciones", label: "Secciones",   icon: Layout },
   { href: "/admin/postulaciones", label: "Propuestas laborales", icon: Briefcase },
 ]
 
@@ -46,6 +45,10 @@ export function AdminSidebar() {
           )
         })}
       </nav>
+
+      <div className="px-3 py-4 border-t border-primary-foreground/10">
+        <AdminLogoutButton variant="sidebar" />
+      </div>
     </aside>
   )
 }

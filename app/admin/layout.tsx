@@ -1,10 +1,6 @@
-'use client'
-
 import { AdminSidebar, AdminMobileNav } from "@/components/admin/admin-sidebar"
+import { AdminLogoutButton } from "@/components/admin/logout-button"
 import { LayoutDashboard } from "lucide-react"
-
-// Prevent static prerendering to ensure dynamic rendering
-export const revalidate = 0
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -20,6 +16,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
               <span className="font-[family-name:var(--font-dm-serif)] text-base">CRUMBS Admin</span>
             </div>
+            <AdminLogoutButton />
           </div>
           <div className="px-4 pb-3">
             <AdminMobileNav />
