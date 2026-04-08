@@ -1,5 +1,3 @@
-"use server"
-
 import { createClient } from "@supabase/supabase-js"
 
 const supabase = createClient(
@@ -19,7 +17,7 @@ export interface Banner {
   updated_at: string
 }
 
-export async function getBanners() {
+export async function getBanners(): Promise<Banner[]> {
   const { data, error } = await supabase
     .from("banners")
     .select("*")
@@ -63,20 +61,11 @@ export async function deleteBanner(id: string) {
 }
 
 export async function reorderBanners(banners: Array<{ id: string; posicion: number }>) {
-  const { error } = await supabase.rpc("reorder_items", {
-    items: banners.map((b, i) => ({ id: b.id, position: i })),
-    table: "banners",
-  })
-
-  if (error) {
-    // Fallback: actualizar uno por uno
-    for (const { id, posicion } of banners) {
-      await supabase
-        .from("banners")
-        .update({ posicion })
-        .eq("id", id)
-    }
+  for (const { id, posicion } of banners) {
+    await supabase
+      .from("banners")
+      .update({ posicion })
+      .eq("id", id)
   }
-
   return { success: true }
 }

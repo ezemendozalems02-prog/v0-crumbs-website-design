@@ -1,5 +1,3 @@
-"use server"
-
 import { createClient } from "@supabase/supabase-js"
 
 const supabase = createClient(
@@ -18,7 +16,7 @@ export interface Seccion {
   updated_at: string
 }
 
-export async function getSecciones() {
+export async function getSecciones(): Promise<Seccion[]> {
   const { data, error } = await supabase
     .from("secciones")
     .select("*")
