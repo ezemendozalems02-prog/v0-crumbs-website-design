@@ -5,6 +5,8 @@ import { getBanners, deleteBanner, type Banner } from "@/lib/admin-banners"
 import { BannerFormModal } from "@/components/admin/banner-form-modal"
 import { Plus, Search, RefreshCw, Image as ImageIcon, Pencil, Trash2 } from "lucide-react"
 
+export const dynamic = 'force-dynamic'
+
 type Toast = { id: number; message: string; type: "success" | "error" }
 
 export default function AdminBannersPage() {

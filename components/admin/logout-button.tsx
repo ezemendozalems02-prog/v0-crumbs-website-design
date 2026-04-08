@@ -10,8 +10,12 @@ export function AdminLogoutButton({ variant = "default" }: Props) {
   const router = useRouter()
 
   const handleLogout = async () => {
-    await clearAdminSession()
-    router.push('/admin/login')
+    try {
+      await clearAdminSession()
+      router.push('/admin/login')
+    } catch (error) {
+      console.error('[v0] Logout error:', error)
+    }
   }
 
   if (variant === "sidebar") {
@@ -37,3 +41,4 @@ export function AdminLogoutButton({ variant = "default" }: Props) {
     </button>
   )
 }
+
