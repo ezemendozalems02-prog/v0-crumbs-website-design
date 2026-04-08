@@ -46,10 +46,6 @@ export function AdminSidebar() {
           )
         })}
       </nav>
-
-      <div className="px-3 py-4 border-t border-primary-foreground/10">
-        <AdminLogoutButton variant="sidebar" />
-      </div>
     </aside>
   )
 }

@@ -15,7 +15,6 @@ import {
 import { MetricasCards } from "@/components/admin/metricas-cards"
 import { DisponibilidadCard } from "@/components/admin/disponibilidad-card"
 import { RefreshCw, Trash2, Search, X } from "lucide-react"
-import { AdminLogoutButton } from "@/components/admin/logout-button"
 
 const today = () => new Date().toISOString().split("T")[0]
 
@@ -203,7 +202,6 @@ export default function AdminReservasPage() {
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
             </button>
-            <AdminLogoutButton />
           </div>
         </div>
       </header>
