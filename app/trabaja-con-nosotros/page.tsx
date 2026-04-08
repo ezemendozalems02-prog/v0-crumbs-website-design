@@ -24,15 +24,19 @@ export default function TrabajaConNosotrosPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      const allowedTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]
-      if (!allowedTypes.includes(file.type)) {
-        setMensaje({ tipo: "error", texto: "Solo se permiten archivos PDF, DOC o DOCX" })
+      console.log('[FORM] Archivo seleccionado:', { name: file.name, type: file.type, size: file.size })
+      // Solo aceptar PDF
+      if (!file.type.includes("pdf")) {
+        console.log('[FORM] ERROR: Tipo de archivo no válido:', file.type)
+        setMensaje({ tipo: "error", texto: "Solo se permiten archivos PDF" })
         return
       }
       if (file.size > 5 * 1024 * 1024) {
+        console.log('[FORM] ERROR: Archivo demasiado grande:', file.size)
         setMensaje({ tipo: "error", texto: "El archivo no puede superar los 5MB" })
         return
       }
+      console.log('[FORM] ✓ Archivo válido')
       setArchivo(file)
       setMensaje(null)
     }
@@ -40,30 +44,36 @@ export default function TrabajaConNosotrosPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('[FORM] ===== SUBMIT INICIADO =====')
     setMensaje(null)
 
     // Validaciones
     if (!formData.nombre || !formData.telefono || !formData.email || !formData.puesto) {
+      console.log('[FORM] ERROR: Faltan campos obligatorios')
       setMensaje({ tipo: "error", texto: "Por favor completá todos los campos obligatorios" })
       return
     }
 
     if (!archivo) {
+      console.log('[FORM] ERROR: No hay archivo')
       setMensaje({ tipo: "error", texto: "Por favor adjuntá tu CV" })
       return
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(formData.email)) {
+      console.log('[FORM] ERROR: Email inválido:', formData.email)
       setMensaje({ tipo: "error", texto: "Por favor ingresá un email válido" })
       return
     }
 
+    console.log('[FORM] Validaciones OK, iniciando upload...')
     setLoading(true)
     setMensaje({ tipo: "success", texto: "Enviando postulación..." })
 
     try {
       // Paso 1: Subir el CV a Blob
+      console.log('[FORM] Paso 1: Subiendo CV a Blob...')
       const formDataBlob = new FormData()
       formDataBlob.append("file", archivo)
 
@@ -72,25 +82,38 @@ export default function TrabajaConNosotrosPage() {
         body: formDataBlob,
       })
 
+      console.log('[FORM] Upload response status:', uploadRes.status)
       if (!uploadRes.ok) {
-        throw new Error("Error al subir el CV")
+        const errorText = await uploadRes.text()
+        console.error('[FORM] ERROR Upload:', errorText)
+        throw new Error("Error al subir el CV: " + errorText)
       }
 
-      const { url: cvUrl } = await uploadRes.json()
+      const uploadData = await uploadRes.json()
+      console.log('[FORM] ✓ CV subido:', uploadData.url)
+      const cvUrl = uploadData.url
 
       // Paso 2: Enviar el email con todos los datos
+      console.log('[FORM] Paso 2: Enviando datos...')
       const emailRes = await fetch("/api/send-postulacion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
           cvUrl,
+          cvNombreArchivo: archivo.name,
         }),
       })
 
+      console.log('[FORM] Send response status:', emailRes.status)
       if (!emailRes.ok) {
-        throw new Error("Error al enviar la postulación")
+        const errorText = await emailRes.text()
+        console.error('[FORM] ERROR Send:', errorText)
+        throw new Error("Error al enviar la postulación: " + errorText)
       }
+
+      const sendData = await emailRes.json()
+      console.log('[FORM] ✓ Postulación enviada:', sendData)
 
       setMensaje({
         tipo: "success",
@@ -102,11 +125,13 @@ export default function TrabajaConNosotrosPage() {
       setArchivo(null)
       const fileInput = document.getElementById("cv-upload") as HTMLInputElement
       if (fileInput) fileInput.value = ""
+      
+      console.log('[FORM] ===== SUBMIT EXITOSO =====')
     } catch (error) {
-      console.error("Error:", error)
+      console.error('[FORM] ✗✗✗ ERROR FATAL:', error)
       setMensaje({
         tipo: "error",
-        texto: "Hubo un problema al enviar tu postulación. Intentá nuevamente.",
+        texto: error instanceof Error ? error.message : "Hubo un problema al enviar tu postulación. Intentá nuevamente.",
       })
     } finally {
       setLoading(false)
