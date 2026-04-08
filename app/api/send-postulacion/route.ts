@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'onboarding@resend.dev',
+            from: 'postulaciones@crumbs.ar',
             to: ADMIN_EMAIL,
             subject: `Nueva postulación: ${nombre} - ${puesto}`,
             html: emailHTML,
@@ -120,15 +120,24 @@ export async function POST(request: NextRequest) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'onboarding@resend.dev',
+            from: 'postulaciones@crumbs.ar',
             to: email,
             subject: 'Hemos recibido tu postulación - CRUMBS',
             html: `
-              <h2>¡Gracias por tu postulación!</h2>
-              <p>Hola ${nombre},</p>
-              <p>Hemos recibido tu postulación para el puesto de <strong>${puesto}</strong>.</p>
-              <p>Revisaremos tu CV y nos pondremos en contacto si estamos interesados.</p>
-              <p>¡Esperamos poder trabajar contigo!</p>
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: #1a1a1a; color: white; padding: 30px; border-radius: 8px 8px 0 0; text-align: center;">
+                  <h1 style="margin: 0; font-size: 24px;">¡Gracias por tu postulación!</h1>
+                </div>
+                <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px;">
+                  <p>Hola <strong>${nombre}</strong>,</p>
+                  <p>Hemos recibido tu postulación para el puesto de <strong>${puesto}</strong> en CRUMBS.</p>
+                  <p>Revisaremos tu CV y nos pondremos en contacto contigo pronto si estamos interesados.</p>
+                  <p>Gracias por tu interés en formar parte de nuestro equipo.</p>
+                  <p style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px;">
+                    Este es un email automático. Por favor no responder a este mensaje.
+                  </p>
+                </div>
+              </div>
             `,
           }),
         })
