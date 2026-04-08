@@ -4,6 +4,8 @@ import { useState, useEffect, useTransition, useCallback } from "react"
 import { getCategorias, upsertCategoria, deleteCategoria, toggleCategoriaActiva, type Categoria } from "@/lib/admin-productos"
 import { Tag, Plus, Pencil, Trash2, ToggleLeft, ToggleRight, RefreshCw, X, Check } from "lucide-react"
 
+export const dynamic = 'force-dynamic'
+
 const TIPO_OPTIONS = [
   { value: "desayuno", label: "Desayunos" },
   { value: "almuerzo_cena", label: "Almuerzo & Cenas" },

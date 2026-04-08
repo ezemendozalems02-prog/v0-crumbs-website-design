@@ -3,6 +3,8 @@
 import { useState, useEffect, useTransition, useCallback } from "react"
 import {
   getProductos, deleteProducto, toggleProductoDisponible, getMetricasProductos, getCategorias,
+
+export const dynamic = 'force-dynamic'
   type Producto, type Categoria,
 } from "@/lib/admin-productos"
 import { ProductoFormModal } from "@/components/admin/producto-form-modal"
