@@ -1,4 +1,5 @@
 "use client"
+// v77 - Cleared build cache issue
 
 import { useState, useEffect, useTransition, useCallback } from "react"
 import { getCategorias, upsertCategoria, deleteCategoria, toggleCategoriaActiva, type Categoria } from "@/lib/admin-productos"
