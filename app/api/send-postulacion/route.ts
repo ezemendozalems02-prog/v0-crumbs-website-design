@@ -2,16 +2,33 @@ import { guardarPostulacion } from '@/lib/postulaciones'
 import { type NextRequest, NextResponse } from 'next/server'
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@crumbs.com.ar'
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'crumbsc38@gmail.com'
 
 export async function POST(request: NextRequest) {
+  console.log('[SEND POSTULACION] ===== INICIO =====')
+  console.log('[SEND POSTULACION] ADMIN_EMAIL configurado:', ADMIN_EMAIL)
+  console.log('[SEND POSTULACION] RESEND_API_KEY presente:', !!RESEND_API_KEY)
+  
   try {
-    const { nombre, telefono, email, puesto, mensaje, cvUrl, cvNombreArchivo } = await request.json()
+    const body = await request.json()
+    console.log('[SEND POSTULACION] Body recibido:', {
+      nombre: body.nombre,
+      telefono: body.telefono,
+      email: body.email,
+      puesto: body.puesto,
+      tieneMensaje: !!body.mensaje,
+      tieneCVUrl: !!body.cvUrl,
+    })
+
+    const { nombre, telefono, email, puesto, mensaje, cvUrl, cvNombreArchivo } = body
 
     // Validar campos
     if (!nombre || !telefono || !email || !puesto) {
+      console.log('[SEND POSTULACION] ERROR: Faltan campos requeridos')
       return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 })
     }
+
+    console.log('[SEND POSTULACION] Validación OK, guardando en BD...')
 
     // Guardar en BD
     const dbResult = await guardarPostulacion({
@@ -24,12 +41,18 @@ export async function POST(request: NextRequest) {
       cvNombreArchivo,
     })
 
+    console.log('[SEND POSTULACION] Resultado BD:', dbResult)
+
     if (!dbResult.success) {
-      return NextResponse.json({ error: 'Error al guardar postulación' }, { status: 500 })
+      console.log('[SEND POSTULACION] ERROR BD:', dbResult.error)
+      return NextResponse.json({ error: 'Error al guardar postulación: ' + dbResult.error }, { status: 500 })
     }
+
+    console.log('[SEND POSTULACION] ✓ Guardado en BD exitoso, ID:', dbResult.id)
 
     // Enviar email al admin si Resend está configurado
     if (RESEND_API_KEY) {
+      console.log('[SEND POSTULACION] Enviando emails...')
       try {
         const emailHTML = `
           <!DOCTYPE html>
@@ -64,29 +87,40 @@ export async function POST(request: NextRequest) {
           </html>
         `
 
-        await fetch('https://api.resend.com/emails', {
+        console.log('[SEND POSTULACION] Enviando email al admin:', ADMIN_EMAIL)
+        
+        const adminEmailRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${RESEND_API_KEY}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'postulaciones@crumbs.com.ar',
+            from: 'onboarding@resend.dev',
             to: ADMIN_EMAIL,
             subject: `Nueva postulación: ${nombre} - ${puesto}`,
             html: emailHTML,
           }),
         })
 
+        if (!adminEmailRes.ok) {
+          const errorText = await adminEmailRes.text()
+          console.error('[SEND POSTULACION] ✗ Error enviando email admin:', errorText)
+        } else {
+          console.log('[SEND POSTULACION] ✓ Email al admin enviado')
+        }
+
+        console.log('[SEND POSTULACION] Enviando confirmación al candidato:', email)
+
         // Enviar confirmación al candidato
-        await fetch('https://api.resend.com/emails', {
+        const candidateEmailRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${RESEND_API_KEY}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'postulaciones@crumbs.com.ar',
+            from: 'onboarding@resend.dev',
             to: email,
             subject: 'Hemos recibido tu postulación - CRUMBS',
             html: `
@@ -98,15 +132,29 @@ export async function POST(request: NextRequest) {
             `,
           }),
         })
+
+        if (!candidateEmailRes.ok) {
+          const errorText = await candidateEmailRes.text()
+          console.error('[SEND POSTULACION] ✗ Error enviando email candidato:', errorText)
+        } else {
+          console.log('[SEND POSTULACION] ✓ Email al candidato enviado')
+        }
       } catch (emailError) {
-        console.error('[postulaciones] Error enviando email:', emailError)
-        // No fallar si el email no se envía
+        console.error('[SEND POSTULACION] ✗ Error enviando emails:', emailError)
+        console.error('[SEND POSTULACION] Stack trace:', emailError instanceof Error ? emailError.stack : 'No stack')
+        // No fallar si el email no se envía - la postulación ya está guardada
       }
+    } else {
+      console.log('[SEND POSTULACION] ⚠ RESEND_API_KEY no configurada, no se enviarán emails')
     }
 
+    console.log('[SEND POSTULACION] ===== FIN EXITOSO =====')
     return NextResponse.json({ success: true, id: dbResult.id })
   } catch (error) {
-    console.error('[postulaciones] Error:', error)
-    return NextResponse.json({ error: 'Error al procesar postulación' }, { status: 500 })
+    console.error('[SEND POSTULACION] ✗✗✗ ERROR FATAL:', error)
+    console.error('[SEND POSTULACION] Stack trace:', error instanceof Error ? error.stack : 'No stack available')
+    return NextResponse.json({ 
+      error: 'Error al procesar postulación: ' + (error instanceof Error ? error.message : 'Error desconocido')
+    }, { status: 500 })
   }
 }
