@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { LogOut } from 'lucide-react'
-import { clearAdminSession } from '@/lib/admin-auth'
+import { logoutAdmin } from '@/app/admin/actions'
 
 interface Props { variant?: "default" | "sidebar" }
 
@@ -11,8 +11,9 @@ export function AdminLogoutButton({ variant = "default" }: Props) {
 
   const handleLogout = async () => {
     try {
-      await clearAdminSession()
+      await logoutAdmin()
       router.push('/admin/login')
+      router.refresh()
     } catch (error) {
       console.error('[v0] Logout error:', error)
     }
