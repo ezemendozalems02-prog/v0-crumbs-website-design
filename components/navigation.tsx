@@ -10,6 +10,7 @@ const navLinks = [
   { href: "/delivery", label: "Delivery" },
   { href: "/reservas", label: "Reservas", highlight: true },
   { href: "/contacto", label: "Contacto" },
+  { href: "/trabaja-con-nosotros", label: "Trabaja con nosotros" },
 ]
 
 export function Navigation() {

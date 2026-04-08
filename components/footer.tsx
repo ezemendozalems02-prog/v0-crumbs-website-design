@@ -44,6 +44,9 @@ export function Footer() {
               <Link href="/contacto" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                 Contacto
               </Link>
+              <Link href="/trabaja-con-nosotros" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                Trabaja con nosotros
+              </Link>
             </nav>
           </div>
 
