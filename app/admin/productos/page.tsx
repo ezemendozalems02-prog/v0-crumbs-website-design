@@ -3,12 +3,12 @@
 import { useState, useEffect, useTransition, useCallback } from "react"
 import {
   getProductos, deleteProducto, toggleProductoDisponible, getMetricasProductos, getCategorias,
-
-export const dynamic = 'force-dynamic'
   type Producto, type Categoria,
 } from "@/lib/admin-productos"
 import { ProductoFormModal } from "@/components/admin/producto-form-modal"
 import { Plus, Search, RefreshCw, UtensilsCrossed, ToggleLeft, ToggleRight, Pencil, Trash2, Star } from "lucide-react"
+
+export const dynamic = 'force-dynamic'
 
 const TIPO_LABEL: Record<string, string> = {
   desayuno: "Desayunos",
