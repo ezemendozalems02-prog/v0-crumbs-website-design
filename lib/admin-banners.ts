@@ -29,7 +29,7 @@ export async function getBanners() {
   return (data || []) as Banner[]
 }
 
-export async function createBanner(banner: Omit<Banner, "id" | "created_at" | "updated_at">) {
+export async function createBanner(banner: Partial<Banner>) {
   const { data, error } = await supabase
     .from("banners")
     .insert([banner])
@@ -40,7 +40,7 @@ export async function createBanner(banner: Omit<Banner, "id" | "created_at" | "u
   return { success: true, data: data as Banner }
 }
 
-export async function updateBanner(id: string, banner: Partial<Omit<Banner, "id" | "created_at" | "updated_at">>) {
+export async function updateBanner(id: string, banner: Partial<Banner>) {
   const { data, error } = await supabase
     .from("banners")
     .update({ ...banner, updated_at: new Date().toISOString() })

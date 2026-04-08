@@ -28,7 +28,7 @@ export async function getSecciones() {
   return (data || []) as Seccion[]
 }
 
-export async function createSeccion(seccion: Omit<Seccion, "id" | "created_at" | "updated_at">) {
+export async function createSeccion(seccion: Partial<Seccion>) {
   const { data, error } = await supabase
     .from("secciones")
     .insert([seccion])
@@ -39,7 +39,7 @@ export async function createSeccion(seccion: Omit<Seccion, "id" | "created_at" |
   return { success: true, data: data as Seccion }
 }
 
-export async function updateSeccion(id: string, seccion: Partial<Omit<Seccion, "id" | "created_at" | "updated_at">>) {
+export async function updateSeccion(id: string, seccion: Partial<Seccion>) {
   const { data, error } = await supabase
     .from("secciones")
     .update({ ...seccion, updated_at: new Date().toISOString() })

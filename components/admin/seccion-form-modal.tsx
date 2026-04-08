@@ -30,7 +30,13 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
     }
 
     try {
-      const data = { titulo: titulo.trim(), descripcion: descripcion.trim(), imagen_url: imagenUrl, activo, posicion: seccion?.posicion ?? 0 }
+      const data: Partial<Seccion> = { 
+        titulo: titulo.trim(), 
+        descripcion: descripcion.trim(), 
+        imagen_url: imagenUrl, 
+        activo, 
+        posicion: seccion?.posicion ?? 0 
+      }
 
       let result
       if (seccion) {

@@ -31,7 +31,14 @@ export function BannerFormModal({ banner, onClose, onSaved }: BannerFormModalPro
     }
 
     try {
-      const data = { titulo: titulo.trim(), descripcion: descripcion.trim(), imagen_url: imagenUrl, enlace_url: enlaceUrl, activo, posicion: banner?.posicion ?? 0 }
+      const data: Partial<Banner> = { 
+        titulo: titulo.trim(), 
+        descripcion: descripcion.trim(), 
+        imagen_url: imagenUrl, 
+        enlace_url: enlaceUrl, 
+        activo,
+        posicion: banner?.posicion ?? 0 
+      }
 
       let result
       if (banner) {
