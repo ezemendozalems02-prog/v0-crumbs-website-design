@@ -1,5 +1,6 @@
 "use client"
 
+// Admin Banners Page v2 - Manage promotional banners and advertisements
 import { useState, useEffect, useTransition, useCallback } from "react"
 import { getBanners, deleteBanner, toggleBannerActivo, type Banner } from "@/lib/admin-banners"
 import { BannerFormModal } from "@/components/admin/banner-form-modal"

@@ -3,6 +3,9 @@
 import { AdminSidebar, AdminMobileNav } from "@/components/admin/admin-sidebar"
 import { LayoutDashboard } from "lucide-react"
 
+// Prevent static prerendering to ensure dynamic rendering
+export const revalidate = 0
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background flex">

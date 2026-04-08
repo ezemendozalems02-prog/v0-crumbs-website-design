@@ -1,5 +1,6 @@
 "use client"
 
+// Admin Secciones Page v2 - Manage menu sections and galleries
 import { useState, useEffect, useTransition, useCallback } from "react"
 import { getSecciones, deleteSeccion, toggleSeccionActiva, type Seccion } from "@/lib/admin-secciones"
 import { SeccionFormModal } from "@/components/admin/seccion-form-modal"
