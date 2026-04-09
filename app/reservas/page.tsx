@@ -11,7 +11,7 @@ import { TimeSelector } from "@/components/reservas/time-selector"
 import { ReservationForm } from "@/components/reservas/reservation-form"
 import { ReservationSummary } from "@/components/reservas/reservation-summary"
 import { AvailabilityBadge } from "@/components/reservas/availability-badge"
-import { getDisponibilidad, crearReserva } from "@/lib/reservas"
+import { getDisponibilidad, crearReserva, enviarConfirmacionReserva } from "@/lib/reservas"
 
 export type TableOption = {
   id: "2" | "4" | "6" | "8+"
@@ -81,6 +81,7 @@ export default function ReservasPage() {
   const [personas, setPersonas] = useState<number>(0)
   const [nombre, setNombre] = useState("")
   const [telefono, setTelefono] = useState("")
+  const [email, setEmail] = useState("")
   const [requerimiento, setRequerimiento] = useState("")
   const [tolerancia, setTolerancia] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -162,6 +163,19 @@ export default function ReservasPage() {
       if (!result.success) {
         setSubmitError(result.error || "Error al crear la reserva")
         return
+      }
+
+      // Enviar email de confirmación si se proporcionó email
+      if (email.trim()) {
+        enviarConfirmacionReserva({
+          nombre: nombre.trim(),
+          email: email.trim(),
+          telefono: telefono.trim(),
+          fecha: dateKey!,
+          horario: selectedTime,
+          cantidadPersonas: personas,
+          tipoMesa: selectedTable!.label,
+        }).catch(err => console.error("Error sending confirmation email:", err))
       }
 
       // Si se guardo correctamente, abrir WhatsApp
@@ -269,11 +283,13 @@ export default function ReservasPage() {
             personas={personas}
             nombre={nombre}
             telefono={telefono}
+            email={email}
             requerimiento={requerimiento}
             tolerancia={tolerancia}
             onPersonasChange={(v) => { setPersonas(v); setErrors((e) => ({ ...e, personas: "" })) }}
             onNombreChange={(v) => { setNombre(v); setErrors((e) => ({ ...e, nombre: "" })) }}
             onTelefonoChange={(v) => { setTelefono(v); setErrors((e) => ({ ...e, telefono: "" })) }}
+            onEmailChange={(v) => { setEmail(v); setErrors((e) => ({ ...e, email: "" })) }}
             onRequerimientoChange={setRequerimiento}
             onToleranciaChange={(v) => { setTolerancia(v); setErrors((e) => ({ ...e, tolerancia: "" })) }}
             errors={errors}

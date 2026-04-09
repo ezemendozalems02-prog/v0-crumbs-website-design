@@ -1,6 +1,6 @@
 "use client"
 
-import { Users, User, Phone, FileText, Clock } from "lucide-react"
+import { Users, User, Phone, Mail, FileText, Clock } from "lucide-react"
 import type { TableOption } from "@/app/reservas/page"
 
 interface ReservationFormProps {
@@ -8,11 +8,13 @@ interface ReservationFormProps {
   personas: number
   nombre: string
   telefono: string
+  email: string
   requerimiento: string
   tolerancia: boolean
   onPersonasChange: (v: number) => void
   onNombreChange: (v: string) => void
   onTelefonoChange: (v: string) => void
+  onEmailChange: (v: string) => void
   onRequerimientoChange: (v: string) => void
   onToleranciaChange: (v: boolean) => void
   errors: Record<string, string>
@@ -23,11 +25,13 @@ export function ReservationForm({
   personas,
   nombre,
   telefono,
+  email,
   requerimiento,
   tolerancia,
   onPersonasChange,
   onNombreChange,
   onTelefonoChange,
+  onEmailChange,
   onRequerimientoChange,
   onToleranciaChange,
   errors,
@@ -109,6 +113,25 @@ export function ReservationForm({
           }`}
         />
         {errors.telefono && <p className="mt-1.5 text-sm text-red-500">{errors.telefono}</p>}
+      </div>
+
+      {/* Email */}
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-foreground/70 mb-2">
+          <Mail className="w-4 h-4 text-accent" />
+          Email
+          <span className="ml-auto text-xs text-foreground/30">Opcional - Para confirmación</span>
+        </label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => onEmailChange(e.target.value)}
+          placeholder="tu@email.com"
+          className={`w-full px-4 py-3 rounded-xl bg-background border text-sm text-foreground placeholder:text-foreground/30 outline-none transition-colors duration-200 focus:border-primary/60 ${
+            errors.email ? "border-red-400" : "border-primary/15"
+          }`}
+        />
+        {errors.email && <p className="mt-1.5 text-sm text-red-500">{errors.email}</p>}
       </div>
 
       {/* Requerimiento especial */}

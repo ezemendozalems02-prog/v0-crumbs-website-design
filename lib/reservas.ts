@@ -211,3 +211,39 @@ export async function getDisponibilidadMesas(
   return (data || []) as any[]
 }
 
+/**
+ * Envía email de confirmación después de crear una reserva
+ */
+export async function enviarConfirmacionReserva(reservaData: {
+  nombre: string
+  email?: string
+  telefono: string
+  fecha: string
+  horario: string
+  cantidadPersonas: number
+  tipoMesa: string
+}) {
+  // No hacer await - enviar en background
+  try {
+    if (!reservaData.email) {
+      console.log("[RESERVA] No email provided, skipping confirmation")
+      return
+    }
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/send-reserva-confirmation`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reservaData),
+    })
+
+    if (!response.ok) {
+      console.error("[RESERVA] Failed to send confirmation email:", await response.text())
+    } else {
+      console.log("[RESERVA] Confirmation email sent successfully")
+    }
+  } catch (error) {
+    console.error("[RESERVA] Error sending confirmation email:", error)
+    // No throw - la reserva ya fue creada, solo el email falló
+  }
+}
+
