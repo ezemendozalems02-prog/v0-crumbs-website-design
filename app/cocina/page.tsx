@@ -58,7 +58,7 @@ export default async function CocinaPage() {
           <div className="text-center mb-16">
             <span className="font-[family-name:var(--font-caveat)] text-xl text-accent">Cocina de estación</span>
             <p className="text-foreground/70 mt-4 max-w-2xl mx-auto">
-              Platos preparados con ingredientes frescos y de estación. Una experiencia gastronómica completa en Ciudad Jardín.
+              Sabores, platos y buenos momentos para cuando pinta algo rico
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
