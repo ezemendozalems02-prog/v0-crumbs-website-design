@@ -79,14 +79,14 @@ export default function ContactoPage() {
                 className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/15 transition-colors duration-300"
               >
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3284.0168878895424!2d-58.38375908477043!3d-34.60373446500459!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4aa9f0a6da5edb%3A0x11bead4e234e558b!2sBuenos%20Aires%2C%20Argentina!5e0!3m2!1sen!2s!4v1635789456789!5m2!1sen!2s"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3282.9449622372753!2d-58.45068!3d-34.604587!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bcb5c8b5c5c5c5%3A0x5c5c5c5c5c5c5c5c!2sCiudad%20Jard%C3%ADn%2C%20Buenos%20Aires!5e0!3m2!1ses!2sar!4v1704067200000"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title="Ubicación de CRUMBS"
+                  title="Ubicación de CRUMBS en Ciudad Jardín"
                   className="pointer-events-none"
                 />
               </a>
