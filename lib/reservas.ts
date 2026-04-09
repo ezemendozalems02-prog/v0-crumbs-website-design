@@ -25,16 +25,41 @@ export interface ReservaResult {
   error?: string
 }
 
-const STOCK_TOTAL = 100
+/**
+ * Obtiene la capacidad total del restaurante desde configuración de mesas
+ * Esto es la fuente única de verdad para la capacidad
+ */
+async function getTotalCapacity(): Promise<number> {
+  const supabase = await createClient()
+  
+  const { data, error } = await supabase
+    .from("configuracion_mesas")
+    .select("capacidad, cantidad")
+    .eq("activo", true)
+  
+  if (error || !data) {
+    console.error("Error fetching table configuration:", error)
+    return 0 // Si falla, retorna 0 para que se notifique el error
+  }
+  
+  // Calcular capacidad total: suma de (capacidad * cantidad) para cada tipo de mesa
+  const total = data.reduce((sum, table) => {
+    return sum + (table.capacidad * table.cantidad)
+  }, 0)
+  
+  return total
+}
 
 /**
  * Obtiene la disponibilidad de cubiertos para una fecha específica
  */
 export async function getDisponibilidad(fecha: string): Promise<Disponibilidad> {
   const supabase = await createClient()
+  const STOCK_TOTAL = await getTotalCapacity()
   
   const { data, error } = await supabase.rpc("get_disponibilidad", {
     p_fecha: fecha,
+    p_stock_total: STOCK_TOTAL,
   })
 
   if (error) {

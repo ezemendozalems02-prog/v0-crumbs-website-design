@@ -38,6 +38,74 @@ export interface DisponibilidadAdmin {
   fecha: string
 }
 
+/**
+ * Obtiene la capacidad total del restaurante desde configuración de mesas
+ * Fuente única de verdad para la capacidad
+ */
+async function getTotalCapacity(): Promise<number> {
+  const supabase = await createClient()
+  
+  const { data, error } = await supabase
+    .from("configuracion_mesas")
+    .select("capacidad, cantidad")
+    .eq("activo", true)
+  
+  if (error || !data) {
+    console.error("Error fetching table configuration:", error)
+    return 0
+  }
+  
+  const total = data.reduce((sum, table) => {
+    return sum + (table.capacidad * table.cantidad)
+  }, 0)
+  
+  return total
+}
+
+export async function getMetricasAdmin(fecha: string): Promise<MetricasAdmin> {
+  const supabase = await createClient()
+  const STOCK_TOTAL = await getTotalCapacity()
+
+  const { data, error } = await supabase
+    .from("reservas")
+    .select("cubiertos_consumidos")
+    .eq("fecha_reserva", fecha)
+
+  if (error || !data) {
+    return { total: 0, cubiertos_ocupados: 0, cubiertos_disponibles: STOCK_TOTAL }
+  }
+
+  const total = data.length
+  const cubiertos_ocupados = data.reduce((sum, r) => sum + r.cubiertos_consumidos, 0)
+
+  return {
+    total,
+    cubiertos_ocupados,
+    cubiertos_disponibles: Math.max(0, STOCK_TOTAL - cubiertos_ocupados),
+  }
+}
+
+export async function getDisponibilidadAdmin(fecha: string): Promise<DisponibilidadAdmin> {
+  const supabase = await createClient()
+  const STOCK_TOTAL = await getTotalCapacity()
+
+  const { data, error } = await supabase.rpc("get_disponibilidad", { 
+    p_fecha: fecha,
+    p_stock_total: STOCK_TOTAL,
+  })
+
+  if (error || !data || data.length === 0) {
+    return { cubiertos_usados: 0, cubiertos_disponibles: STOCK_TOTAL, porcentaje_ocupacion: 0, fecha }
+  }
+
+  return {
+    cubiertos_usados: Number(data[0].cubiertos_usados),
+    cubiertos_disponibles: Number(data[0].cubiertos_disponibles),
+    porcentaje_ocupacion: Number(data[0].porcentaje_ocupacion),
+    fecha,
+  }
+}
+
 const STOCK_TOTAL = 100
 
 export async function getReservasAdmin(filtros: FiltrosAdmin = {}): Promise<Reserva[]> {
