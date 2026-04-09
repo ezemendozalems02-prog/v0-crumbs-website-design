@@ -81,8 +81,7 @@ export default async function CafeteriaPage() {
               Café de especialidad
             </span>
             <p className="text-foreground/70 mt-4 max-w-2xl mx-auto">
-              Cada taza es preparada con granos seleccionados y tostados con cuidado.
-              Disfrutá del mejor café de especialidad en Ciudad Jardín.
+              Café, algo dulce y esos clasicos que siempre dan ganas
             </p>
           </div>
 
