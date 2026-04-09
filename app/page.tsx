@@ -60,10 +60,10 @@ export default function HomePage() {
             Ciudad Jardín, Buenos Aires
           </span>
           <h1 className="font-[family-name:var(--font-dm-serif)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight mb-6 animate-fade-in-up">
-            Café de especialidad & cocina de estación
+            Cafe de especialidad & cocina todo el día
           </h1>
           <p className="text-lg md:text-xl text-card/90 mb-10 animate-fade-in-up delay-200">
-            Desde el primer espresso hasta el último Negroni.
+            Para arrancar el día, cortar la tarde y cerrar la noche.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up delay-300 flex-wrap">
@@ -126,19 +126,19 @@ export default function HomePage() {
               {
                 icon: Coffee,
                 title: "Café de especialidad",
-                description: "Granos seleccionados, tostados con cuidado y preparados con pasión. Cada taza cuenta una historia.",
+                description: "Granos seleccionados, preparaciones cuidadas y una pausa para disfrutar sin apuro.",
                 delay: 0,
               },
               {
                 icon: UtensilsCrossed,
                 title: "Cocina fresca",
-                description: "Ingredientes de estación, recetas de autor y platos que celebran lo mejor de la gastronomía local.",
+                description: "Platos ricos, recetas de autor y una propuesta variada para disfrutar desde el desayuno hasta la cena.",
                 delay: 100,
               },
               {
                 icon: Wine,
                 title: "Coctelería de autor",
-                description: "Clásicos reimaginados y creaciones propias. El cierre perfecto para una experiencia completa.",
+                description: "Sabores frescos, combinaciones originales y una excusa perfecta para quedarse un rato más",
                 delay: 200,
               },
             ].map((item, index) => (
