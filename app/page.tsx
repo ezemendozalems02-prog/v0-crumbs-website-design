@@ -184,25 +184,25 @@ export default function HomePage() {
               { 
                 image: "/images/hamburguesa.jpg", 
                 title: "Hamburguesas", 
-                subtitle: "Gourmet & artesanales",
+                subtitle: "Para comer con ganas",
                 link: "/cocina"
               },
               { 
                 image: "/images/brunch.jpg", 
                 title: "Brunch", 
-                subtitle: "Todos los días",
+                subtitle: "Un clasico para compartir",
                 link: "/cafeteria"
               },
               { 
                 image: "/images/cocktail.jpg", 
                 title: "Coctelería", 
-                subtitle: "De autor",
+                subtitle: "Para quedarse un rato más",
                 link: "/cocina"
               },
               { 
                 image: "/images/cafe.jpg", 
                 title: "Café", 
-                subtitle: "De especialidad",
+                subtitle: "La pausa favorita de todos",
                 link: "/cafeteria"
               },
             ].map((item, index) => (
