@@ -141,46 +141,6 @@ export async function getReservasAdmin(filtros: FiltrosAdmin = {}): Promise<Rese
   return (data ?? []) as Reserva[]
 }
 
-export async function getMetricasAdmin(fecha: string): Promise<MetricasAdmin> {
-  const supabase = await createClient()
-
-  const { data, error } = await supabase
-    .from("reservas")
-    .select("cubiertos_consumidos")
-    .eq("fecha_reserva", fecha)
-
-  if (error || !data) {
-    return { total: 0, cubiertos_ocupados: 0, cubiertos_disponibles: STOCK_TOTAL }
-  }
-
-  const total = data.length
-  const cubiertos_ocupados = data.reduce((sum, r) => sum + r.cubiertos_consumidos, 0)
-
-  return {
-    total,
-    cubiertos_ocupados,
-    cubiertos_disponibles: Math.max(0, STOCK_TOTAL - cubiertos_ocupados),
-  }
-}
-
-export async function getDisponibilidadAdmin(fecha: string): Promise<DisponibilidadAdmin> {
-  const supabase = await createClient()
-
-  const { data, error } = await supabase.rpc("get_disponibilidad", { p_fecha: fecha })
-
-  if (error || !data || data.length === 0) {
-    return { cubiertos_usados: 0, cubiertos_disponibles: STOCK_TOTAL, porcentaje_ocupacion: 0, fecha }
-  }
-
-  return {
-    cubiertos_usados: Number(data[0].cubiertos_usados),
-    cubiertos_disponibles: Number(data[0].cubiertos_disponibles),
-    porcentaje_ocupacion: Number(data[0].porcentaje_ocupacion),
-    fecha,
-  }
-}
-
-
 export async function getUltimasReservas(limite: number = 5): Promise<Reserva[]> {
   const supabase = await createClient()
 
