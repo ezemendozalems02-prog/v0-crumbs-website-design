@@ -75,24 +75,24 @@ export default function NosotrosPage() {
             </span>
             
             <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl md:text-4xl text-primary">
-              Un espacio donde el café de especialidad y la cocina de calidad se encuentran
+              Un espacio donde el café, la cocina y los buenos momentos van de la mano.
             </h2>
             
             <div className="prose prose-lg text-foreground/70 space-y-6">
               <p>
-                CRUMBS nació en Ciudad Jardín con la idea de crear un espacio donde el café de especialidad y la cocina de calidad se encuentren en un ambiente cálido, moderno y relajado.
+                Crumbs nació en Ciudad Jardín con una idea simple: crear un espacio cálido y relajado, donde siempre haya algo rico esperándote.
               </p>
               
               <p>
-                Desde nuestros inicios, nos propusimos ofrecer una experiencia gastronómica completa: comenzando con el mejor café de la mañana, pasando por almuerzos frescos y creativos, hasta terminar el día con una cena acompañada de coctelería de autor.
+                En estos 9 años, se fue convirtiendo en ese plan al que volvés para arrancar el día con un buen café, cortar al mediodía, estirar la tarde o cerrar la noche con algo para comer y un buen trago.
               </p>
               
               <p>
-                Cada detalle en CRUMBS está pensado para que disfrutes: desde la selección de granos de café de origen único, hasta los ingredientes de estación que inspiran nuestros platos.
+                Acá, cada detalle está pensado para que te sientas cómodo, con una propuesta variada, un ambiente cálido y un equipo que siempre te recibe con buena onda.
               </p>
               
               <p>
-                Nuestro equipo está formado por apasionados de la gastronomía y la hospitalidad, comprometidos con brindarte la mejor experiencia en cada visita.
+                Somos café, cocina y encuentros. Un espacio para compartir, hacer una pausa y volver una y otra vez.
               </p>
             </div>
           </div>
@@ -119,12 +119,12 @@ export default function NosotrosPage() {
               {
                 icon: Coffee,
                 title: "Calidad",
-                description: "Seleccionamos los mejores ingredientes y trabajamos con proveedores locales de confianza.",
+                description: "Elegimos buenos ingredientes, trabajamos con productores y proveedores en los que confiamos.",
               },
               {
                 icon: Leaf,
                 title: "Frescura",
-                description: "Cocinamos con productos de estación, privilegiando lo fresco y lo local.",
+                description: "Trabajamos con productos de estación y una propuesta pensada para cada momento del día.",
               },
               {
                 icon: Heart,
@@ -134,7 +134,7 @@ export default function NosotrosPage() {
               {
                 icon: Users,
                 title: "Comunidad",
-                description: "Somos parte de Ciudad Jardín y queremos ser un punto de encuentro para el barrio.",
+                description: "Somos parte de Ciudad Jardín y nos encanta ser el punto de encuentro para el barrio.",
               },
             ].map((value, index) => (
               <div
@@ -169,7 +169,7 @@ export default function NosotrosPage() {
             Vení a conocernos
           </h2>
           <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
-            Estamos en Ciudad Jardín, Buenos Aires. Abrimos todos los días para que disfrutes del mejor café y la mejor cocina del barrio.
+            Estamos en Ciudad Jardín, Buenos Aires. Abrimos todos los días para acompañarte con café, cocina y buenos momentos.
           </p>
           <a
             href="/contacto"
