@@ -66,7 +66,7 @@ export default function HomePage() {
             Desde el primer espresso hasta el último Negroni.
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up delay-300">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up delay-300 flex-wrap">
             <Link
               href="/cafeteria"
               className="group bg-card text-primary px-8 py-4 rounded-full font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center gap-2"
@@ -86,6 +86,13 @@ export default function HomePage() {
               className="group bg-accent text-accent-foreground px-8 py-4 rounded-full font-medium hover:bg-secondary transition-all duration-300 flex items-center gap-2"
             >
               Pedir delivery
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link
+              href="/reservas"
+              className="group bg-transparent border-2 border-accent text-card px-8 py-4 rounded-full font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center gap-2"
+            >
+              Reservas
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
