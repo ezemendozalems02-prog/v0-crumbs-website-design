@@ -14,6 +14,7 @@ import {
 } from "@/lib/admin-reservas"
 import { MetricasCards } from "@/components/admin/metricas-cards"
 import { DisponibilidadCard } from "@/components/admin/disponibilidad-card"
+import { DatePickerCalendar } from "@/components/admin/date-picker-calendar"
 import { RefreshCw, Trash2, Search, X } from "lucide-react"
 import { AdminLogoutButton } from "@/components/admin/logout-button"
 
@@ -213,67 +214,104 @@ export default function AdminReservasPage() {
         {/* Métricas */}
         <MetricasCards metricas={metricas} />
 
-        {/* Filtros */}
-        <div className="mt-6 bg-card rounded-2xl border border-border/40 p-6">
-          <h2 className="text-sm font-semibold text-foreground mb-4">Filtros</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Fecha */}
-            <div>
-              <label className="text-xs font-medium text-foreground/60 block mb-2">Fecha</label>
-              <input
-                type="date"
-                value={fecha}
-                onChange={(e) => setFecha(e.target.value)}
-                className="w-full px-3 py-2 bg-background border border-border/40 rounded-lg text-sm focus:outline-none focus:border-primary/60"
-              />
+        {/* Filtros y Calendario */}
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Calendario - Más prominente en el left */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24">
+              <DatePickerCalendar selectedDate={fecha} onDateChange={setFecha} />
             </div>
+          </div>
 
-            {/* Horario */}
-            <div>
-              <label className="text-xs font-medium text-foreground/60 block mb-2">Horario</label>
-              <select
-                value={horarioFiltro}
-                onChange={(e) => setHorarioFiltro(e.target.value)}
-                className="w-full px-3 py-2 bg-background border border-border/40 rounded-lg text-sm focus:outline-none focus:border-primary/60"
-              >
-                <option value="">Todos los horarios</option>
-                {horariosUnicos.map((h) => (
-                  <option key={h} value={h}>
-                    {h}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Otros filtros */}
+          <div className="lg:col-span-3 bg-card rounded-2xl border border-border/40 p-6">
+            <h2 className="text-sm font-semibold text-foreground mb-4">Filtros adicionales</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Horario */}
+              <div>
+                <label className="text-xs font-medium text-foreground/60 block mb-2">Horario</label>
+                <select
+                  value={horarioFiltro}
+                  onChange={(e) => setHorarioFiltro(e.target.value)}
+                  className="w-full px-3 py-2 bg-background border border-border/40 rounded-lg text-sm focus:outline-none focus:border-primary/60"
+                >
+                  <option value="">Todos los horarios</option>
+                  {horariosUnicos.map((h) => (
+                    <option key={h} value={h}>
+                      {h}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Buscador */}
-            <div className="md:col-span-2 lg:col-span-2">
-              <label className="text-xs font-medium text-foreground/60 block mb-2">Buscar (nombre o teléfono)</label>
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-3 text-foreground/40" />
-                <input
-                  type="text"
-                  placeholder="Juan, 1131101739..."
-                  value={busqueda}
-                  onChange={(e) => setBusqueda(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-background border border-border/40 rounded-lg text-sm focus:outline-none focus:border-primary/60"
-                />
-                {busqueda && (
-                  <button
-                    onClick={() => setBusqueda("")}
-                    className="absolute right-3 top-3 text-foreground/40 hover:text-foreground/60"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
+              {/* Buscador */}
+              <div>
+                <label className="text-xs font-medium text-foreground/60 block mb-2">Buscar (nombre o teléfono)</label>
+                <div className="relative">
+                  <Search className="w-4 h-4 absolute left-3 top-3 text-foreground/40" />
+                  <input
+                    type="text"
+                    placeholder="Juan, 1131101739..."
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-background border border-border/40 rounded-lg text-sm focus:outline-none focus:border-primary/60"
+                  />
+                  {busqueda && (
+                    <button
+                      onClick={() => setBusqueda("")}
+                      className="absolute right-3 top-3 text-foreground/40 hover:text-foreground/60"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Contenido principal */}
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Listado principal */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar izquierdo con Calendario */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Últimas reservas */}
+            <div className="bg-card rounded-2xl border border-border/40 p-6">
+              <h3 className="font-semibold text-foreground mb-4">Últimas reservas</h3>
+              {ultimasReservas.length === 0 ? (
+                <p className="text-sm text-foreground/40">No hay reservas aún</p>
+              ) : (
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {ultimasReservas.map((r) => {
+                    const fechaRes = new Date(r.fecha_reserva + "T12:00:00").toLocaleDateString("es-AR", {
+                      month: "short",
+                      day: "numeric",
+                    })
+                    return (
+                      <div
+                        key={r.id}
+                        className="p-3 bg-background border border-border/20 rounded-lg cursor-pointer hover:border-border/40 transition-colors"
+                        onClick={() => {
+                          setFecha(r.fecha_reserva)
+                          setDetalleId(r.id)
+                        }}
+                      >
+                        <div className="font-medium text-foreground text-sm">{r.nombre}</div>
+                        <div className="text-xs text-foreground/60 mt-1 flex justify-between">
+                          <span>
+                            {fechaRes} • {r.horario}
+                          </span>
+                          <span>{r.cantidad_personas} pers.</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Contenido central y detalles */}
+          <div className="lg:col-span-3 space-y-6">
             {/* Disponibilidad */}
             <DisponibilidadCard disponibilidad={disponibilidad} />
 
@@ -334,10 +372,7 @@ export default function AdminReservasPage() {
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Sidebar derecho */}
-          <div className="space-y-6">
             {/* Detalles */}
             {detalle && (
               <div className="bg-card rounded-2xl border border-border/40 p-6">
@@ -387,41 +422,6 @@ export default function AdminReservasPage() {
                 </div>
               </div>
             )}
-
-            {/* Últimas reservas */}
-            <div className="bg-card rounded-2xl border border-border/40 p-6">
-              <h3 className="font-semibold text-foreground mb-4">Últimas reservas</h3>
-              {ultimasReservas.length === 0 ? (
-                <p className="text-sm text-foreground/40">No hay reservas aún</p>
-              ) : (
-                <div className="space-y-3">
-                  {ultimasReservas.map((r) => {
-                    const fechaRes = new Date(r.fecha_reserva + "T12:00:00").toLocaleDateString("es-AR", {
-                      month: "short",
-                      day: "numeric",
-                    })
-                    return (
-                      <div
-                        key={r.id}
-                        className="p-3 bg-background border border-border/20 rounded-lg cursor-pointer hover:border-border/40 transition-colors"
-                        onClick={() => {
-                          setFecha(r.fecha_reserva)
-                          setDetalleId(r.id)
-                        }}
-                      >
-                        <div className="font-medium text-foreground text-sm">{r.nombre}</div>
-                        <div className="text-xs text-foreground/60 mt-1 flex justify-between">
-                          <span>
-                            {fechaRes} • {r.horario}
-                          </span>
-                          <span>{r.cantidad_personas} pers.</span>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </main>
