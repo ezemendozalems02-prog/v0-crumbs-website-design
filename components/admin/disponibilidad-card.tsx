@@ -2,6 +2,7 @@
 
 import type { DisponibilidadAdmin } from "@/lib/admin-reservas"
 import { Utensils, AlertTriangle } from "lucide-react"
+import { useEffect, useState } from "react"
 
 interface DisponibilidadCardProps {
   disponibilidad: DisponibilidadAdmin
@@ -9,6 +10,14 @@ interface DisponibilidadCardProps {
 
 export function DisponibilidadCard({ disponibilidad }: DisponibilidadCardProps) {
   const { cubiertos_usados, cubiertos_disponibles, porcentaje_ocupacion, fecha } = disponibilidad
+  const [totalCapacity, setTotalCapacity] = useState(56) // Default capacity
+  
+  // Calcular capacidad total desde disponibilidad
+  useEffect(() => {
+    const total = cubiertos_usados + cubiertos_disponibles
+    setTotalCapacity(total)
+  }, [cubiertos_usados, cubiertos_disponibles])
+
   const pocaDisponibilidad = cubiertos_disponibles < 20
   const barWidth = Math.min(100, Math.max(0, Number(porcentaje_ocupacion)))
 
@@ -33,7 +42,7 @@ export function DisponibilidadCard({ disponibilidad }: DisponibilidadCardProps) 
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-primary-foreground/10 rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold">100</p>
+          <p className="text-2xl font-bold">{totalCapacity}</p>
           <p className="text-xs text-primary-foreground/60 mt-0.5">Totales</p>
         </div>
         <div className="bg-primary-foreground/10 rounded-xl p-3 text-center">
