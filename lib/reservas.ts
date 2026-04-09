@@ -113,3 +113,76 @@ export async function verificarDisponibilidad(
 
   return { disponible: true }
 }
+
+/**
+ * Asigna mesas automáticamente a una reserva
+ */
+export async function asignarMesasAReserva(
+  reservaId: string,
+  fecha: string,
+  horario: string,
+  cantidadPersonas: number
+): Promise<{ success: boolean; mesas?: any; error?: string }> {
+  const supabase = await createClient()
+
+  // Llamar RPC para obtener asignación de mesas
+  const { data: mesasAsignadas, error: errorAsignacion } = await supabase.rpc(
+    "asignar_mesas_automaticamente",
+    {
+      p_reserva_id: reservaId,
+      p_fecha: fecha,
+      p_horario: horario,
+      p_cantidad_personas: cantidadPersonas,
+    }
+  )
+
+  if (errorAsignacion || !mesasAsignadas) {
+    console.error("Error asigning tables:", errorAsignacion)
+    return {
+      success: false,
+      error: "No hay suficientes mesas disponibles para esta cantidad de personas.",
+    }
+  }
+
+  // Registrar la asignación
+  const { error: errorRegistro } = await supabase.rpc("registrar_asignacion_mesas", {
+    p_reserva_id: reservaId,
+    p_mesas_asignadas: mesasAsignadas,
+  })
+
+  if (errorRegistro) {
+    console.error("Error registering table assignment:", errorRegistro)
+    return {
+      success: false,
+      error: "Error al registrar la asignación de mesas.",
+    }
+  }
+
+  return {
+    success: true,
+    mesas: mesasAsignadas,
+  }
+}
+
+/**
+ * Obtiene disponibilidad de mesas por fecha y horario
+ */
+export async function getDisponibilidadMesas(
+  fecha: string,
+  horario: string
+): Promise<any[]> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase.rpc("calcular_disponibilidad_mesas", {
+    p_fecha: fecha,
+    p_horario: horario,
+  })
+
+  if (error) {
+    console.error("Error fetching table availability:", error)
+    return []
+  }
+
+  return (data || []) as any[]
+}
+
