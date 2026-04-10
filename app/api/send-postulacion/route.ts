@@ -2,8 +2,8 @@ import { guardarPostulacion } from '@/lib/postulaciones'
 import { type NextRequest, NextResponse } from 'next/server'
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'crumbsc38@gmail.com'
-const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev'
+const ADMIN_EMAIL = 'crumbsc38@gmail.com'
+const FROM_EMAIL = process.env.FROM_EMAIL
 
 export async function POST(request: NextRequest) {
   console.log('[SEND POSTULACION] ===== INICIO =====')
@@ -45,11 +45,8 @@ export async function POST(request: NextRequest) {
     console.log('[SEND POSTULACION] ✓ Guardado en BD exitoso')
 
     // Enviar emails si Resend está configurado
-    if (RESEND_API_KEY) {
-      console.log('[SEND POSTULACION] API Key presente, enviando emails...')
-      const apiKey = RESEND_API_KEY.trim()
-      const fromEmail = FROM_EMAIL.trim()
-      const adminEmail = ADMIN_EMAIL.trim()
+    if (RESEND_API_KEY && FROM_EMAIL) {
+      console.log('[SEND POSTULACION] Enviando emails desde:', FROM_EMAIL, 'a admin:', ADMIN_EMAIL)
       
       try {
         const emailHTML = `
@@ -90,12 +87,12 @@ export async function POST(request: NextRequest) {
         const adminEmailRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${apiKey}`,
+            'Authorization': `Bearer ${RESEND_API_KEY}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: fromEmail,
-            to: adminEmail,
+            from: FROM_EMAIL,
+            to: ADMIN_EMAIL,
             subject: `Nueva postulación: ${nombre} - ${puesto}`,
             html: emailHTML,
           }),
@@ -114,11 +111,11 @@ export async function POST(request: NextRequest) {
         const candidateEmailRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${apiKey}`,
+            'Authorization': `Bearer ${RESEND_API_KEY}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: fromEmail,
+            from: FROM_EMAIL,
             to: email.trim(),
             subject: 'Hemos recibido tu postulación - CRUMBS',
             html: `
