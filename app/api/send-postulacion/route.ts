@@ -10,21 +10,12 @@ export async function POST(request: NextRequest) {
   
   try {
     const body = await request.json()
-    console.log('[SEND POSTULACION] Body recibido:', {
-      nombre: body.nombre,
-      email: body.email,
-      puesto: body.puesto,
-    })
-
     const { nombre, telefono, email, puesto, mensaje, cvUrl, cvNombreArchivo } = body
 
     // Validar campos
     if (!nombre || !telefono || !email || !puesto) {
-      console.log('[SEND POSTULACION] ERROR: Faltan campos requeridos')
       return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 })
     }
-
-    console.log('[SEND POSTULACION] Validación OK, guardando en BD...')
 
     // Guardar en BD
     const dbResult = await guardarPostulacion({
@@ -38,7 +29,6 @@ export async function POST(request: NextRequest) {
     })
 
     if (!dbResult.success) {
-      console.log('[SEND POSTULACION] ERROR BD:', dbResult.error)
       return NextResponse.json({ error: 'Error al guardar postulación: ' + dbResult.error }, { status: 500 })
     }
 
@@ -46,8 +36,6 @@ export async function POST(request: NextRequest) {
 
     // Enviar emails si Resend está configurado
     if (RESEND_API_KEY && FROM_EMAIL) {
-      console.log('[SEND POSTULACION] Enviando emails desde:', FROM_EMAIL, 'a admin:', ADMIN_EMAIL)
-      
       try {
         const emailHTML = `
           <!DOCTYPE html>

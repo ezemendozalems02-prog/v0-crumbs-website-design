@@ -3,53 +3,36 @@ export const ADMIN_EMAIL = 'crumbsc38@gmail.com'
 export const RESEND_FROM_EMAIL = process.env.FROM_EMAIL
 
 export async function sendEmail(to: string, subject: string, html: string) {
-  const apiKey = RESEND_API_KEY?.trim()
-  const fromEmail = RESEND_FROM_EMAIL?.trim()
-  
-  console.log('[EMAIL] Starting email send to:', to)
-  console.log('[EMAIL] FROM_EMAIL:', fromEmail)
-  console.log('[EMAIL] API Key configured:', !!apiKey)
-  
-  if (!apiKey) {
-    console.warn('[EMAIL] RESEND_API_KEY not configured')
+  if (!RESEND_API_KEY || !RESEND_FROM_EMAIL) {
+    console.warn('[EMAIL] Resend no configurado. API_KEY:', !!RESEND_API_KEY, 'FROM_EMAIL:', !!RESEND_FROM_EMAIL)
     return { success: false, error: 'Email service not configured' }
   }
 
   try {
-    const payload = {
-      from: fromEmail,
-      to: to.trim(),
-      subject,
-      html,
-    }
-    
-    console.log('[EMAIL] Sending payload with from:', payload.from, 'to:', payload.to)
+    console.log('[EMAIL] Enviando a:', to)
     
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        from: RESEND_FROM_EMAIL,
+        to: to,
+        subject: subject,
+        html: html,
+      }),
     })
 
-    const responseText = await response.text()
-    console.log('[EMAIL] Response status:', response.status, 'Body:', responseText.substring(0, 200))
+    const data = await response.json()
     
     if (!response.ok) {
-      let errorData
-      try {
-        errorData = JSON.parse(responseText)
-      } catch {
-        errorData = responseText
-      }
-      console.error('[EMAIL] Error:', errorData)
-      return { success: false, error: JSON.stringify(errorData) }
+      console.error('[EMAIL] Error:', data)
+      return { success: false, error: JSON.stringify(data) }
     }
 
-    const result = JSON.parse(responseText)
-    console.log('[EMAIL] ✓ Success:', result.id)
+    console.log('[EMAIL] ✓ Enviado exitosamente:', data.id)
     return { success: true }
   } catch (error) {
     console.error('[EMAIL] Exception:', error)
