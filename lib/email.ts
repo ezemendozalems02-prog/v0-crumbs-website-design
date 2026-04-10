@@ -1,52 +1,55 @@
 export const RESEND_API_KEY = process.env.RESEND_API_KEY
 export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'crumbsc38@gmail.com'
-export const RESEND_FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev' // Email verificado en Resend
+export const RESEND_FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev'
 
 export async function sendEmail(to: string, subject: string, html: string) {
-  console.log('[EMAIL] Starting email send...')
-  console.log('[EMAIL] FROM_EMAIL config:', RESEND_FROM_EMAIL)
-  console.log('[EMAIL] API Key present:', !!RESEND_API_KEY)
-  console.log('[EMAIL] API Key length:', RESEND_API_KEY?.length || 0)
+  const apiKey = RESEND_API_KEY?.trim()
+  const fromEmail = RESEND_FROM_EMAIL?.trim()
   
-  if (!RESEND_API_KEY) {
+  console.log('[EMAIL] Starting email send to:', to)
+  console.log('[EMAIL] FROM_EMAIL:', fromEmail)
+  console.log('[EMAIL] API Key configured:', !!apiKey)
+  
+  if (!apiKey) {
     console.warn('[EMAIL] RESEND_API_KEY not configured')
     return { success: false, error: 'Email service not configured' }
   }
 
   try {
     const payload = {
-      from: RESEND_FROM_EMAIL,
-      to,
+      from: fromEmail,
+      to: to.trim(),
       subject,
       html,
     }
     
-    console.log('[EMAIL] Sending to:', to)
-    console.log('[EMAIL] Payload keys:', Object.keys(payload))
+    console.log('[EMAIL] Sending payload with from:', payload.from, 'to:', payload.to)
     
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
     })
 
-    console.log('[EMAIL] Response status:', response.status)
+    const responseText = await response.text()
+    console.log('[EMAIL] Response status:', response.status, 'Body:', responseText.substring(0, 200))
     
     if (!response.ok) {
-      const errorData = await response.json().catch(() => response.text())
-      console.error('[EMAIL] Error sending email:', {
-        status: response.status,
-        statusText: response.statusText,
-        error: errorData
-      })
+      let errorData
+      try {
+        errorData = JSON.parse(responseText)
+      } catch {
+        errorData = responseText
+      }
+      console.error('[EMAIL] Error:', errorData)
       return { success: false, error: JSON.stringify(errorData) }
     }
 
-    const result = await response.json()
-    console.log('[EMAIL] ✓ Email sent successfully:', result)
+    const result = JSON.parse(responseText)
+    console.log('[EMAIL] ✓ Success:', result.id)
     return { success: true }
   } catch (error) {
     console.error('[EMAIL] Exception:', error)

@@ -3,22 +3,17 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'crumbsc38@gmail.com'
-const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev' // Email verificado en Resend
+const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev'
 
 export async function POST(request: NextRequest) {
   console.log('[SEND POSTULACION] ===== INICIO =====')
-  console.log('[SEND POSTULACION] ADMIN_EMAIL configurado:', ADMIN_EMAIL)
-  console.log('[SEND POSTULACION] RESEND_API_KEY presente:', !!RESEND_API_KEY)
   
   try {
     const body = await request.json()
     console.log('[SEND POSTULACION] Body recibido:', {
       nombre: body.nombre,
-      telefono: body.telefono,
       email: body.email,
       puesto: body.puesto,
-      tieneMensaje: !!body.mensaje,
-      tieneCVUrl: !!body.cvUrl,
     })
 
     const { nombre, telefono, email, puesto, mensaje, cvUrl, cvNombreArchivo } = body
@@ -42,20 +37,20 @@ export async function POST(request: NextRequest) {
       cvNombreArchivo,
     })
 
-    console.log('[SEND POSTULACION] Resultado BD:', dbResult)
-
     if (!dbResult.success) {
       console.log('[SEND POSTULACION] ERROR BD:', dbResult.error)
       return NextResponse.json({ error: 'Error al guardar postulación: ' + dbResult.error }, { status: 500 })
     }
 
-    console.log('[SEND POSTULACION] ✓ Guardado en BD exitoso, ID:', dbResult.id)
+    console.log('[SEND POSTULACION] ✓ Guardado en BD exitoso')
 
-    // Enviar email al admin si Resend está configurado
+    // Enviar emails si Resend está configurado
     if (RESEND_API_KEY) {
-      console.log('[SEND POSTULACION] Enviando emails...')
-      console.log('[SEND POSTULACION] API Key length:', RESEND_API_KEY.length)
-      console.log('[SEND POSTULACION] FROM_EMAIL:', FROM_EMAIL)
+      console.log('[SEND POSTULACION] API Key presente, enviando emails...')
+      const apiKey = RESEND_API_KEY.trim()
+      const fromEmail = FROM_EMAIL.trim()
+      const adminEmail = ADMIN_EMAIL.trim()
+      
       try {
         const emailHTML = `
           <!DOCTYPE html>
@@ -95,40 +90,36 @@ export async function POST(request: NextRequest) {
         const adminEmailRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${RESEND_API_KEY}`,
+            'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: FROM_EMAIL,
-            to: ADMIN_EMAIL,
+            from: fromEmail,
+            to: adminEmail,
             subject: `Nueva postulación: ${nombre} - ${puesto}`,
             html: emailHTML,
           }),
         })
 
+        const adminResText = await adminEmailRes.text()
+        console.log('[SEND POSTULACION] Admin email response:', adminEmailRes.status, adminResText.substring(0, 100))
+        
         if (!adminEmailRes.ok) {
-          const errorData = await adminEmailRes.json().catch(() => adminEmailRes.text())
-          console.error('[SEND POSTULACION] ✗ Error enviando email admin:', {
-            status: adminEmailRes.status,
-            statusText: adminEmailRes.statusText,
-            error: errorData
-          })
+          console.error('[SEND POSTULACION] ✗ Error al admin')
         } else {
           console.log('[SEND POSTULACION] ✓ Email al admin enviado')
         }
-
-        console.log('[SEND POSTULACION] Enviando confirmación al candidato:', email)
 
         // Enviar confirmación al candidato
         const candidateEmailRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${RESEND_API_KEY}`,
+            'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: FROM_EMAIL,
-            to: email,
+            from: fromEmail,
+            to: email.trim(),
             subject: 'Hemos recibido tu postulación - CRUMBS',
             html: `
               <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto;">
@@ -150,12 +141,7 @@ export async function POST(request: NextRequest) {
         })
 
         if (!candidateEmailRes.ok) {
-          const errorData = await candidateEmailRes.json().catch(() => candidateEmailRes.text())
-          console.error('[SEND POSTULACION] ✗ Error enviando email candidato:', {
-            status: candidateEmailRes.status,
-            statusText: candidateEmailRes.statusText,
-            error: errorData
-          })
+          console.error('[SEND POSTULACION] ✗ Error al candidato')
         } else {
           console.log('[SEND POSTULACION] ✓ Email al candidato enviado')
         }
