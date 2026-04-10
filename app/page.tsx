@@ -56,7 +56,7 @@ export default function HomePage() {
         </div>
         
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-          <span className="font-[family-name:var(--font-caveat)] text-2xl md:text-3xl text-card/90 mb-4 block animate-fade-in">
+          <span className="font-[family-name:var(--font-caveat)] text-xl md:text-2xl lg:text-3xl text-card/80 mb-6 block animate-fade-in tracking-wide">
             Ciudad Jardín, Buenos Aires
           </span>
           <h1 className="font-[family-name:var(--font-dm-serif)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight mb-6 animate-fade-in-up">
@@ -99,9 +99,10 @@ export default function HomePage() {
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-card/50 rounded-full flex justify-center">
-            <div className="w-1.5 h-3 bg-card/50 rounded-full mt-2 animate-pulse" />
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce hidden md:flex flex-col items-center gap-2">
+          <p className="text-card/60 text-xs tracking-widest uppercase font-medium">Desplazá</p>
+          <div className="w-5 h-8 border-2 border-card/40 rounded-full flex justify-center hover:border-card/60 transition-colors">
+            <div className="w-1 h-2.5 bg-card/40 rounded-full mt-1.5 animate-pulse" />
           </div>
         </div>
       </section>
