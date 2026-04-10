@@ -3,32 +3,50 @@ export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'crumbsc38@gmail.com'
 export const RESEND_FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev' // Email verificado en Resend
 
 export async function sendEmail(to: string, subject: string, html: string) {
+  console.log('[EMAIL] Starting email send...')
+  console.log('[EMAIL] FROM_EMAIL config:', RESEND_FROM_EMAIL)
+  console.log('[EMAIL] API Key present:', !!RESEND_API_KEY)
+  console.log('[EMAIL] API Key length:', RESEND_API_KEY?.length || 0)
+  
   if (!RESEND_API_KEY) {
     console.warn('[EMAIL] RESEND_API_KEY not configured')
     return { success: false, error: 'Email service not configured' }
   }
 
   try {
+    const payload = {
+      from: RESEND_FROM_EMAIL,
+      to,
+      subject,
+      html,
+    }
+    
+    console.log('[EMAIL] Sending to:', to)
+    console.log('[EMAIL] Payload keys:', Object.keys(payload))
+    
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        from: RESEND_FROM_EMAIL,
-        to,
-        subject,
-        html,
-      }),
+      body: JSON.stringify(payload),
     })
 
+    console.log('[EMAIL] Response status:', response.status)
+    
     if (!response.ok) {
-      const error = await response.text()
-      console.error('[EMAIL] Error sending email:', error)
-      return { success: false, error }
+      const errorData = await response.json().catch(() => response.text())
+      console.error('[EMAIL] Error sending email:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData
+      })
+      return { success: false, error: JSON.stringify(errorData) }
     }
 
+    const result = await response.json()
+    console.log('[EMAIL] ✓ Email sent successfully:', result)
     return { success: true }
   } catch (error) {
     console.error('[EMAIL] Exception:', error)

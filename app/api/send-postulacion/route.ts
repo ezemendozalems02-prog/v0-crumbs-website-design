@@ -54,6 +54,8 @@ export async function POST(request: NextRequest) {
     // Enviar email al admin si Resend está configurado
     if (RESEND_API_KEY) {
       console.log('[SEND POSTULACION] Enviando emails...')
+      console.log('[SEND POSTULACION] API Key length:', RESEND_API_KEY.length)
+      console.log('[SEND POSTULACION] FROM_EMAIL:', FROM_EMAIL)
       try {
         const emailHTML = `
           <!DOCTYPE html>
@@ -105,8 +107,12 @@ export async function POST(request: NextRequest) {
         })
 
         if (!adminEmailRes.ok) {
-          const errorText = await adminEmailRes.text()
-          console.error('[SEND POSTULACION] ✗ Error enviando email admin:', errorText)
+          const errorData = await adminEmailRes.json().catch(() => adminEmailRes.text())
+          console.error('[SEND POSTULACION] ✗ Error enviando email admin:', {
+            status: adminEmailRes.status,
+            statusText: adminEmailRes.statusText,
+            error: errorData
+          })
         } else {
           console.log('[SEND POSTULACION] ✓ Email al admin enviado')
         }
@@ -144,8 +150,12 @@ export async function POST(request: NextRequest) {
         })
 
         if (!candidateEmailRes.ok) {
-          const errorText = await candidateEmailRes.text()
-          console.error('[SEND POSTULACION] ✗ Error enviando email candidato:', errorText)
+          const errorData = await candidateEmailRes.json().catch(() => candidateEmailRes.text())
+          console.error('[SEND POSTULACION] ✗ Error enviando email candidato:', {
+            status: candidateEmailRes.status,
+            statusText: candidateEmailRes.statusText,
+            error: errorData
+          })
         } else {
           console.log('[SEND POSTULACION] ✓ Email al candidato enviado')
         }
