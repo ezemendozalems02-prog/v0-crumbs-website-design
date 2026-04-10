@@ -1,6 +1,6 @@
 export const RESEND_API_KEY = process.env.RESEND_API_KEY
 export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'crumbsc38@gmail.com'
-export const RESEND_FROM_EMAIL = 'noreply@crumbs.ar'
+export const RESEND_FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev' // Email verificado en Resend
 
 export async function sendEmail(to: string, subject: string, html: string) {
   if (!RESEND_API_KEY) {

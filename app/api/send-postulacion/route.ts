@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'crumbsc38@gmail.com'
+const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev' // Email verificado en Resend
 
 export async function POST(request: NextRequest) {
   console.log('[SEND POSTULACION] ===== INICIO =====')
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'postulaciones@crumbs.ar',
+            from: FROM_EMAIL,
             to: ADMIN_EMAIL,
             subject: `Nueva postulación: ${nombre} - ${puesto}`,
             html: emailHTML,
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'postulaciones@crumbs.ar',
+            from: FROM_EMAIL,
             to: email,
             subject: 'Hemos recibido tu postulación - CRUMBS',
             html: `
