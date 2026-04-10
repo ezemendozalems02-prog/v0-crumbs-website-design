@@ -1,9 +1,9 @@
 import { guardarPostulacion } from '@/lib/postulaciones'
 import { type NextRequest, NextResponse } from 'next/server'
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'crumbsc38@gmail.com'
-const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev' // Email verificado en Resend
+const RESEND_API_KEY = process.env.RESEND_API_KEY?.trim()
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'crumbsc38@gmail.com').trim()
+const FROM_EMAIL = (process.env.FROM_EMAIL || 'onboarding@resend.dev').trim() // Email verificado en Resend
 
 export async function POST(request: NextRequest) {
   console.log('[SEND POSTULACION] ===== INICIO =====')
@@ -52,9 +52,10 @@ export async function POST(request: NextRequest) {
     console.log('[SEND POSTULACION] ✓ Guardado en BD exitoso, ID:', dbResult.id)
 
     // Enviar email al admin si Resend está configurado
-    if (RESEND_API_KEY) {
+    if (RESEND_API_KEY && RESEND_API_KEY.length > 0) {
       console.log('[SEND POSTULACION] Enviando emails...')
       console.log('[SEND POSTULACION] API Key length:', RESEND_API_KEY.length)
+      console.log('[SEND POSTULACION] API Key starts with:', RESEND_API_KEY.substring(0, 10))
       console.log('[SEND POSTULACION] FROM_EMAIL:', FROM_EMAIL)
       try {
         const emailHTML = `

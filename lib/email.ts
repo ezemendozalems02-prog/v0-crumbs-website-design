@@ -1,14 +1,15 @@
-export const RESEND_API_KEY = process.env.RESEND_API_KEY
-export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'crumbsc38@gmail.com'
-export const RESEND_FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev' // Email verificado en Resend
+export const RESEND_API_KEY = process.env.RESEND_API_KEY?.trim()
+export const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'crumbsc38@gmail.com').trim()
+export const RESEND_FROM_EMAIL = (process.env.FROM_EMAIL || 'onboarding@resend.dev').trim() // Email verificado en Resend
 
 export async function sendEmail(to: string, subject: string, html: string) {
   console.log('[EMAIL] Starting email send...')
   console.log('[EMAIL] FROM_EMAIL config:', RESEND_FROM_EMAIL)
   console.log('[EMAIL] API Key present:', !!RESEND_API_KEY)
   console.log('[EMAIL] API Key length:', RESEND_API_KEY?.length || 0)
+  console.log('[EMAIL] API Key starts with:', RESEND_API_KEY?.substring(0, 10) || 'NO KEY')
   
-  if (!RESEND_API_KEY) {
+  if (!RESEND_API_KEY || RESEND_API_KEY.length === 0) {
     console.warn('[EMAIL] RESEND_API_KEY not configured')
     return { success: false, error: 'Email service not configured' }
   }
