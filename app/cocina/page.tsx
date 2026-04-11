@@ -12,6 +12,8 @@ import type { Banner } from "@/lib/admin-banners-types"
 export const revalidate = 0
 // Force dynamic rendering - sin caché estático
 export const dynamic = 'force-dynamic'
+
+const staticMenuData: MenuCategory[] = [
   {
     id: "sc-1", nombre: "Entradas", slug: "entradas", tipo_menu: "almuerzo_cena",
     productos: [
