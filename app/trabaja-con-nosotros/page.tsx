@@ -72,12 +72,12 @@ export default function TrabajaConNosotrosPage() {
     setMensaje({ tipo: "success", texto: "Enviando postulación..." })
 
     try {
-      // Paso 1: Subir el CV a Blob
-      console.log('[FORM] Paso 1: Subiendo CV a Blob...')
+      // Paso 1: Subir el CV a Supabase Storage
+      console.log('[FORM] Paso 1: Subiendo CV a Supabase Storage...')
       const formDataBlob = new FormData()
       formDataBlob.append("file", archivo)
 
-      const uploadRes = await fetch("/api/upload-cv", {
+      const uploadRes = await fetch("/api/upload-cv-supabase", {
         method: "POST",
         body: formDataBlob,
       })
@@ -90,8 +90,8 @@ export default function TrabajaConNosotrosPage() {
       }
 
       const uploadData = await uploadRes.json()
-      console.log('[FORM] ✓ CV subido:', uploadData.pathname)
-      const cvUrl = uploadData.pathname
+      console.log('[FORM] ✓ CV subido a Supabase Storage:', uploadData.url)
+      const cvUrl = uploadData.url
 
       // Paso 2: Enviar el email con todos los datos
       console.log('[FORM] Paso 2: Enviando datos...')
