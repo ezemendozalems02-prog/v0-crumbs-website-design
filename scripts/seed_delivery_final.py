@@ -3,16 +3,13 @@ import sys
 import subprocess
 import time
 
-# Install supabase package first
 try:
     import supabase
 except ImportError:
-    print("[v0] Installing supabase package...")
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "supabase"])
 
 from supabase import create_client
 
-# Get credentials from environment
 url = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 key = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
 
@@ -20,20 +17,7 @@ if not url or not key:
     print("[ERROR] Missing Supabase credentials")
     sys.exit(1)
 
-# Initialize Supabase client
 supabase = create_client(url, key)
-
-print("[v0] Connecting to Supabase...")
-
-# First, refresh the schema cache
-try:
-    cat_response = supabase.table("categorias").select("*", count="exact").limit(1).execute()
-    print(f"[v0] Categorias columns: {list(cat_response.data[0].keys())}")
-    
-    prod_response = supabase.table("productos").select("*", count="exact").limit(1).execute()
-    print(f"[v0] Productos columns: {list(prod_response.data[0].keys())}")
-except Exception as e:
-    print(f"[v0] Schema check: {e}")
 
 # Categories data
 categories = [
@@ -49,38 +33,7 @@ categories = [
     ("Sin TACC / Tartas", "sin-tacc-tartas", "delivery", True, 10),
 ]
 
-# Create or get categories and their IDs
-cat_ids = {}
-for nombre, slug, tipo_menu, activa, orden in categories:
-    print(f"[v0] Processing category: {nombre}")
-    
-    # First try to get existing category
-    try:
-        response = supabase.table("categorias").select("id").eq("slug", slug).execute()
-        if response.data:
-            cat_ids[nombre] = response.data[0]["id"]
-            print(f"[v0] Category {nombre} already exists with ID {response.data[0]['id']}")
-            continue
-    except Exception as e:
-        print(f"[v0] Check existing category: {e}")
-    
-    # If not found, try to insert
-    try:
-        response = supabase.table("categorias").insert({
-            "nombre": nombre,
-            "slug": slug,
-            "tipo_menu": tipo_menu,
-            "activa": activa,
-            "orden": orden
-        }).execute()
-        
-        if response.data:
-            cat_ids[nombre] = response.data[0]["id"]
-            print(f"[v0] Category {nombre} created with ID {response.data[0]['id']}")
-    except Exception as e:
-        print(f"[ERROR] Failed to create/get category {nombre}: {e}")
-
-# Products data by category
+# Products data
 products_data = {
     "Entradas": [
         ("Papas Fritas", "Papas fritas crocantes con sal marina", 7000, False, 1),
@@ -164,21 +117,45 @@ products_data = {
     ],
 }
 
+# Create or get categories
+cat_ids = {}
+for nombre, slug, tipo_menu, activa, orden in categories:
+    try:
+        response = supabase.table("categorias").select("id").eq("slug", slug).execute()
+        if response.data:
+            cat_ids[nombre] = response.data[0]["id"]
+            print(f"[v0] Category {nombre} already exists")
+            continue
+    except Exception as e:
+        pass
+    
+    try:
+        response = supabase.table("categorias").insert({
+            "nombre": nombre,
+            "slug": slug,
+            "tipo_menu": tipo_menu,
+            "activa": activa,
+            "orden": orden
+        }).execute()
+        
+        if response.data:
+            cat_ids[nombre] = response.data[0]["id"]
+            print(f"[v0] Created category: {nombre}")
+    except Exception as e:
+        print(f"[ERROR] Failed to create category {nombre}: {e}")
+
 # Insert products in batches
 total_inserted = 0
-batch_size = 10
-
-for categoria, productos in products_data.items():
-    if categoria not in cat_ids:
-        print(f"[ERROR] Category {categoria} not found in cat_ids")
+for categoria_nombre, productos in products_data.items():
+    if categoria_nombre not in cat_ids:
+        print(f"[ERROR] Category {categoria_nombre} not in cat_ids")
         continue
     
-    cat_id = cat_ids[categoria]
-    
-    # Build batch of products
+    cat_id = cat_ids[categoria_nombre]
     batch = []
+    
     for nombre, desc, precio, destacado, orden in productos:
-        product = {
+        batch.append({
             "nombre": nombre,
             "descripcion": desc,
             "precio": precio,
@@ -186,23 +163,16 @@ for categoria, productos in products_data.items():
             "disponible": True,
             "destacado": destacado,
             "orden": orden,
-            "imagen_url": None,
-            "etiquetas": None,
-        }
-        batch.append(product)
+        })
     
-    # Insert batch
     try:
         response = supabase.table("productos").insert(batch).execute()
         if response.data:
             total_inserted += len(response.data)
-            print(f"[v0] Inserted {len(response.data)} products for category {categoria}")
-        else:
-            print(f"[ERROR] Failed to insert batch for {categoria}")
+            print(f"[v0] Inserted {len(response.data)} products for {categoria_nombre}")
     except Exception as e:
-        print(f"[ERROR] Batch insert error for {categoria}: {e}")
+        print(f"[ERROR] Failed to insert products for {categoria_nombre}: {e}")
     
-    # Small delay between batches
-    time.sleep(0.5)
+    time.sleep(0.3)
 
-print(f"\n[v0] ✓ Successfully inserted {total_inserted} products and {len(cat_ids)} categories!")
+print(f"\n[v0] ✓ Successfully inserted {total_inserted} products!")
