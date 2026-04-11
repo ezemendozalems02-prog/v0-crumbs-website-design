@@ -5,6 +5,8 @@ import { WhatsAppButton } from "@/components/whatsapp-button"
 import { getMenuByTipo } from "@/lib/menu-publico"
 import { MenuCategorySection } from "@/components/menu-category-section"
 import type { MenuCategory } from "@/lib/menu-publico"
+import { getBannersForPage } from "@/lib/public-content"
+import type { Banner } from "@/lib/admin-banners-types"
 
 // Static fallback used if Supabase returns no data yet
 const staticMenuData: MenuCategory[] = [
@@ -44,7 +46,13 @@ const staticMenuData: MenuCategory[] = [
 
 export default async function CafeteriaPage() {
   const liveMenu = await getMenuByTipo("desayuno")
+  const banners = await getBannersForPage("cafeteria")
+  const banner: Banner | null = banners.length > 0 ? banners[0] : null
   const menuData = liveMenu.length > 0 ? liveMenu : staticMenuData
+
+  const heroImage = banner?.imagen_url || "/images/cafeteria-hero.jpg"
+  const heroSubtitle = banner?.subtitulo || "Nuestra carta"
+  const heroTitle = banner?.titulo || "Desayunos & Cafetería"
 
   return (
     <main className="min-h-screen">
@@ -54,7 +62,7 @@ export default async function CafeteriaPage() {
       <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="/images/cafeteria-hero.jpg"
+            src={heroImage}
             alt="Cafetería CRUMBS"
             fill
             className="object-cover"
@@ -65,10 +73,10 @@ export default async function CafeteriaPage() {
 
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
           <span className="font-[family-name:var(--font-caveat)] text-2xl text-card/90 mb-4 block animate-fade-in">
-            Nuestra carta
+            {heroSubtitle}
           </span>
           <h1 className="font-[family-name:var(--font-dm-serif)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight animate-fade-in-up">
-            Desayunos & Cafetería
+            {heroTitle}
           </h1>
         </div>
       </section>

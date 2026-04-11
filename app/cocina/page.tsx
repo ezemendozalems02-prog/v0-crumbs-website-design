@@ -5,6 +5,8 @@ import { WhatsAppButton } from "@/components/whatsapp-button"
 import { getMenuByTipo } from "@/lib/menu-publico"
 import { MenuCategorySection } from "@/components/menu-category-section"
 import type { MenuCategory } from "@/lib/menu-publico"
+import { getBannersForPage, getSeccionByClave } from "@/lib/public-content"
+import type { Banner } from "@/lib/admin-banners-types"
 
 const staticMenuData: MenuCategory[] = [
   {
@@ -36,7 +38,15 @@ const staticMenuData: MenuCategory[] = [
 
 export default async function CocinaPage() {
   const liveMenu = await getMenuByTipo("almuerzo_cena")
+  const banners = await getBannersForPage("cocina")
+  const banner: Banner | null = banners.length > 0 ? banners[0] : null
+  const seccion = await getSeccionByClave("cocina-intro")
   const menuData = liveMenu.length > 0 ? liveMenu : staticMenuData
+
+  const heroImage = banner?.imagen_url || "/images/cocina-hero.jpg"
+  const heroSubtitle = banner?.subtitulo || "Nuestra carta"
+  const heroTitle = banner?.titulo || "Almuerzos & Cenas"
+  const descriptionText = seccion?.descripcion || "Sabores, platos y buenos momentos para cuando pinta algo rico"
 
   return (
     <main className="min-h-screen">
@@ -44,21 +54,21 @@ export default async function CocinaPage() {
 
       <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <Image src="/images/cocina-hero.jpg" alt="Cocina CRUMBS" fill className="object-cover" priority />
+          <Image src={heroImage} alt="Cocina CRUMBS" fill className="object-cover" priority />
           <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/70" />
         </div>
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-          <span className="font-[family-name:var(--font-caveat)] text-2xl text-card/90 mb-4 block animate-fade-in">Nuestra carta</span>
-          <h1 className="font-[family-name:var(--font-dm-serif)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight animate-fade-in-up">Almuerzos & Cenas</h1>
+          <span className="font-[family-name:var(--font-caveat)] text-2xl text-card/90 mb-4 block animate-fade-in">{heroSubtitle}</span>
+          <h1 className="font-[family-name:var(--font-dm-serif)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight animate-fade-in-up">{heroTitle}</h1>
         </div>
       </section>
 
       <section className="py-24 bg-card">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="font-[family-name:var(--font-caveat)] text-xl text-accent">Cocina de estación</span>
+            <span className="font-[family-name:var(--font-caveat)] text-xl text-accent">{seccion?.subtitulo || "Cocina de estación"}</span>
             <p className="text-foreground/70 mt-4 max-w-2xl mx-auto">
-              Sabores, platos y buenos momentos para cuando pinta algo rico
+              {descriptionText}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
