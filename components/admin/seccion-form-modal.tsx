@@ -3,8 +3,9 @@
 import { useState, useEffect, useTransition } from 'react'
 import { X, Loader2 } from 'lucide-react'
 import { ImageUploadField } from '@/components/admin/image-upload-field'
-import { createSeccion, updateSeccion, type Seccion, type SeccionInput } from '@/lib/admin-secciones'
-import { PAGINAS_OPCIONES } from '@/lib/admin-banners'
+import { createSeccion, updateSeccion } from '@/lib/admin-secciones'
+import type { Seccion, SeccionInput } from '@/lib/admin-content-types'
+import { PAGINAS_OPCIONES } from '@/lib/admin-content-types'
 
 interface SeccionFormModalProps {
   seccion?: Seccion | null

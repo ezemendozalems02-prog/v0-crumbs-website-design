@@ -3,7 +3,9 @@
 import { useState, useEffect, useTransition } from 'react'
 import { X, Loader2, ExternalLink } from 'lucide-react'
 import { ImageUploadField } from '@/components/admin/image-upload-field'
-import { createBanner, updateBanner, type Banner, type BannerInput, PAGINAS_OPCIONES } from '@/lib/admin-banners'
+import { createBanner, updateBanner } from '@/lib/admin-banners'
+import type { Banner, BannerInput } from '@/lib/admin-content-types'
+import { PAGINAS_OPCIONES } from '@/lib/admin-content-types'
 
 interface BannerFormModalProps {
   banner?: Banner | null

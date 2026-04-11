@@ -1,31 +1,9 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import type { Seccion, SeccionInput } from "@/lib/admin-content-types"
 
-export type Seccion = {
-  id: string
-  clave: string
-  nombre: string
-  titulo: string | null
-  subtitulo: string | null
-  descripcion: string | null
-  imagen_url: string | null
-  pagina: string
-  activo: boolean
-  created_at: string
-  updated_at: string
-}
-
-export type SeccionInput = {
-  clave: string
-  nombre: string
-  titulo?: string
-  subtitulo?: string
-  descripcion?: string
-  imagen_url?: string
-  pagina: string
-  activo: boolean
-}
+export type { Seccion, SeccionInput }
 
 export async function getSecciones(pagina?: string): Promise<Seccion[]> {
   const supabase = await createClient()

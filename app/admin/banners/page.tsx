@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useTransition, useCallback } from "react"
 import Image from "next/image"
-import {
-  getBanners, deleteBanner, toggleBannerActivo, updateBannerOrden,
-  type Banner, PAGINAS_OPCIONES,
-} from "@/lib/admin-banners"
+import { getBanners, deleteBanner, toggleBannerActivo, updateBannerOrden } from "@/lib/admin-banners"
+import type { Banner } from "@/lib/admin-content-types"
+import { PAGINAS_OPCIONES } from "@/lib/admin-content-types"
 import { BannerFormModal } from "@/components/admin/banner-form-modal"
 import {
   Plus, RefreshCw, Image as ImageIcon, Pencil, Trash2,
