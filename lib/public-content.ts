@@ -1,96 +1,81 @@
-import { createClient } from "@/lib/supabase/server"
 import type { Banner } from "@/lib/admin-banners-types"
 import type { Seccion } from "@/lib/admin-secciones-types"
 
-// Agregar timestamp a URLs de imágenes para forzar recarga
-export function withCacheBuster(url: string | null | undefined): string | null | undefined {
-  if (!url) return url
-  if (!url.includes("supabase.co")) return url
-  
-  // Si ya tiene query params, agregar &t=
-  if (url.includes("?")) {
-    return `${url}&t=${Date.now()}`
+// Hacer fetch directo a la API REST de Supabase con cache: 'no-store'
+// Esto evita que el Data Cache de Next.js guarde los datos entre requests
+async function supabaseFetch<T>(
+  table: string,
+  params: Record<string, string>
+): Promise<T[]> {
+  const url = new URL(
+    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/${table}`
+  )
+
+  // Agregar filtros como query params (formato PostgREST)
+  for (const [key, value] of Object.entries(params)) {
+    url.searchParams.set(key, value)
   }
-  // Si no tiene query params, agregar ?t=
-  return `${url}?t=${Date.now()}`
+
+  const res = await fetch(url.toString(), {
+    cache: "no-store",
+    headers: {
+      apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+  })
+
+  if (!res.ok) {
+    console.error(`[public-content] supabaseFetch error ${res.status}:`, await res.text())
+    return []
+  }
+
+  return res.json()
 }
 
-// Traer banners de una página específica
+// Traer banners de una página específica — sin caché
 export async function getBannersForPage(pagina: string): Promise<Banner[]> {
   try {
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from("banners")
-      .select("*")
-      .eq("pagina", pagina)
-      .eq("activo", true)
-      .order("orden")
-
-    if (error) {
-      console.error("[public-content] getBannersForPage error:", error)
-      return []
-    }
-    
-    // Agregar cache buster a las imágenes
-    return (data ?? []).map(banner => ({
-      ...banner,
-      imagen_url: withCacheBuster(banner.imagen_url),
-    }))
+    const data = await supabaseFetch<Banner>("banners", {
+      pagina: `eq.${pagina}`,
+      activo: "eq.true",
+      order: "orden.asc",
+      select: "*",
+    })
+    return data
   } catch (err) {
     console.error("[public-content] getBannersForPage exception:", err)
     return []
   }
 }
 
-// Traer una sección por clave
+// Traer una sección por clave — sin caché
 export async function getSeccionByClave(clave: string): Promise<Seccion | null> {
   try {
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from("secciones")
-      .select("*")
-      .eq("clave", clave)
-      .eq("activo", true)
-      .single()
-
-    if (error) {
-      console.error("[public-content] getSeccionByClave error:", error)
-      return null
-    }
-    
-    // Agregar cache buster a la imagen
-    if (data?.imagen_url) {
-      data.imagen_url = withCacheBuster(data.imagen_url)
-    }
-    
-    return data
+    const data = await supabaseFetch<Seccion>("secciones", {
+      clave: `eq.${clave}`,
+      activo: "eq.true",
+      select: "*",
+      limit: "1",
+    })
+    return data[0] ?? null
   } catch (err) {
     console.error("[public-content] getSeccionByClave exception:", err)
     return null
   }
 }
 
-// Traer todas las secciones de una página
+// Traer todas las secciones de una página — sin caché
 export async function getSeccionesForPage(pagina: string): Promise<Seccion[]> {
   try {
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from("secciones")
-      .select("*")
-      .eq("pagina", pagina)
-      .eq("activo", true)
-      .order("nombre")
-
-    if (error) {
-      console.error("[public-content] getSeccionesForPage error:", error)
-      return []
-    }
-    
-    // Agregar cache buster a las imágenes
-    return (data ?? []).map(seccion => ({
-      ...seccion,
-      imagen_url: withCacheBuster(seccion.imagen_url),
-    }))
+    const data = await supabaseFetch<Seccion>("secciones", {
+      pagina: `eq.${pagina}`,
+      activo: "eq.true",
+      order: "nombre.asc",
+      select: "*",
+    })
+    return data
   } catch (err) {
     console.error("[public-content] getSeccionesForPage exception:", err)
     return []
