@@ -23,6 +23,7 @@ export default function AdminProductosPage() {
   const [metricas, setMetricas] = useState({ total: 0, disponibles: 0, no_disponibles: 0, destacados: 0 })
   const [search, setSearch] = useState("")
   const [filterDisp, setFilterDisp] = useState<"todos" | "disponible" | "no_disponible">("todos")
+  const [filterTipo, setFilterTipo] = useState<"todos" | "carta" | "delivery">("todos")
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProducto, setEditingProducto] = useState<Producto | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -69,6 +70,14 @@ export default function AdminProductosPage() {
   }
 
   const handleSaved = () => { setModalOpen(false); setEditingProducto(null); addToast("Producto guardado", "success"); loadData() }
+
+  // Aplicar filtro de tipo antes de aplicar otros filtros
+  const productosFiltroPorTipo = productos.filter((p) => {
+    if (filterTipo === "todos") return true
+    if (filterTipo === "carta") return p.categoria?.tipo_menu === "desayuno" || p.categoria?.tipo_menu === "almuerzo_cena"
+    if (filterTipo === "delivery") return p.categoria?.tipo_menu === "delivery"
+    return true
+  })
 
   // Separar productos por tipo
   const productosDeCartaFilters = (p: Producto) => {
@@ -149,6 +158,15 @@ export default function AdminProductosPage() {
             />
           </div>
           <select
+            value={filterTipo}
+            onChange={(e) => setFilterTipo(e.target.value as any)}
+            className="px-3 py-2.5 bg-background border border-border/40 rounded-xl text-sm text-foreground outline-none focus:border-primary/50 transition-colors"
+          >
+            <option value="todos">Todo</option>
+            <option value="carta">Carta</option>
+            <option value="delivery">Delivery</option>
+          </select>
+          <select
             value={filterDisp}
             onChange={(e) => setFilterDisp(e.target.value as any)}
             className="px-3 py-2.5 bg-background border border-border/40 rounded-xl text-sm text-foreground outline-none focus:border-primary/50 transition-colors"
@@ -172,6 +190,7 @@ export default function AdminProductosPage() {
         ) : (
           <>
             {/* SECCIÓN: PRODUCTOS DE CARTA */}
+            {(filterTipo === "todos" || filterTipo === "carta") && (
             <section className="space-y-4">
               <div className="flex items-center gap-2">
                 <div className="p-2 bg-primary/10 rounded-lg">
@@ -220,8 +239,10 @@ export default function AdminProductosPage() {
                 </>
               )}
             </section>
+            )}
 
             {/* SECCIÓN: PRODUCTOS DE DELIVERY */}
+            {(filterTipo === "todos" || filterTipo === "delivery") && (
             <section className="space-y-4 pt-6 border-t border-border/30">
               <div className="flex items-center gap-2">
                 <div className="p-2 bg-accent/10 rounded-lg">
@@ -270,6 +291,7 @@ export default function AdminProductosPage() {
                 </>
               )}
             </section>
+            )}
 
             {/* Empty state */}
             {productosCarta.length === 0 && productosDelivery.length === 0 && (
