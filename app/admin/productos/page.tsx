@@ -48,6 +48,7 @@ export default function AdminProductosPage() {
         if (filterTipo === "carta") filters.tipo_menu = "carta"
       }
       const [p, m, c] = await Promise.all([getProductos(filters), getMetricasProductos(), getCategorias()])
+      console.log("[v0] Loaded", p.length, "products with filters:", filters)
       setProductos(p)
       setMetricas(m)
       setCategorias(c)
