@@ -39,16 +39,20 @@ export default function AdminProductosPage() {
 
   const loadData = useCallback(() => {
     startTransition(async () => {
-      const filters: { disponible?: boolean; search?: string } = {}
+      const filters: { disponible?: boolean; search?: string; tipo_menu?: string } = {}
       if (filterDisp === "disponible") filters.disponible = true
       if (filterDisp === "no_disponible") filters.disponible = false
       if (search.trim()) filters.search = search.trim()
+      if (filterTipo !== "todos") {
+        if (filterTipo === "delivery") filters.tipo_menu = "delivery"
+        if (filterTipo === "carta") filters.tipo_menu = "carta"
+      }
       const [p, m, c] = await Promise.all([getProductos(filters), getMetricasProductos(), getCategorias()])
       setProductos(p)
       setMetricas(m)
       setCategorias(c)
     })
-  }, [filterDisp, search])
+  }, [filterDisp, search, filterTipo])
 
   useEffect(() => { loadData() }, [loadData])
 

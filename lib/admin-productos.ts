@@ -92,7 +92,7 @@ export async function deleteCategoria(id: string): Promise<{ success: boolean; e
 
 // ---------- PRODUCTOS ----------
 
-export async function getProductos(filters?: { categoria_id?: string; disponible?: boolean; search?: string }): Promise<Producto[]> {
+export async function getProductos(filters?: { categoria_id?: string; disponible?: boolean; search?: string; tipo_menu?: string }): Promise<Producto[]> {
   const supabase = await createClient()
   let query = supabase
     .from("productos")
@@ -103,9 +103,19 @@ export async function getProductos(filters?: { categoria_id?: string; disponible
   if (filters?.categoria_id) query = query.eq("categoria_id", filters.categoria_id)
   if (filters?.disponible !== undefined) query = query.eq("disponible", filters.disponible)
   if (filters?.search) query = query.ilike("nombre", `%${filters.search}%`)
-
+  
   const { data, error } = await query
   if (error) { console.error(error); return [] }
+  
+  // Filter by tipo_menu on the client side since we need to check the categoria relationship
+  if (filters?.tipo_menu) {
+    if (filters.tipo_menu === "delivery") {
+      return (data ?? []).filter(p => p.categoria?.tipo_menu === "delivery")
+    } else if (filters.tipo_menu === "carta") {
+      return (data ?? []).filter(p => p.categoria?.tipo_menu === "desayuno" || p.categoria?.tipo_menu === "almuerzo_cena")
+    }
+  }
+  
   return data ?? []
 }
 
