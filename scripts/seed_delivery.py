@@ -1,5 +1,15 @@
 import os
 import sys
+import subprocess
+import time
+
+# Install supabase package first
+try:
+    import supabase
+except ImportError:
+    print("[v0] Installing supabase package...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "supabase"])
+
 from supabase import create_client
 
 # Get credentials from environment
@@ -15,34 +25,60 @@ supabase = create_client(url, key)
 
 print("[v0] Connecting to Supabase...")
 
+# First, refresh the schema cache
+try:
+    cat_response = supabase.table("categorias").select("*", count="exact").limit(1).execute()
+    print(f"[v0] Categorias columns: {list(cat_response.data[0].keys())}")
+    
+    prod_response = supabase.table("productos").select("*", count="exact").limit(1).execute()
+    print(f"[v0] Productos columns: {list(prod_response.data[0].keys())}")
+except Exception as e:
+    print(f"[v0] Schema check: {e}")
+
 # Categories data
 categories = [
-    ("Entradas", "Entradas para compartir", 1),
-    ("Hamburguesas", "Hamburguesas gourmet", 2),
-    ("Bowls", "Bowls saludables", 3),
-    ("Al Plato", "Platos principales", 4),
-    ("Pastas", "Pastas frescas y salsas", 5),
-    ("Ensaladas", "Ensaladas frescas", 6),
-    ("Pizzas Individuales", "Pizzas de estación", 7),
-    ("Sandwiches", "Sandwiches artesanales", 8),
-    ("Wraps", "Wraps variados", 9),
-    ("Sin TACC / Tartas", "Opciones sin gluten y tartas", 10),
+    ("Entradas", "entradas", "delivery", True, 1),
+    ("Hamburguesas", "hamburguesas", "delivery", True, 2),
+    ("Bowls", "bowls", "delivery", True, 3),
+    ("Al Plato", "al-plato", "delivery", True, 4),
+    ("Pastas", "pastas", "delivery", True, 5),
+    ("Ensaladas", "ensaladas", "delivery", True, 6),
+    ("Pizzas Individuales", "pizzas-individuales", "delivery", True, 7),
+    ("Sandwiches", "sandwiches", "delivery", True, 8),
+    ("Wraps", "wraps", "delivery", True, 9),
+    ("Sin TACC / Tartas", "sin-tacc-tartas", "delivery", True, 10),
 ]
 
-# Create categories and get their IDs
+# Create or get categories and their IDs
 cat_ids = {}
-for nombre, desc, orden in categories:
-    print(f"[v0] Inserting category: {nombre}")
-    response = supabase.table("categorias").insert({
-        "nombre": nombre,
-        "descripcion": desc,
-        "imagen_url": None,
-        "orden": orden
-    }).execute()
+for nombre, slug, tipo_menu, activa, orden in categories:
+    print(f"[v0] Processing category: {nombre}")
     
-    if response.data:
-        cat_ids[nombre] = response.data[0]["id"]
-        print(f"[v0] Category {nombre} created with ID {response.data[0]['id']}")
+    # First try to get existing category
+    try:
+        response = supabase.table("categorias").select("id").eq("slug", slug).execute()
+        if response.data:
+            cat_ids[nombre] = response.data[0]["id"]
+            print(f"[v0] Category {nombre} already exists with ID {response.data[0]['id']}")
+            continue
+    except Exception as e:
+        print(f"[v0] Check existing category: {e}")
+    
+    # If not found, try to insert
+    try:
+        response = supabase.table("categorias").insert({
+            "nombre": nombre,
+            "slug": slug,
+            "tipo_menu": tipo_menu,
+            "activa": activa,
+            "orden": orden
+        }).execute()
+        
+        if response.data:
+            cat_ids[nombre] = response.data[0]["id"]
+            print(f"[v0] Category {nombre} created with ID {response.data[0]['id']}")
+    except Exception as e:
+        print(f"[ERROR] Failed to create/get category {nombre}: {e}")
 
 # Products data by category
 products_data = {
@@ -128,8 +164,10 @@ products_data = {
     ],
 }
 
-# Insert products
+# Insert products in batches
 total_inserted = 0
+batch_size = 10
+
 for categoria, productos in products_data.items():
     if categoria not in cat_ids:
         print(f"[ERROR] Category {categoria} not found in cat_ids")
@@ -137,6 +175,8 @@ for categoria, productos in products_data.items():
     
     cat_id = cat_ids[categoria]
     
+    # Build batch of products
+    batch = []
     for nombre, desc, precio, destacado, orden in productos:
         product = {
             "nombre": nombre,
@@ -146,14 +186,23 @@ for categoria, productos in products_data.items():
             "disponible": True,
             "destacado": destacado,
             "orden": orden,
+            "imagen_url": None,
+            "etiquetas": None,
         }
-        
-        response = supabase.table("productos").insert(product).execute()
-        
+        batch.append(product)
+    
+    # Insert batch
+    try:
+        response = supabase.table("productos").insert(batch).execute()
         if response.data:
-            total_inserted += 1
-            print(f"[v0] Inserted: {nombre}")
+            total_inserted += len(response.data)
+            print(f"[v0] Inserted {len(response.data)} products for category {categoria}")
         else:
-            print(f"[ERROR] Failed to insert {nombre}")
+            print(f"[ERROR] Failed to insert batch for {categoria}")
+    except Exception as e:
+        print(f"[ERROR] Batch insert error for {categoria}: {e}")
+    
+    # Small delay between batches
+    time.sleep(0.5)
 
 print(f"\n[v0] ✓ Successfully inserted {total_inserted} products and {len(cat_ids)} categories!")
