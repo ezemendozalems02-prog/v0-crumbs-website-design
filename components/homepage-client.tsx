@@ -63,7 +63,7 @@ export function HomepageClient({ mainBanner, experienceSection, locationSection 
         </div>
 
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-          <span className="font-[family-name:var(--font-caveat)] text-xl md:text-2xl lg:text-3xl text-card/80 mb-6 block animate-fade-in tracking-wide">
+          <span className="font-[family-name:var(--font-reenie-beanie)] text-xl md:text-2xl lg:text-3xl text-card/80 mb-6 block animate-fade-in tracking-wide">
             {banner.subtitulo}
           </span>
           <h1 className="font-[family-name:var(--font-dm-serif)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight mb-6 animate-fade-in-up">
@@ -121,7 +121,7 @@ export function HomepageClient({ mainBanner, experienceSection, locationSection 
       >
         <div className="max-w-7xl mx-auto px-6">
           <div className={`text-center mb-16 transition-all duration-700 ${experienceSectionInView.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <span className="font-[family-name:var(--font-caveat)] text-xl text-accent">
+            <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-accent">
               Nuestra experiencia
             </span>
             <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl md:text-5xl text-primary mt-2">
@@ -179,7 +179,7 @@ export function HomepageClient({ mainBanner, experienceSection, locationSection 
       >
         <div className="max-w-7xl mx-auto px-6">
           <div className={`text-center mb-16 transition-all duration-700 ${highlightsSectionInView.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <span className="font-[family-name:var(--font-caveat)] text-xl text-accent">
+            <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-accent">
               Destacados
             </span>
             <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl md:text-5xl text-primary mt-2">
@@ -210,7 +210,7 @@ export function HomepageClient({ mainBanner, experienceSection, locationSection 
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <span className="font-[family-name:var(--font-caveat)] text-lg text-card/80">
+                  <span className="font-[family-name:var(--font-reenie-beanie)] text-lg text-card/80">
                     {item.subtitle}
                   </span>
                   <h3 className="font-[family-name:var(--font-dm-serif)] text-2xl text-card">
@@ -256,7 +256,7 @@ export function HomepageClient({ mainBanner, experienceSection, locationSection 
             {/* Info */}
             <div className={`space-y-8 transition-all duration-700 delay-200 ${locationSectionInView.isInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
               <div>
-                <span className="font-[family-name:var(--font-caveat)] text-xl text-accent">
+                <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-accent">
                   Visitanos
                 </span>
                 <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl md:text-5xl text-primary mt-2">

@@ -63,7 +63,7 @@ export default async function CocinaPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/70" />
         </div>
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-          <span className="font-[family-name:var(--font-caveat)] text-2xl text-card/90 mb-4 block animate-fade-in">{heroSubtitle}</span>
+          <span className="font-[family-name:var(--font-reenie-beanie)] text-2xl text-card/90 mb-4 block animate-fade-in">{heroSubtitle}</span>
           <h1 className="font-[family-name:var(--font-dm-serif)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight animate-fade-in-up">{heroTitle}</h1>
         </div>
       </section>
@@ -71,7 +71,7 @@ export default async function CocinaPage() {
       <section className="py-24 bg-card">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="font-[family-name:var(--font-caveat)] text-xl text-accent">{seccion?.subtitulo || "Cocina de estación"}</span>
+            <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-accent">{seccion?.subtitulo || "Cocina de estación"}</span>
             <p className="text-foreground/70 mt-4 max-w-2xl mx-auto">
               {descriptionText}
             </p>
