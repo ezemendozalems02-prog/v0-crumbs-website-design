@@ -3,10 +3,11 @@ import { Footer } from "@/components/footer"
 import { WhatsAppButton } from "@/components/whatsapp-button"
 import { HomepageClient } from "@/components/homepage-client"
 import { getBannersForPage, getSeccionByClave } from "@/lib/public-content"
-import { revalidatePath } from "next/cache"
 
 // Revalidar cada cambio (ISR con revalidación inmediata)
 export const revalidate = 0
+// Force dynamic rendering - sin caché estático
+export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   // Fetch data on the server

@@ -10,8 +10,8 @@ import type { Banner } from "@/lib/admin-banners-types"
 
 // Revalidar cada cambio (ISR con revalidación inmediata)
 export const revalidate = 0
-
-const staticMenuData: MenuCategory[] = [
+// Force dynamic rendering - sin caché estático
+export const dynamic = 'force-dynamic'
   {
     id: "sc-1", nombre: "Entradas", slug: "entradas", tipo_menu: "almuerzo_cena",
     productos: [

@@ -10,8 +10,8 @@ import type { Banner } from "@/lib/admin-banners-types"
 
 // Revalidar cada cambio (ISR con revalidación inmediata)
 export const revalidate = 0
-
-// Static fallback used if Supabase returns no data yet
+// Force dynamic rendering - sin caché estático
+export const dynamic = 'force-dynamic'
 const staticMenuData: MenuCategory[] = [
   {
     id: "static-1", nombre: "Cafés Clásicos", slug: "cafes-clasicos", tipo_menu: "desayuno",
