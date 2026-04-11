@@ -5,8 +5,8 @@ import { HomepageClient } from "@/components/homepage-client"
 import { getBannersForPage, getSeccionByClave } from "@/lib/public-content"
 import { revalidatePath } from "next/cache"
 
-// Revalidar cada 60 segundos
-export const revalidate = 60
+// Revalidar cada cambio (ISR con revalidación inmediata)
+export const revalidate = 0
 
 export default async function HomePage() {
   // Fetch data on the server

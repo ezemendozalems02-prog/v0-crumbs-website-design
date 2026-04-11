@@ -8,8 +8,8 @@ import type { MenuCategory } from "@/lib/menu-publico"
 import { getBannersForPage, getSeccionByClave } from "@/lib/public-content"
 import type { Banner } from "@/lib/admin-banners-types"
 
-// Revalidar cada 60 segundos
-export const revalidate = 60
+// Revalidar cada cambio (ISR con revalidación inmediata)
+export const revalidate = 0
 
 const staticMenuData: MenuCategory[] = [
   {
