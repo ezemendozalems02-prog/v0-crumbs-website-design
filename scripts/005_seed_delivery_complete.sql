@@ -10,8 +10,7 @@ VALUES
   ('Pizzas Individuales', 'Pizzas de estación', NULL, 7),
   ('Sandwiches', 'Sandwiches artesanales', NULL, 8),
   ('Wraps', 'Wraps variados', NULL, 9),
-  ('Sin TACC / Tartas', 'Opciones sin gluten y tartas', NULL, 10)
-ON CONFLICT DO NOTHING;
+  ('Sin TACC / Tartas', 'Opciones sin gluten y tartas', NULL, 10);
 
 -- ENTRADAS
 INSERT INTO productos (nombre, descripcion, precio, categoria_id, disponible, destacado, orden)
@@ -27,8 +26,7 @@ VALUES
   ('Langostinos en Panko', 'Langostinos rebozados en panko', 15200, (SELECT id FROM categorias WHERE nombre = 'Entradas' LIMIT 1), true, false, 9),
   ('Rabas', 'Rabas a la romana', 15800, (SELECT id FROM categorias WHERE nombre = 'Entradas' LIMIT 1), true, false, 10),
   ('Nuggets', 'Nuggets con salsa de miel mostaza', 11900, (SELECT id FROM categorias WHERE nombre = 'Entradas' LIMIT 1), true, false, 11),
-  ('Nachos', 'Nachos con cheddar y jalapeños', 12000, (SELECT id FROM categorias WHERE nombre = 'Entradas' LIMIT 1), true, false, 12)
-ON CONFLICT DO NOTHING;
+  ('Nachos', 'Nachos con cheddar y jalapeños', 12000, (SELECT id FROM categorias WHERE nombre = 'Entradas' LIMIT 1), true, false, 12);
 
 -- HAMBURGUESAS
 INSERT INTO productos (nombre, descripcion, precio, categoria_id, disponible, destacado, orden)
@@ -42,15 +40,13 @@ VALUES
   ('Royale Simple', 'Hamburguesa Royale - Simple', 14000, (SELECT id FROM categorias WHERE nombre = 'Hamburguesas' LIMIT 1), true, false, 7),
   ('Royale Doble', 'Hamburguesa Royale - Doble', 16500, (SELECT id FROM categorias WHERE nombre = 'Hamburguesas' LIMIT 1), true, false, 8),
   ('Takisburguer Simple', 'Hamburguesa Takis - Simple', 15300, (SELECT id FROM categorias WHERE nombre = 'Hamburguesas' LIMIT 1), true, false, 9),
-  ('Takisburguer Doble', 'Hamburguesa Takis - Doble', 17800, (SELECT id FROM categorias WHERE nombre = 'Hamburguesas' LIMIT 1), true, false, 10)
-ON CONFLICT DO NOTHING;
+  ('Takisburguer Doble', 'Hamburguesa Takis - Doble', 17800, (SELECT id FROM categorias WHERE nombre = 'Hamburguesas' LIMIT 1), true, false, 10);
 
 -- BOWLS
 INSERT INTO productos (nombre, descripcion, precio, categoria_id, disponible, destacado, orden)
 VALUES 
   ('Poke de Pollo Teriyaki', 'Base de arroz, pollo marinado en teriyaki, edamame y vegetales', 16000, (SELECT id FROM categorias WHERE nombre = 'Bowls' LIMIT 1), true, false, 1),
-  ('Poke de Langostinos', 'Base de arroz, langostinos frescos, palta, edamame y salsa ponzu', 17600, (SELECT id FROM categorias WHERE nombre = 'Bowls' LIMIT 1), true, false, 2)
-ON CONFLICT DO NOTHING;
+  ('Poke de Langostinos', 'Base de arroz, langostinos frescos, palta, edamame y salsa ponzu', 17600, (SELECT id FROM categorias WHERE nombre = 'Bowls' LIMIT 1), true, false, 2);
 
 -- AL PLATO
 INSERT INTO productos (nombre, descripcion, precio, categoria_id, disponible, destacado, orden)
@@ -58,8 +54,7 @@ VALUES
   ('Suprema Grillé con Ensalada', 'Pechuga de pollo grillada con ensalada fresca', 17400, (SELECT id FROM categorias WHERE nombre = 'Al Plato' LIMIT 1), true, false, 1),
   ('Milanesa con Puré', 'Milanesa y puré de papas', 17400, (SELECT id FROM categorias WHERE nombre = 'Al Plato' LIMIT 1), true, false, 2),
   ('Milanesa Napolitana con Papas', 'Milanesa napolitana con papas fritas', 21200, (SELECT id FROM categorias WHERE nombre = 'Al Plato' LIMIT 1), true, false, 3),
-  ('Bondiola Braseada con Puré de Batata', 'Bondiola braseada con puré de batata', 21200, (SELECT id FROM categorias WHERE nombre = 'Al Plato' LIMIT 1), true, false, 4)
-ON CONFLICT DO NOTHING;
+  ('Bondiola Braseada con Puré de Batata', 'Bondiola braseada con puré de batata', 21200, (SELECT id FROM categorias WHERE nombre = 'Al Plato' LIMIT 1), true, false, 4);
 
 -- PASTAS
 INSERT INTO productos (nombre, descripcion, precio, categoria_id, disponible, destacado, orden)
@@ -69,8 +64,7 @@ VALUES
   ('Sorrentinos de Jamón y Queso', 'Sorrentinos rellenos de jamón y queso', 14400, (SELECT id FROM categorias WHERE nombre = 'Pastas' LIMIT 1), true, false, 3),
   ('Salsa Filetto', 'Salsa a base de tomate', 4200, (SELECT id FROM categorias WHERE nombre = 'Pastas' LIMIT 1), true, false, 4),
   ('Salsa Crema + Tomates Confitados + Pesto', 'Salsa cremosa con tomates confitados', 5400, (SELECT id FROM categorias WHERE nombre = 'Pastas' LIMIT 1), true, false, 5),
-  ('Salsa Bolognesa', 'Salsa a la bolognesa', 6600, (SELECT id FROM categorias WHERE nombre = 'Pastas' LIMIT 1), true, false, 6)
-ON CONFLICT DO NOTHING;
+  ('Salsa Bolognesa', 'Salsa a la bolognesa', 6600, (SELECT id FROM categorias WHERE nombre = 'Pastas' LIMIT 1), true, false, 6);
 
 -- ENSALADAS
 INSERT INTO productos (nombre, descripcion, precio, categoria_id, disponible, destacado, orden)
@@ -79,16 +73,14 @@ VALUES
   ('Cuzco', 'Ensalada Cuzco con ingredientes especiales', 16000, (SELECT id FROM categorias WHERE nombre = 'Ensaladas' LIMIT 1), true, false, 2),
   ('Mediterránea', 'Ensalada mediterránea con tomate, mozzarella y aceitunas', 18500, (SELECT id FROM categorias WHERE nombre = 'Ensaladas' LIMIT 1), true, false, 3),
   ('Anticucha', 'Ensalada anticucha con carnes y vegetales', 15500, (SELECT id FROM categorias WHERE nombre = 'Ensaladas' LIMIT 1), true, false, 4),
-  ('Capri', 'Tomate, mozzarella fresca, rúcula y aceite de oliva', 17000, (SELECT id FROM categorias WHERE nombre = 'Ensaladas' LIMIT 1), true, false, 5)
-ON CONFLICT DO NOTHING;
+  ('Capri', 'Tomate, mozzarella fresca, rúcula y aceite de oliva', 17000, (SELECT id FROM categorias WHERE nombre = 'Ensaladas' LIMIT 1), true, false, 5);
 
 -- PIZZAS INDIVIDUALES
 INSERT INTO productos (nombre, descripcion, precio, categoria_id, disponible, destacado, orden)
 VALUES 
   ('Muzza y Albahaca', 'Pizza clásica con mozzarella y albahaca fresca', 11600, (SELECT id FROM categorias WHERE nombre = 'Pizzas Individuales' LIMIT 1), true, false, 1),
   ('Crudo y Rúcula', 'Pizza con jamón crudo y rúcula', 14200, (SELECT id FROM categorias WHERE nombre = 'Pizzas Individuales' LIMIT 1), true, false, 2),
-  ('Hongos y Queso Azul', 'Pizza con hongos y queso azul', 14200, (SELECT id FROM categorias WHERE nombre = 'Pizzas Individuales' LIMIT 1), true, false, 3)
-ON CONFLICT DO NOTHING;
+  ('Hongos y Queso Azul', 'Pizza con hongos y queso azul', 14200, (SELECT id FROM categorias WHERE nombre = 'Pizzas Individuales' LIMIT 1), true, false, 3);
 
 -- SANDWICHES
 INSERT INTO productos (nombre, descripcion, precio, categoria_id, disponible, destacado, orden)
@@ -102,8 +94,7 @@ VALUES
   ('Milahuevo', 'Sándwich milanesa con huevo frito', 17900, (SELECT id FROM categorias WHERE nombre = 'Sandwiches' LIMIT 1), true, false, 7),
   ('Bocata de Calamar', 'Bocata de calamares fritos', 14900, (SELECT id FROM categorias WHERE nombre = 'Sandwiches' LIMIT 1), true, false, 8),
   ('Portobellos', 'Sándwich con hongos portobello', 16000, (SELECT id FROM categorias WHERE nombre = 'Sandwiches' LIMIT 1), true, false, 9),
-  ('Viet-Ñam', 'Sándwich estilo vietnamita', 14900, (SELECT id FROM categorias WHERE nombre = 'Sandwiches' LIMIT 1), true, false, 10)
-ON CONFLICT DO NOTHING;
+  ('Viet-Ñam', 'Sándwich estilo vietnamita', 14900, (SELECT id FROM categorias WHERE nombre = 'Sandwiches' LIMIT 1), true, false, 10);
 
 -- WRAPS
 INSERT INTO productos (nombre, descripcion, precio, categoria_id, disponible, destacado, orden)
@@ -112,13 +103,11 @@ VALUES
   ('Pollo Palta', 'Wrap con pollo, palta, tomate y espinaca', 17000, (SELECT id FROM categorias WHERE nombre = 'Wraps' LIMIT 1), true, false, 2),
   ('Tuna Wrap', 'Wrap con atún, lechuga y vegetales frescos', 15400, (SELECT id FROM categorias WHERE nombre = 'Wraps' LIMIT 1), true, false, 3),
   ('Ternera', 'Wrap con ternera y vegetales asados', 17000, (SELECT id FROM categorias WHERE nombre = 'Wraps' LIMIT 1), true, false, 4),
-  ('Hongos', 'Wrap vegetariano con hongos y queso', 16000, (SELECT id FROM categorias WHERE nombre = 'Wraps' LIMIT 1), true, false, 5)
-ON CONFLICT DO NOTHING;
+  ('Hongos', 'Wrap vegetariano con hongos y queso', 16000, (SELECT id FROM categorias WHERE nombre = 'Wraps' LIMIT 1), true, false, 5);
 
 -- SIN TACC / TARTAS
 INSERT INTO productos (nombre, descripcion, precio, categoria_id, disponible, destacado, orden)
 VALUES 
   ('Tarta de Cabutia', 'Tarta sin TACC de cabutia', 14900, (SELECT id FROM categorias WHERE nombre = 'Sin TACC / Tartas' LIMIT 1), true, true, 1),
   ('Tarta de Jamón y Queso', 'Tarta sin TACC de jamón y queso', 14900, (SELECT id FROM categorias WHERE nombre = 'Sin TACC / Tartas' LIMIT 1), true, true, 2),
-  ('Tarta de Vegetales', 'Tarta sin TACC de vegetales', 14900, (SELECT id FROM categorias WHERE nombre = 'Sin TACC / Tartas' LIMIT 1), true, true, 3)
-ON CONFLICT DO NOTHING;
+  ('Tarta de Vegetales', 'Tarta sin TACC de vegetales', 14900, (SELECT id FROM categorias WHERE nombre = 'Sin TACC / Tartas' LIMIT 1), true, true, 3);
