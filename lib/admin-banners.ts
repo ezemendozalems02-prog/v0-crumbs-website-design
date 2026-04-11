@@ -1,7 +1,18 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { revalidatePath } from "next/cache"
 import type { Banner, BannerInput } from "@/lib/admin-banners-types"
+
+const revalidateBannerPages = (pagina?: string) => {
+  // Revalidar la página específica
+  if (pagina === "inicio") revalidatePath("/")
+  if (pagina === "cafeteria") revalidatePath("/cafeteria")
+  if (pagina === "cocina") revalidatePath("/cocina")
+  
+  // Revalidar admin también
+  revalidatePath("/admin/banners")
+}
 
 export async function getBanners(pagina?: string): Promise<Banner[]> {
   const supabase = await createClient()
@@ -40,20 +51,40 @@ export async function createBanner(input: BannerInput): Promise<{ success: boole
     .select("id")
     .single()
   if (error) return { success: false, error: error.message }
+  
+  // Revalidar páginas después de crear
+  revalidateBannerPages(input.pagina)
+  
   return { success: true, id: data.id }
 }
 
 export async function updateBanner(id: string, input: Partial<BannerInput>): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
+  
+  // Obtener el banner para saber su página
+  const banner = await getBanner(id)
+  
   const { error } = await supabase.from("banners").update(input).eq("id", id)
   if (error) return { success: false, error: error.message }
+  
+  // Revalidar la página del banner
+  if (banner) revalidateBannerPages(banner.pagina)
+  
   return { success: true }
 }
 
 export async function toggleBannerActivo(id: string, activo: boolean): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
+  
+  // Obtener el banner para saber su página
+  const banner = await getBanner(id)
+  
   const { error } = await supabase.from("banners").update({ activo }).eq("id", id)
   if (error) return { success: false, error: error.message }
+  
+  // Revalidar la página del banner
+  if (banner) revalidateBannerPages(banner.pagina)
+  
   return { success: true }
 }
 
@@ -66,8 +97,16 @@ export async function updateBannerOrden(id: string, orden: number): Promise<{ su
 
 export async function deleteBanner(id: string): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
+  
+  // Obtener el banner para saber su página antes de eliminarlo
+  const banner = await getBanner(id)
+  
   const { error } = await supabase.from("banners").delete().eq("id", id)
   if (error) return { success: false, error: error.message }
+  
+  // Revalidar la página del banner
+  if (banner) revalidateBannerPages(banner.pagina)
+  
   return { success: true }
 }
 

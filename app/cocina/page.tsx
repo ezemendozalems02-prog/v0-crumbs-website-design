@@ -8,6 +8,9 @@ import type { MenuCategory } from "@/lib/menu-publico"
 import { getBannersForPage, getSeccionByClave } from "@/lib/public-content"
 import type { Banner } from "@/lib/admin-banners-types"
 
+// Revalidar cada 60 segundos
+export const revalidate = 60
+
 const staticMenuData: MenuCategory[] = [
   {
     id: "sc-1", nombre: "Entradas", slug: "entradas", tipo_menu: "almuerzo_cena",
