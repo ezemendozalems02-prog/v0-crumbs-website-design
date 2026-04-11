@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 import { Menu, X, LayoutDashboard } from "lucide-react"
@@ -21,13 +22,15 @@ export function Navigation() {
       <nav className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="group">
-            <span className="font-[family-name:var(--font-dm-serif)] text-2xl md:text-3xl text-primary tracking-wide">
-              CRUMBS
-            </span>
-            <span className="block font-[family-name:var(--font-caveat)] text-sm text-accent -mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              café & cocina
-            </span>
+          <Link href="/" className="group flex items-center gap-2">
+            <Image
+              src="/images/logo.png"
+              alt="CRUMBS Logo"
+              width={120}
+              height={50}
+              priority
+              className="h-12 w-auto"
+            />
           </Link>
 
           {/* Desktop Navigation */}

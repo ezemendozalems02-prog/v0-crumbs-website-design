@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { AdminSidebar, AdminMobileNav } from "@/components/admin/admin-sidebar"
 import { AdminLogoutButton } from "@/components/admin/logout-button"
 import { LayoutDashboard } from "lucide-react"
@@ -10,12 +11,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Mobile header */}
         <header className="lg:hidden bg-primary text-primary-foreground sticky top-0 z-30 border-b border-primary-foreground/10">
           <div className="px-4 py-3 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-primary-foreground/10 rounded-lg">
-                <LayoutDashboard className="w-4 h-4" />
-              </div>
-              <span className="font-[family-name:var(--font-dm-serif)] text-base">CRUMBS Admin</span>
-            </div>
+            <Image
+              src="/images/logo.png"
+              alt="CRUMBS Logo"
+              width={100}
+              height={40}
+              priority
+              className="h-8 w-auto"
+            />
             <AdminLogoutButton />
           </div>
           <div className="px-4 pb-3">

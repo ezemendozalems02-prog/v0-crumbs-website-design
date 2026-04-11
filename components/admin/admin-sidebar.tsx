@@ -1,8 +1,9 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, UtensilsCrossed, BookOpen, Tag, CalendarCheck, Briefcase, Grid3x3, Image, LayoutTemplate } from "lucide-react"
+import { LayoutDashboard, UtensilsCrossed, BookOpen, Tag, CalendarCheck, Briefcase, Grid3x3, Image as ImageIcon, LayoutTemplate } from "lucide-react"
 import { AdminLogoutButton } from "@/components/admin/logout-button"
 
 const navItems = [
@@ -11,7 +12,7 @@ const navItems = [
   { href: "/admin/categorias",   label: "Categorías",         icon: Tag },
   { href: "/admin/mesas",        label: "Mesas",              icon: Grid3x3 },
   { href: "/admin/postulaciones",label: "Propuestas",         icon: Briefcase },
-  { href: "/admin/banners",      label: "Banners",            icon: Image },
+  { href: "/admin/banners",      label: "Banners",            icon: ImageIcon },
   { href: "/admin/secciones",    label: "Secciones",          icon: LayoutTemplate },
 ]
 
@@ -20,13 +21,15 @@ export function AdminSidebar() {
   return (
     <aside className="hidden lg:flex flex-col w-56 shrink-0 bg-primary text-primary-foreground min-h-screen sticky top-0">
       <div className="px-5 py-6 border-b border-primary-foreground/10">
-        <div className="flex items-center gap-2.5">
-          <div className="p-1.5 bg-primary-foreground/10 rounded-lg">
-            <LayoutDashboard className="w-4 h-4" />
-          </div>
-          <span className="font-[family-name:var(--font-dm-serif)] text-lg leading-tight">CRUMBS</span>
-        </div>
-        <p className="text-xs text-primary-foreground/50 mt-1 pl-0.5">Panel de administración</p>
+        <Image
+          src="/images/logo.png"
+          alt="CRUMBS Logo"
+          width={140}
+          height={50}
+          priority
+          className="h-10 w-auto mb-2"
+        />
+        <p className="text-xs text-primary-foreground/50">Panel de administración</p>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">

@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 import { Instagram, MapPin, Clock } from "lucide-react"
 
@@ -8,12 +9,14 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Logo & Tagline */}
           <div className="space-y-4">
-            <span className="font-[family-name:var(--font-dm-serif)] text-3xl tracking-wide">
-              CRUMBS
-            </span>
-            <p className="font-[family-name:var(--font-caveat)] text-xl text-primary-foreground/80">
-              café & cocina
-            </p>
+            <Image
+              src="/images/logo.png"
+              alt="CRUMBS Logo"
+              width={150}
+              height={60}
+              priority
+              className="h-16 w-auto"
+            />
             <p className="text-sm text-primary-foreground/70 leading-relaxed">
               Café de especialidad y cocina de estación en Ciudad Jardín, Buenos Aires.
             </p>
