@@ -1,9 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
-import type { Seccion, SeccionInput } from "@/lib/admin-content-types"
-
-export type { Seccion, SeccionInput }
+import type { Seccion, SeccionInput } from "@/lib/admin-secciones-types"
 
 export async function getSecciones(pagina?: string): Promise<Seccion[]> {
   const supabase = await createClient()
@@ -16,7 +14,10 @@ export async function getSecciones(pagina?: string): Promise<Seccion[]> {
   if (pagina) query = query.eq("pagina", pagina)
 
   const { data, error } = await query
-  if (error) { console.error("[admin-secciones] getSecciones error:", error); return [] }
+  if (error) {
+    console.error("[admin-secciones] getSecciones error:", error)
+    return []
+  }
   return data ?? []
 }
 

@@ -1,10 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
-import type { Banner, BannerInput } from "@/lib/admin-content-types"
-
-export type { Banner, BannerInput }
-export { PAGINAS_OPCIONES } from "@/lib/admin-content-types"
+import type { Banner, BannerInput } from "@/lib/admin-banners-types"
 
 export async function getBanners(pagina?: string): Promise<Banner[]> {
   const supabase = await createClient()
@@ -17,7 +14,10 @@ export async function getBanners(pagina?: string): Promise<Banner[]> {
   if (pagina) query = query.eq("pagina", pagina)
 
   const { data, error } = await query
-  if (error) { console.error("[admin-banners] getBanners error:", error); return [] }
+  if (error) {
+    console.error("[admin-banners] getBanners error:", error)
+    return []
+  }
   return data ?? []
 }
 
@@ -70,3 +70,4 @@ export async function deleteBanner(id: string): Promise<{ success: boolean; erro
   if (error) return { success: false, error: error.message }
   return { success: true }
 }
+

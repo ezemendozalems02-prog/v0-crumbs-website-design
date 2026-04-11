@@ -3,8 +3,8 @@
 import { useState, useEffect, useTransition, useCallback } from "react"
 import Image from "next/image"
 import { getSecciones, deleteSeccion, toggleSeccionActiva } from "@/lib/admin-secciones"
-import type { Seccion } from "@/lib/admin-content-types"
-import { PAGINAS_OPCIONES } from "@/lib/admin-content-types"
+import type { Seccion } from "@/lib/admin-secciones-types"
+import { PAGINAS_OPCIONES } from "@/lib/admin-secciones-types"
 import { SeccionFormModal } from "@/components/admin/seccion-form-modal"
 import {
   Plus, RefreshCw, LayoutTemplate, Pencil, Trash2,
