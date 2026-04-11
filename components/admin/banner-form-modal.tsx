@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useTransition } from 'react'
-import { X, Loader2, ExternalLink } from 'lucide-react'
+import Image from 'next/image'
+import { X, Loader2, ExternalLink, Check } from 'lucide-react'
 import { ImageUploadField } from '@/components/admin/image-upload-field'
 import { createBanner, updateBanner } from '@/lib/admin-banners'
 import type { Banner, BannerInput } from '@/lib/admin-banners-types'
@@ -28,7 +29,9 @@ const EMPTY: BannerInput = {
 export function BannerFormModal({ banner, onClose, onSaved }: BannerFormModalProps) {
   const [form, setForm] = useState<BannerInput>(EMPTY)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [imagePreview, setImagePreview] = useState<string>("")
 
   useEffect(() => {
     if (banner) {
@@ -43,17 +46,24 @@ export function BannerFormModal({ banner, onClose, onSaved }: BannerFormModalPro
         activo: banner.activo,
         orden: banner.orden,
       })
+      setImagePreview(banner.imagen_url ?? "")
     } else {
       setForm(EMPTY)
+      setImagePreview("")
     }
   }, [banner])
 
-  const set = (key: keyof BannerInput, value: string | boolean | number) =>
+  const set = (key: keyof BannerInput, value: string | boolean | number) => {
     setForm(prev => ({ ...prev, [key]: value }))
+    if (key === 'imagen_url' && typeof value === 'string') {
+      setImagePreview(value)
+    }
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setSuccess(null)
     if (!form.titulo.trim()) { setError('El título es obligatorio'); return }
 
     startTransition(async () => {
@@ -75,7 +85,9 @@ export function BannerFormModal({ banner, onClose, onSaved }: BannerFormModalPro
         setError(result.error ?? 'Error al guardar')
         return
       }
-      onSaved()
+      
+      setSuccess(banner ? 'Banner actualizado correctamente' : 'Banner creado correctamente')
+      setTimeout(() => onSaved(), 500)
     })
   }
 
@@ -218,8 +230,31 @@ export function BannerFormModal({ banner, onClose, onSaved }: BannerFormModalPro
                 onChange={url => set('imagen_url', url ?? '')}
                 label="Imagen del banner"
               />
-              {form.imagen_url && (
-                <p className="text-xs text-foreground/50 mt-2 break-all">{form.imagen_url}</p>
+              
+              {/* Preview de imagen */}
+              {imagePreview && (
+                <div className="mt-4 space-y-2">
+                  <div className="text-xs font-medium text-foreground flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-primary" />
+                    Previsualización
+                  </div>
+                  <div className="w-full aspect-video rounded-xl overflow-hidden border border-border bg-muted">
+                    <Image
+                      src={imagePreview}
+                      alt="Preview"
+                      width={400}
+                      height={225}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <p className="text-xs text-foreground/50 break-all">{imagePreview}</p>
+                </div>
+              )}
+              
+              {!imagePreview && (
+                <div className="mt-4 p-4 rounded-xl border border-dashed border-border/50 text-center">
+                  <p className="text-xs text-foreground/40">Sin imagen cargada</p>
+                </div>
               )}
             </div>
           </div>
@@ -227,6 +262,13 @@ export function BannerFormModal({ banner, onClose, onSaved }: BannerFormModalPro
           {error && (
             <div className="mx-6 mb-4 px-4 py-3 bg-destructive/10 text-destructive text-sm rounded-xl">
               {error}
+            </div>
+          )}
+          
+          {success && (
+            <div className="mx-6 mb-4 px-4 py-3 bg-primary/10 text-primary text-sm rounded-xl flex items-center gap-2">
+              <Check className="w-4 h-4" />
+              {success}
             </div>
           )}
 

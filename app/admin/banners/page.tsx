@@ -66,8 +66,14 @@ export default function AdminBannersPage() {
   const handleSaved = () => {
     setModalOpen(false)
     setEditingBanner(null)
-    addToast(editingBanner ? "Banner actualizado" : "Banner creado", "success")
-    loadData()
+    
+    // Mostrar toast de éxito
+    addToast(editingBanner ? "Banner actualizado y publicado" : "Banner creado y publicado", "success")
+    
+    // Esperar un poco para que se actualice en BD y caché
+    setTimeout(() => {
+      loadData()
+    }, 1000)
   }
 
   // Agrupar por página

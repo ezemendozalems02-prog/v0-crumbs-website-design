@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import type { Banner, BannerInput } from "@/lib/admin-banners-types"
 
-const revalidateBannerPages = (pagina?: string) => {
+const revalidateBannerPages = async (pagina?: string) => {
   // Revalidar la página específica
   if (pagina === "inicio") revalidatePath("/")
   if (pagina === "cafeteria") revalidatePath("/cafeteria")
@@ -12,6 +12,25 @@ const revalidateBannerPages = (pagina?: string) => {
   
   // Revalidar admin también
   revalidatePath("/admin/banners")
+  
+  // También hacer llamada al API para asegurar revalidación
+  try {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    console.log("[admin-banners] Revalidating via API:", appUrl)
+    
+    const response = await fetch(`${appUrl}/api/revalidate-banners`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pagina }),
+      cache: "no-store",
+    })
+    
+    if (!response.ok) {
+      console.error("[admin-banners] Revalidation API error:", response.statusText)
+    }
+  } catch (err) {
+    console.error("[admin-banners] Error calling revalidate API:", err)
+  }
 }
 
 export async function getBanners(pagina?: string): Promise<Banner[]> {
@@ -53,7 +72,7 @@ export async function createBanner(input: BannerInput): Promise<{ success: boole
   if (error) return { success: false, error: error.message }
   
   // Revalidar páginas después de crear
-  revalidateBannerPages(input.pagina)
+  await revalidateBannerPages(input.pagina)
   
   return { success: true, id: data.id }
 }
@@ -68,7 +87,7 @@ export async function updateBanner(id: string, input: Partial<BannerInput>): Pro
   if (error) return { success: false, error: error.message }
   
   // Revalidar la página del banner
-  if (banner) revalidateBannerPages(banner.pagina)
+  if (banner) await revalidateBannerPages(banner.pagina)
   
   return { success: true }
 }
@@ -83,7 +102,7 @@ export async function toggleBannerActivo(id: string, activo: boolean): Promise<{
   if (error) return { success: false, error: error.message }
   
   // Revalidar la página del banner
-  if (banner) revalidateBannerPages(banner.pagina)
+  if (banner) await revalidateBannerPages(banner.pagina)
   
   return { success: true }
 }
@@ -105,7 +124,7 @@ export async function deleteBanner(id: string): Promise<{ success: boolean; erro
   if (error) return { success: false, error: error.message }
   
   // Revalidar la página del banner
-  if (banner) revalidateBannerPages(banner.pagina)
+  if (banner) await revalidateBannerPages(banner.pagina)
   
   return { success: true }
 }
