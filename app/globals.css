@@ -7,8 +7,7 @@
   /* CRUMBS Fonts */
   --font-inter-tight: 'Inter Tight', 'Inter Tight Fallback';
   --font-reenie-beanie: 'Reenie Beanie', 'Reenie Beanie Fallback';
-
-:root {
+  
   /* CRUMBS Color Palette */
   --background: #F2EDE3;
   --foreground: #1A1A1A;
@@ -60,9 +59,8 @@
 }
 
 @theme inline {
-  --font-sans: 'Inter', 'Inter Fallback', sans-serif;
-  --font-serif: 'DM Serif Display', 'Georgia', serif;
-  --font-display: 'Caveat', cursive;
+  --font-sans: 'Inter Tight', 'Inter Tight Fallback', sans-serif;
+  --font-serif: 'Reenie Beanie', 'Reenie Beanie Fallback', cursive;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
