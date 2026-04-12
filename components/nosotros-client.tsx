@@ -43,16 +43,15 @@ export function NosotrosClient({ bannerImageUrl }: NosotrosClientProps) {
 
       {/* Hero Section */}
       {bannerImageUrl ? (
-        <section className="relative w-full overflow-hidden" style={{ aspectRatio: "1440/480", maxHeight: "480px" }}>
-          <Image
+        <div className="w-full">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={bannerImageUrl}
             alt="Interior de CRUMBS"
-            fill
-            className="object-contain object-center"
-            priority
-            unoptimized
+            className="w-full h-auto block"
+            style={{ maxHeight: "520px", objectFit: "cover", objectPosition: "center" }}
           />
-        </section>
+        </div>
       ) : (
         <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0">

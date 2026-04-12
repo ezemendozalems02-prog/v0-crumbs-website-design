@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { useState } from "react"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
@@ -112,16 +111,15 @@ export function TrabajarClient({ bannerImageUrl }: TrabajarClientProps) {
 
       {/* Hero banner */}
       {bannerImageUrl ? (
-        <section className="relative w-full overflow-hidden" style={{ aspectRatio: "1440/480", maxHeight: "480px" }}>
-          <Image
+        <div className="w-full">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={bannerImageUrl}
             alt="Trabajá con nosotros en CRUMBS"
-            fill
-            className="object-contain object-center"
-            priority
-            unoptimized
+            className="w-full h-auto block"
+            style={{ maxHeight: "520px", objectFit: "cover", objectPosition: "center" }}
           />
-        </section>
+        </div>
       ) : (
         <div className="h-32 bg-primary" />
       )}

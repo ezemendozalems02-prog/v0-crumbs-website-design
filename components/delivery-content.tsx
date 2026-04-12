@@ -133,19 +133,28 @@ function DeliveryInner({ liveMenu, bannerImageUrl }: Props) {
     <main className="min-h-screen">
       <Navigation />
 
-      <section className={`relative flex items-center justify-center overflow-hidden ${bannerImageUrl ? "w-full" : "h-[50vh]"}`}
-        style={bannerImageUrl ? { aspectRatio: "1440/480", maxHeight: "480px" } : undefined}>
-        <div className="absolute inset-0">
-          <Image src={heroImage} alt="Delivery CRUMBS" fill className={bannerImageUrl ? "object-contain object-center" : "object-cover"} priority unoptimized />
-          {!bannerImageUrl && <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/70" />}
+      {bannerImageUrl ? (
+        <div className="w-full">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={heroImage}
+            alt="Delivery CRUMBS"
+            className="w-full h-auto block"
+            style={{ maxHeight: "520px", objectFit: "cover", objectPosition: "center" }}
+          />
         </div>
-        {!bannerImageUrl && (
+      ) : (
+        <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0">
+            <Image src={heroImage} alt="Delivery CRUMBS" fill className="object-cover" priority unoptimized />
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/70" />
+          </div>
           <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
             <span className="font-[family-name:var(--font-caveat)] text-2xl text-card/90 mb-4 block animate-fade-in">Comida rica, sin salir de casa</span>
             <h1 className="font-[family-name:var(--font-dm-serif)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight animate-fade-in-up">Pedido Delivery</h1>
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
       <nav className="sticky top-[73px] z-30 bg-card border-b border-primary/10 shadow-sm">
         <div className="max-w-7xl mx-auto px-6">

@@ -62,23 +62,22 @@ export default async function CafeteriaPage() {
       <Navigation />
 
       {/* Hero Section */}
-      <section className={`relative flex items-center justify-center overflow-hidden ${banner?.imagen_url ? "w-full" : "h-[45vh] md:h-[50vh]"}`}
-        style={banner?.imagen_url ? { aspectRatio: "1440/480", maxHeight: "480px" } : undefined}>
-        <div className="absolute inset-0">
-          <Image
+      {banner?.imagen_url ? (
+        <div className="w-full">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={heroImage}
             alt="Cafetería CRUMBS"
-            fill
-            className={banner?.imagen_url ? "object-contain object-center" : "object-cover"}
-            priority
-            unoptimized
+            className="w-full h-auto block"
+            style={{ maxHeight: "520px", objectFit: "cover", objectPosition: "center" }}
           />
-          {!banner?.imagen_url && (
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/70" />
-          )}
         </div>
-
-        {!banner?.imagen_url && (
+      ) : (
+        <section className="relative h-[45vh] md:h-[50vh] flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0">
+            <Image src={heroImage} alt="Cafetería CRUMBS" fill className="object-cover" priority unoptimized />
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/70" />
+          </div>
           <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
             <span className="font-[family-name:var(--font-reenie-beanie)] text-2xl text-card/90 mb-4 block animate-fade-in">
               {heroSubtitle}
@@ -87,8 +86,8 @@ export default async function CafeteriaPage() {
               {heroTitle}
             </h1>
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
       {/* Menu Section */}
       <section className="py-24 bg-card">
