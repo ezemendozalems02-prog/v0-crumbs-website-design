@@ -60,12 +60,26 @@ export async function getBanner(id: string): Promise<Banner | null> {
 
 export async function createBanner(input: BannerInput): Promise<{ success: boolean; id?: string; error?: string }> {
   const supabase = await createClient()
+  
+  console.log('[v0] createBanner: Starting', {
+    title: input.titulo,
+    hasImage: !!input.imagen_url,
+    imageUrl: input.imagen_url ? `${input.imagen_url.substring(0, 50)}...` : 'none',
+    pagina: input.pagina,
+  })
+  
   const { data, error } = await supabase
     .from("banners")
     .insert(input)
     .select("id")
     .single()
-  if (error) return { success: false, error: error.message }
+  
+  if (error) {
+    console.error('[v0] createBanner: Supabase error', error)
+    return { success: false, error: error.message }
+  }
+  
+  console.log('[v0] createBanner: Success! ID:', data.id)
   
   // Revalidar páginas después de crear
   revalidateBannerPages(input.pagina)
@@ -76,11 +90,23 @@ export async function createBanner(input: BannerInput): Promise<{ success: boole
 export async function updateBanner(id: string, input: Partial<BannerInput>): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   
+  console.log('[v0] updateBanner: Starting', {
+    bannerId: id,
+    fieldsUpdated: Object.keys(input),
+    hasImage: !!input.imagen_url,
+    imageUrl: input.imagen_url ? `${input.imagen_url.substring(0, 50)}...` : undefined,
+  })
+  
   // Obtener el banner para saber su página
   const banner = await getBanner(id)
   
   const { error } = await supabase.from("banners").update(input).eq("id", id)
-  if (error) return { success: false, error: error.message }
+  if (error) {
+    console.error('[v0] updateBanner: Supabase error', error)
+    return { success: false, error: error.message }
+  }
+  
+  console.log('[v0] updateBanner: Success!')
   
   // Revalidar la página del banner
   if (banner) revalidateBannerPages(banner.pagina)

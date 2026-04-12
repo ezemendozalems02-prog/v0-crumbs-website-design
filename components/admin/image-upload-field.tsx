@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import Image from 'next/image'
-import { Upload, X, Loader2 } from 'lucide-react'
+import { Upload, X, Loader2, AlertCircle, CheckCircle } from 'lucide-react'
 
 interface ImageUploadFieldProps {
   value: string | null
@@ -10,65 +10,85 @@ interface ImageUploadFieldProps {
   label?: string
 }
 
-export function ImageUploadField({ value, onChange, label = 'Imagen del producto' }: ImageUploadFieldProps) {
+export function ImageUploadField({ value, onChange, label = 'Imagen del banner' }: ImageUploadFieldProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [preview, setPreview] = useState<string | null>(value)
+  const [uploadSuccess, setUploadSuccess] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    if (!file.type.startsWith('image/')) {
-      setError('Solo se permiten archivos de imagen')
+    console.log(`[v0] File selected: ${file.name} (${file.type}, ${(file.size / 1024).toFixed(2)}KB)`)
+
+    // Validar tipo
+    if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
+      setError(`Tipo de archivo no permitido: ${file.type}. Use JPG, PNG o WebP.`)
+      console.log(`[v0] Invalid file type: ${file.type}`)
       return
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError('El archivo debe ser menor a 5MB')
+    // Validar tamaño
+    if (file.size > 10 * 1024 * 1024) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2)
+      setError(`Archivo demasiado grande: ${sizeMB}MB (máximo 10MB)`)
+      console.log(`[v0] File too large: ${sizeMB}MB`)
       return
     }
 
     setError(null)
+    setUploadSuccess(false)
     setIsUploading(true)
-
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      setPreview(e.target?.result as string)
-    }
-    reader.readAsDataURL(file)
 
     const formData = new FormData()
     formData.append('file', file)
 
     try {
+      console.log('[v0] Starting upload...')
       const response = await fetch('/api/upload/image', {
         method: 'POST',
         body: formData,
       })
 
       const result = await response.json()
+      console.log(`[v0] Upload response status: ${response.status}`, result)
 
-      if (response.ok && result.url) {
-        onChange(result.url)
-        setError(null)
-      } else {
-        setError(result.error || 'Error al subir la imagen')
-        setPreview(value)
+      if (!response.ok) {
+        const errorMsg = result.error || `Error HTTP ${response.status}`
+        setError(errorMsg)
+        console.error(`[v0] Upload failed: ${errorMsg}`)
+        return
+      }
+
+      if (!result.url) {
+        setError('No se recibió URL de la imagen del servidor')
+        console.error('[v0] No URL in response:', result)
+        return
+      }
+
+      console.log(`[v0] Upload successful! URL: ${result.url}`)
+      onChange(result.url)
+      setUploadSuccess(true)
+      setError(null)
+      
+      // Limpiar el input
+      if (inputRef.current) {
+        inputRef.current.value = ''
       }
     } catch (err) {
-      console.error('[v0] Upload error:', err)
-      setError('Error al subir la imagen')
-      setPreview(value)
+      const errorMsg = err instanceof Error ? err.message : String(err)
+      console.error(`[v0] Upload exception: ${errorMsg}`, err)
+      setError(`Error de conexión: ${errorMsg}`)
+    } finally {
+      setIsUploading(false)
     }
-
-    setIsUploading(false)
   }
 
   const handleRemove = () => {
     onChange(null)
-    setPreview(null)
+    setError(null)
+    setUploadSuccess(false)
     if (inputRef.current) {
       inputRef.current.value = ''
     }
@@ -78,15 +98,24 @@ export function ImageUploadField({ value, onChange, label = 'Imagen del producto
     <div className="space-y-3">
       <label className="block text-sm font-medium text-foreground">{label}</label>
 
-      {preview ? (
+      {value ? (
         <div className="relative group">
-          <div className="relative w-full aspect-square bg-background rounded-xl overflow-hidden border border-primary/20">
+          <div className="relative w-full aspect-video bg-background rounded-xl overflow-hidden border border-primary/20">
             <Image
-              src={preview}
-              alt="Preview"
+              src={value}
+              alt="Imagen cargada"
               fill
               className="object-cover"
+              unoptimized
             />
+            {uploadSuccess && (
+              <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-2">
+                  <CheckCircle className="w-8 h-8 text-primary" />
+                  <p className="text-xs font-medium text-primary">Guardado</p>
+                </div>
+              </div>
+            )}
           </div>
           <button
             type="button"
@@ -98,8 +127,8 @@ export function ImageUploadField({ value, onChange, label = 'Imagen del producto
           </button>
         </div>
       ) : (
-        <label className="flex flex-col items-center justify-center w-full aspect-square bg-background border-2 border-dashed border-primary/20 hover:border-primary/40 rounded-xl cursor-pointer transition-colors group">
-          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+        <label className="flex flex-col items-center justify-center w-full aspect-video bg-background border-2 border-dashed border-primary/20 hover:border-primary/40 rounded-xl cursor-pointer transition-colors group">
+          <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
             {isUploading ? (
               <>
                 <Loader2 className="w-8 h-8 text-primary mb-2 animate-spin" />
@@ -108,16 +137,15 @@ export function ImageUploadField({ value, onChange, label = 'Imagen del producto
             ) : (
               <>
                 <Upload className="w-8 h-8 text-primary/60 mb-2 group-hover:text-primary transition-colors" />
-                <p className="text-sm font-medium text-foreground">Arrastra una imagen aquí</p>
-                <p className="text-xs text-foreground/50 mt-1">o haz clic para seleccionar</p>
-                <p className="text-xs text-foreground/40 mt-2">JPG, PNG (máx. 5MB)</p>
+                <p className="text-sm font-medium text-foreground">Arrastra aquí o haz clic</p>
+                <p className="text-xs text-foreground/50 mt-1">JPG, PNG, WebP (máx. 10MB)</p>
               </>
             )}
           </div>
           <input
             ref={inputRef}
             type="file"
-            accept="image/*"
+            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/jpg,image/png,image/webp"
             onChange={handleFileChange}
             disabled={isUploading}
             className="hidden"
@@ -126,7 +154,17 @@ export function ImageUploadField({ value, onChange, label = 'Imagen del producto
       )}
 
       {error && (
-        <p className="text-xs text-destructive bg-destructive/10 px-3 py-2 rounded-lg">{error}</p>
+        <div className="flex items-start gap-2 p-3 bg-destructive/10 rounded-lg">
+          <AlertCircle className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-destructive">{error}</p>
+        </div>
+      )}
+
+      {uploadSuccess && value && (
+        <div className="flex items-start gap-2 p-3 bg-primary/10 rounded-lg">
+          <CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-primary">Imagen subida exitosamente</p>
+        </div>
       )}
     </div>
   )

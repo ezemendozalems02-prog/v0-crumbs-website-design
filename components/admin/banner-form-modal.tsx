@@ -64,7 +64,19 @@ export function BannerFormModal({ banner, onClose, onSaved }: BannerFormModalPro
     e.preventDefault()
     setError(null)
     setSuccess(null)
-    if (!form.titulo.trim()) { setError('El título es obligatorio'); return }
+    
+    if (!form.titulo.trim()) { 
+      setError('El título es obligatorio')
+      return 
+    }
+
+    console.log('[v0] BannerFormModal: Submitting form', {
+      bannerId: banner?.id,
+      title: form.titulo,
+      hasImage: !!form.imagen_url,
+      imageUrl: form.imagen_url ? `${form.imagen_url.substring(0, 50)}...` : 'none',
+      pagina: form.pagina,
+    })
 
     startTransition(async () => {
       const input: BannerInput = {
@@ -77,16 +89,26 @@ export function BannerFormModal({ banner, onClose, onSaved }: BannerFormModalPro
         boton_link: form.boton_link?.trim() || undefined,
       }
 
+      console.log('[v0] BannerFormModal: Calling updateBanner/createBanner', {
+        operation: banner ? 'update' : 'create',
+        bannerId: banner?.id,
+      })
+
       const result = banner
         ? await updateBanner(banner.id, input)
         : await createBanner(input)
 
+      console.log('[v0] BannerFormModal: Server response', result)
+
       if (!result.success) {
-        setError(result.error ?? 'Error al guardar')
+        const errorMsg = result.error ?? 'Error al guardar'
+        setError(errorMsg)
+        console.error('[v0] BannerFormModal: Error saving', errorMsg)
         return
       }
       
       setSuccess(banner ? 'Banner actualizado correctamente' : 'Banner creado correctamente')
+      console.log('[v0] BannerFormModal: Success! Closing in 500ms...')
       setTimeout(() => onSaved(), 500)
     })
   }
