@@ -1,7 +1,6 @@
 "use client"
 
 import { Users, User, Phone, Mail, FileText, Clock } from "lucide-react"
-import Image from "next/image"
 import type { TableOption } from "@/app/reservas/page"
 
 interface ReservationFormProps {
@@ -78,11 +77,9 @@ export function ReservationForm({
                     : "border-primary/20 bg-background hover:border-primary/50"
                 }`}
               >
-                <Image
+                <img
                   src={getTableImage(n)}
                   alt={`Mesa para ${n} personas`}
-                  width={60}
-                  height={60}
                   className="w-12 h-12 object-contain"
                 />
                 <span className="text-xs font-semibold text-foreground">{n}</span>
