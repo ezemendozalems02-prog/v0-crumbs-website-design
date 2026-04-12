@@ -66,7 +66,7 @@ export function HomepageClient({ mainBanner, experienceSection, locationSection 
           <span className="font-[family-name:var(--font-reenie-beanie)] text-xl md:text-2xl lg:text-3xl text-card/80 mb-6 block animate-fade-in tracking-wide">
             {banner.subtitulo}
           </span>
-          <h1 className="font-[family-name:var(--font-dm-serif)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight mb-6 animate-fade-in-up">
+          <h1 className="font-[family-name:var(--font-reenie-beanie)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight mb-6 animate-fade-in-up">
             {banner.titulo}
           </h1>
           <p className="text-lg md:text-xl text-card/90 mb-10 animate-fade-in-up delay-200">
@@ -124,7 +124,7 @@ export function HomepageClient({ mainBanner, experienceSection, locationSection 
             <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-accent">
               Nuestra experiencia
             </span>
-            <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl md:text-5xl text-primary mt-2">
+            <h2 className="font-[family-name:var(--font-reenie-beanie)] text-3xl md:text-5xl text-primary mt-2">
               Un lugar para cada momento
             </h2>
           </div>
