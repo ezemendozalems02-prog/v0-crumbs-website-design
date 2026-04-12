@@ -119,7 +119,7 @@ export function TrabajarClient({ bannerImageUrl }: TrabajarClientProps) {
             width={1440}
             height={480}
             className="w-full h-auto block"
-            style={{ maxHeight: "520px", objectFit: "cover", objectPosition: "center" }}
+            style={{ maxHeight: "520px", objectFit: "cover", objectPosition: "center 70%" }}
             fetchPriority="high"
           />
         </div>
