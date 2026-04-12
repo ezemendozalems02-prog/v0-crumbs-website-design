@@ -62,13 +62,14 @@ export default async function CafeteriaPage() {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="relative h-[45vh] md:h-[50vh] flex items-center justify-center overflow-hidden">
+      <section className={`relative flex items-center justify-center overflow-hidden ${banner?.imagen_url ? "w-full" : "h-[45vh] md:h-[50vh]"}`}
+        style={banner?.imagen_url ? { aspectRatio: "1440/480", maxHeight: "480px" } : undefined}>
         <div className="absolute inset-0">
           <Image
             src={heroImage}
             alt="Cafetería CRUMBS"
             fill
-            className="object-cover"
+            className={banner?.imagen_url ? "object-contain object-center" : "object-cover"}
             priority
             unoptimized
           />

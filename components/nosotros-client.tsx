@@ -42,21 +42,30 @@ export function NosotrosClient({ bannerImageUrl }: NosotrosClientProps) {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0">
+      {bannerImageUrl ? (
+        <section className="relative w-full overflow-hidden" style={{ aspectRatio: "1440/480", maxHeight: "480px" }}>
           <Image
-            src={heroImage}
+            src={bannerImageUrl}
             alt="Interior de CRUMBS"
             fill
-            className="object-cover"
+            className="object-contain object-center"
             priority
             unoptimized
           />
-          {!bannerImageUrl && (
+        </section>
+      ) : (
+        <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0">
+            <Image
+              src={heroImage}
+              alt="Interior de CRUMBS"
+              fill
+              className="object-cover"
+              priority
+              unoptimized
+            />
             <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/70" />
-          )}
-        </div>
-        {!bannerImageUrl && (
+          </div>
           <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
             <span className="font-[family-name:var(--font-caveat)] text-2xl text-card/90 mb-4 block animate-fade-in">
               Nuestra historia
@@ -65,8 +74,8 @@ export function NosotrosClient({ bannerImageUrl }: NosotrosClientProps) {
               Sobre Nosotros
             </h1>
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
       {/* Story Section */}
       <section ref={storySection.ref} className="py-24 bg-card">

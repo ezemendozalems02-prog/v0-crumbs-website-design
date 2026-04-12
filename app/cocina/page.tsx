@@ -57,13 +57,14 @@ export default async function CocinaPage() {
     <main className="min-h-screen">
       <Navigation />
 
-      <section className="relative h-[45vh] md:h-[50vh] flex items-center justify-center overflow-hidden">
+      <section className={`relative flex items-center justify-center overflow-hidden ${banner?.imagen_url ? "w-full" : "h-[45vh] md:h-[50vh]"}`}
+        style={banner?.imagen_url ? { aspectRatio: "1440/480", maxHeight: "480px" } : undefined}>
         <div className="absolute inset-0">
           <Image
             src={heroImage}
             alt="Cocina CRUMBS"
             fill
-            className="object-cover"
+            className={banner?.imagen_url ? "object-contain object-center" : "object-cover"}
             priority
             unoptimized
           />

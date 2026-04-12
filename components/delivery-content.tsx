@@ -133,9 +133,10 @@ function DeliveryInner({ liveMenu, bannerImageUrl }: Props) {
     <main className="min-h-screen">
       <Navigation />
 
-      <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
+      <section className={`relative flex items-center justify-center overflow-hidden ${bannerImageUrl ? "w-full" : "h-[50vh]"}`}
+        style={bannerImageUrl ? { aspectRatio: "1440/480", maxHeight: "480px" } : undefined}>
         <div className="absolute inset-0">
-          <Image src={heroImage} alt="Delivery CRUMBS" fill className="object-cover" priority unoptimized />
+          <Image src={heroImage} alt="Delivery CRUMBS" fill className={bannerImageUrl ? "object-contain object-center" : "object-cover"} priority unoptimized />
           {!bannerImageUrl && <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/70" />}
         </div>
         {!bannerImageUrl && (

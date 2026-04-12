@@ -19,12 +19,12 @@ export function ReservasHero({ bannerImageUrl }: ReservasHeroProps) {
   // Si hay imagen de banner, mostrarla directamente como hero
   if (bannerImageUrl) {
     return (
-      <section className="relative h-[45vh] md:h-[50vh] overflow-hidden">
+      <section className="relative w-full overflow-hidden" style={{ aspectRatio: "1440/480", maxHeight: "480px" }}>
         <Image
           src={bannerImageUrl}
           alt="Reservá tu mesa"
           fill
-          className="object-cover"
+          className="object-contain object-center"
           priority
           unoptimized
         />
