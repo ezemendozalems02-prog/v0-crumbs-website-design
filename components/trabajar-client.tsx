@@ -111,13 +111,16 @@ export function TrabajarClient({ bannerImageUrl }: TrabajarClientProps) {
 
       {/* Hero banner */}
       {bannerImageUrl ? (
-        <div className="w-full">
+        <div className="w-full overflow-hidden" style={{ maxHeight: "520px" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={bannerImageUrl}
             alt="Trabajá con nosotros en CRUMBS"
+            width={1440}
+            height={480}
             className="w-full h-auto block"
             style={{ maxHeight: "520px", objectFit: "cover", objectPosition: "center" }}
+            fetchPriority="high"
           />
         </div>
       ) : (

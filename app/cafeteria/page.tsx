@@ -63,13 +63,16 @@ export default async function CafeteriaPage() {
 
       {/* Hero Section */}
       {banner?.imagen_url ? (
-        <div className="w-full">
+        <div className="w-full overflow-hidden" style={{ maxHeight: "520px" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={heroImage}
             alt="Cafetería CRUMBS"
+            width={1440}
+            height={480}
             className="w-full h-auto block"
             style={{ maxHeight: "520px", objectFit: "cover", objectPosition: "center" }}
+            fetchPriority="high"
           />
         </div>
       ) : (

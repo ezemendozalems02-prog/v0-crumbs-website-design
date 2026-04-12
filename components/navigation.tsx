@@ -68,9 +68,13 @@ export function Navigation() {
           </button>
         </div>
 
-        {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="lg:hidden mt-4 pb-4 border-t border-primary/10 pt-4 animate-fade-in">
+        {/* Mobile Navigation — always in DOM, height animates to avoid layout shift */}
+        <div
+          className="lg:hidden overflow-hidden transition-all duration-300 ease-in-out"
+          style={{ maxHeight: isOpen ? "400px" : "0px", opacity: isOpen ? 1 : 0 }}
+          aria-hidden={!isOpen}
+        >
+          <div className="mt-4 pb-4 border-t border-primary/10 pt-4">
             <div className="flex flex-col gap-4">
               {navLinks.map((link) => (
                 <Link
@@ -92,7 +96,7 @@ export function Navigation() {
               </Link>
             </div>
           </div>
-        )}
+        </div>
       </nav>
     </header>
   )

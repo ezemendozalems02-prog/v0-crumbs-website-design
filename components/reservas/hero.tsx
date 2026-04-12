@@ -1,31 +1,28 @@
 "use client"
 
 import Image from "next/image"
-import { useEffect, useRef, useState } from "react"
+import { useRef } from "react"
 
 interface ReservasHeroProps {
   bannerImageUrl?: string | null
 }
 
 export function ReservasHero({ bannerImageUrl }: ReservasHeroProps) {
-  const [visible, setVisible] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const t = setTimeout(() => setVisible(true), 80)
-    return () => clearTimeout(t)
-  }, [])
 
   // Si hay imagen de banner, mostrarla directamente como hero
   if (bannerImageUrl) {
     return (
-      <div className="w-full">
+      <div className="w-full overflow-hidden" style={{ maxHeight: "520px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={bannerImageUrl}
           alt="Reservá tu mesa"
+          width={1440}
+          height={480}
           className="w-full h-auto block"
           style={{ maxHeight: "520px", objectFit: "cover", objectPosition: "center" }}
+          fetchPriority="high"
         />
       </div>
     )
@@ -60,10 +57,7 @@ export function ReservasHero({ bannerImageUrl }: ReservasHeroProps) {
       />
 
       <div className="max-w-4xl mx-auto px-6 relative z-10">
-        <div
-          className="transition-all duration-700 ease-out"
-          style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(16px)" }}
-        >
+        <div>
           <span className="font-[family-name:var(--font-caveat)] text-accent text-xl tracking-wide block mb-4">
             reservas
           </span>

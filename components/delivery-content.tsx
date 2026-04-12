@@ -45,6 +45,8 @@ function useInView(threshold = 0.1) {
   const ref = useRef<HTMLDivElement>(null)
   const [isInView, setIsInView] = useState(false)
   useEffect(() => {
+    // Start as visible on first render to avoid hydration mismatch and layout shift
+    setIsInView(true)
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) { setIsInView(true); observer.disconnect() }
     }, { threshold })
@@ -100,7 +102,7 @@ function CategorySection({ category, products }: { category: string; products: C
     <div
       ref={ref}
       id={category.toLowerCase().replace(/\s+/g, "-")}
-      className={`scroll-mt-32 transition-all duration-700 ${isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+      className="scroll-mt-32"
     >
       <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl text-primary mb-8">{category}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -136,13 +138,16 @@ function DeliveryInner({ liveMenu, bannerImageUrl }: Props) {
       <Navigation />
 
       {bannerImageUrl ? (
-        <div className="w-full">
+        <div className="w-full overflow-hidden" style={{ maxHeight: "520px" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={heroImage}
             alt="Delivery CRUMBS"
+            width={1440}
+            height={480}
             className="w-full h-auto block"
             style={{ maxHeight: "520px", objectFit: "cover", objectPosition: "center" }}
+            fetchPriority="high"
           />
         </div>
       ) : (
@@ -158,7 +163,7 @@ function DeliveryInner({ liveMenu, bannerImageUrl }: Props) {
         </section>
       )}
 
-      <nav className="sticky top-[73px] z-30 bg-card border-b border-primary/10 shadow-sm">
+      <nav className="sticky top-[81px] z-30 bg-card border-b border-primary/10 shadow-sm">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center gap-2 py-4 overflow-x-auto scrollbar-hide">
             {categories.map((category) => (
