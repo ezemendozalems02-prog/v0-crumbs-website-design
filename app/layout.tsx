@@ -1,11 +1,18 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter_Tight } from 'next/font/google'
+import { Inter_Tight, Reenie_Beanie } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 const interTight = Inter_Tight({ 
   subsets: ["latin"],
-  weight: ["900"],
+  variable: '--font-inter-tight',
+  display: 'swap',
+});
+
+const reenieBeanie = Reenie_Beanie({
+  weight: '400',
+  subsets: ["latin"],
+  variable: '--font-reenie-beanie',
   display: 'swap',
 });
 
@@ -45,7 +52,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={interTight.className}>
+    <html lang="es" className={`${interTight.variable} ${reenieBeanie.variable}`}>
       <body className="font-sans antialiased">
         {children}
         <Analytics />

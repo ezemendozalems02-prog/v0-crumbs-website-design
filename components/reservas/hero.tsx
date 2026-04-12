@@ -58,10 +58,10 @@ export function ReservasHero({ bannerImageUrl }: ReservasHeroProps) {
 
       <div className="max-w-4xl mx-auto px-6 relative z-10">
         <div>
-          <span className="font-[family-name:var(--font-reenie-beanie)] text-accent text-xl tracking-wide block mb-4">
+          <span className="font-[family-name:var(--font-caveat)] text-accent text-xl tracking-wide block mb-4">
             reservas
           </span>
-          <h1 className="font-[family-name:var(--font-reenie-beanie)] text-5xl md:text-7xl text-primary-foreground leading-tight text-balance mb-6">
+          <h1 className="font-[family-name:var(--font-dm-serif)] text-5xl md:text-7xl text-primary-foreground leading-tight text-balance mb-6">
             Reservá tu mesa
           </h1>
           <p className="text-primary-foreground/80 text-lg md:text-xl leading-relaxed max-w-xl mb-3">

@@ -69,7 +69,7 @@ export function NosotrosClient({ bannerImageUrl }: NosotrosClientProps) {
             <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/70" />
           </div>
           <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-            <span className="font-[family-name:var(--font-reenie-beanie)] text-2xl text-card/90 mb-4 block animate-fade-in">
+            <span className="font-[family-name:var(--font-caveat)] text-2xl text-card/90 mb-4 block animate-fade-in">
               Nuestra historia
             </span>
             <h1 className="font-[family-name:var(--font-dm-serif)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight animate-fade-in-up">
@@ -87,7 +87,7 @@ export function NosotrosClient({ bannerImageUrl }: NosotrosClientProps) {
               storySection.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
           >
-            <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-accent">
+            <span className="font-[family-name:var(--font-caveat)] text-xl text-accent">
               Desde Ciudad Jardín
             </span>
             <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl md:text-4xl text-primary">
@@ -124,7 +124,7 @@ export function NosotrosClient({ bannerImageUrl }: NosotrosClientProps) {
               valuesSection.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
           >
-            <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-accent">
+            <span className="font-[family-name:var(--font-caveat)] text-xl text-accent">
               Lo que nos define
             </span>
             <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl md:text-4xl text-primary mt-2">
@@ -181,7 +181,7 @@ export function NosotrosClient({ bannerImageUrl }: NosotrosClientProps) {
       {/* CTA Section */}
       <section className="py-24 bg-primary text-primary-foreground">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-primary-foreground/80">
+          <span className="font-[family-name:var(--font-caveat)] text-xl text-primary-foreground/80">
             Te esperamos
           </span>
           <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl md:text-4xl mt-2 mb-8">

@@ -35,8 +35,8 @@ export function ReservationSummary({
 
   return (
     <div className="bg-primary rounded-2xl p-6 md:p-8 text-primary-foreground shadow-xl animate-fade-in-up">
-      <p className="font-[family-name:var(--font-reenie-beanie)] text-accent text-lg mb-2">tu reserva</p>
-      <h3 className="font-[family-name:var(--font-reenie-beanie)] text-2xl mb-6">
+      <p className="font-[family-name:var(--font-caveat)] text-accent text-lg mb-2">tu reserva</p>
+      <h3 className="font-[family-name:var(--font-dm-serif)] text-2xl mb-6">
         Resumen
       </h3>
 

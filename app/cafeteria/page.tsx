@@ -1,10 +1,13 @@
-import { Inter_Tight } from 'next/font/google'
-
-const interTight = Inter_Tight({ 
-  subsets: ["latin"],
-  weight: ["900"],
-  display: 'swap',
-});
+import Image from "next/image"
+import { Navigation } from "@/components/navigation"
+import { Footer } from "@/components/footer"
+import { WhatsAppButton } from "@/components/whatsapp-button"
+import { getMenuByTipo } from "@/lib/menu-publico"
+import { MenuCategorySection } from "@/components/menu-category-section"
+import { MenuSticker } from "@/components/menu-sticker"
+import type { MenuCategory } from "@/lib/menu-publico"
+import { getBannersForPage } from "@/lib/public-content"
+import type { Banner } from "@/lib/admin-banners-types"
 
 // Revalidar cada cambio (ISR con revalidación inmediata)
 export const revalidate = 0
@@ -83,7 +86,7 @@ export default async function CafeteriaPage() {
             <span className="font-[family-name:var(--font-reenie-beanie)] text-2xl text-card/90 mb-4 block animate-fade-in">
               {heroSubtitle}
             </span>
-            <h1 className={`${interTight.className} text-4xl md:text-6xl lg:text-7xl text-card leading-tight animate-fade-in-up uppercase`}>
+            <h1 className="font-[family-name:var(--font-dm-serif)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight animate-fade-in-up">
               {heroTitle}
             </h1>
           </div>
@@ -116,7 +119,7 @@ export default async function CafeteriaPage() {
         />
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
-            <span className="font-inter font-black text-xl text-accent uppercase">
+            <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-accent">
               Café de especialidad
             </span>
             <p className="font-[family-name:var(--font-reenie-beanie)] text-foreground/70 mt-4 max-w-2xl mx-auto text-lg">

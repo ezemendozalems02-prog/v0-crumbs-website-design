@@ -79,7 +79,7 @@ export default async function CocinaPage() {
           </div>
           <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
             <span className="font-[family-name:var(--font-reenie-beanie)] text-2xl text-card/90 mb-4 block animate-fade-in">{heroSubtitle}</span>
-            <h1 className="font-[family-name:var(--font-reenie-beanie)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight animate-fade-in-up">{heroTitle}</h1>
+            <h1 className="font-[family-name:var(--font-dm-serif)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight animate-fade-in-up">{heroTitle}</h1>
           </div>
         </section>
       )}
@@ -137,7 +137,7 @@ export default async function CocinaPage() {
         />
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
-            <span className="font-inter font-black text-xl text-accent uppercase">{seccion?.subtitulo || "Cocina de estación"}</span>
+            <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-accent">{seccion?.subtitulo || "Cocina de estación"}</span>
             <p className="font-[family-name:var(--font-reenie-beanie)] text-foreground/70 mt-4 max-w-2xl mx-auto text-lg">
               {descriptionText}
             </p>
