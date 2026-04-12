@@ -317,7 +317,7 @@ export function ReservasClient({ bannerImageUrl }: ReservasClientProps) {
 function SectionLabel({ number, title }: { number: string; title: string }) {
   return (
     <div className="flex items-baseline gap-3 mb-8">
-      <span className="font-[family-name:var(--font-caveat)] text-accent text-xl leading-none">{number}</span>
+      <span className="font-[family-name:var(--font-reenie-beanie)] text-accent text-xl leading-none">{number}</span>
       <h2 className="font-[family-name:var(--font-dm-serif)] text-2xl md:text-3xl text-primary text-balance">
         {title}
       </h2>
