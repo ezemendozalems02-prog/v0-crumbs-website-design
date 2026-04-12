@@ -12,6 +12,7 @@
   --header-height: 81px;
 
   /* CRUMBS Fonts */
+  --font-dm-serif: 'DM Serif Display', serif;
   --font-inter-tight: 'Inter Tight', 'Inter Tight Fallback';
   --font-reenie-beanie: 'Reenie Beanie', 'Reenie Beanie Fallback';
   

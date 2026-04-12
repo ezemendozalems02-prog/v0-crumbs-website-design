@@ -1,7 +1,14 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter_Tight, Reenie_Beanie } from 'next/font/google'
+import { DM_Serif_Display, Inter_Tight, Reenie_Beanie } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
+
+const dmSerif = DM_Serif_Display({
+  weight: '400',
+  subsets: ["latin"],
+  variable: '--font-dm-serif',
+  display: 'swap',
+});
 
 const interTight = Inter_Tight({ 
   subsets: ["latin"],
@@ -52,7 +59,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`${interTight.variable} ${reenieBeanie.variable}`}>
+    <html lang="es" className={`${dmSerif.variable} ${interTight.variable} ${reenieBeanie.variable}`}>
       <body className="font-sans antialiased">
         {children}
         <Analytics />
