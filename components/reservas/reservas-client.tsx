@@ -1,13 +1,17 @@
-import { getBannersForPage } from "@/lib/public-content"
-import { ReservasClient } from "@/components/reservas/reservas-client"
+"use client"
 
-export const dynamic = 'force-dynamic'
-
-export default async function ReservasPage() {
-  const banners = await getBannersForPage("reservas")
-  const bannerImageUrl = banners[0]?.imagen_url ?? null
-  return <ReservasClient bannerImageUrl={bannerImageUrl} />
-}
+import { useState, useEffect, useTransition } from "react"
+import { Navigation } from "@/components/navigation"
+import { Footer } from "@/components/footer"
+import { WhatsAppButton } from "@/components/whatsapp-button"
+import { ReservasHero } from "@/components/reservas/hero"
+import { TableSelector } from "@/components/reservas/table-selector"
+import { DateSelector } from "@/components/reservas/date-selector"
+import { TimeSelector } from "@/components/reservas/time-selector"
+import { ReservationForm } from "@/components/reservas/reservation-form"
+import { ReservationSummary } from "@/components/reservas/reservation-summary"
+import { AvailabilityBadge } from "@/components/reservas/availability-badge"
+import { getDisponibilidad, crearReserva, enviarConfirmacionReserva } from "@/lib/reservas"
 
 export type TableOption = {
   id: "2" | "4" | "6" | "8+"
@@ -17,7 +21,7 @@ export type TableOption = {
   maxPersons: number
   minPersons: number
   image: string
-  tipoMesa: string // Para la base de datos
+  tipoMesa: string
 }
 
 export const TABLE_OPTIONS: TableOption[] = [
@@ -70,7 +74,11 @@ export const HORARIOS = [
 
 export const STOCK_TOTAL = 100
 
-export default function ReservasPage() {
+interface ReservasClientProps {
+  bannerImageUrl?: string | null
+}
+
+export default function ReservasClient({ bannerImageUrl }: ReservasClientProps) {
   const [selectedTable, setSelectedTable] = useState<TableOption | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedTime, setSelectedTime] = useState<string>("")
@@ -82,11 +90,9 @@ export default function ReservasPage() {
   const [tolerancia, setTolerancia] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Disponibilidad desde Supabase
   const [availableCovers, setAvailableCovers] = useState<number>(STOCK_TOTAL)
   const [loadingDisponibilidad, setLoadingDisponibilidad] = useState(false)
 
-  // Para manejar el estado de envío
   const [isPending, startTransition] = useTransition()
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitSuccess, setSubmitSuccess] = useState(false)
@@ -95,24 +101,16 @@ export default function ReservasPage() {
     ? selectedDate.toISOString().split("T")[0]
     : null
 
-  // Cargar disponibilidad cuando cambia la fecha
   useEffect(() => {
     if (!dateKey) {
       setAvailableCovers(STOCK_TOTAL)
       return
     }
-
     setLoadingDisponibilidad(true)
     getDisponibilidad(dateKey)
-      .then((data) => {
-        setAvailableCovers(data.cubiertos_disponibles)
-      })
-      .catch(() => {
-        setAvailableCovers(STOCK_TOTAL)
-      })
-      .finally(() => {
-        setLoadingDisponibilidad(false)
-      })
+      .then((data) => { setAvailableCovers(data.cubiertos_disponibles) })
+      .catch(() => { setAvailableCovers(STOCK_TOTAL) })
+      .finally(() => { setLoadingDisponibilidad(false) })
   }, [dateKey])
 
   function validate(): boolean {
@@ -140,11 +138,8 @@ export default function ReservasPage() {
 
   async function handleReservar() {
     if (!validate()) return
-
     setSubmitError(null)
-
     startTransition(async () => {
-      // Primero guardar en Supabase
       const result = await crearReserva({
         nombre: nombre.trim(),
         telefono: telefono.trim(),
@@ -155,13 +150,10 @@ export default function ReservasPage() {
         requerimiento: requerimiento.trim() || undefined,
         tolerancia,
       })
-
       if (!result.success) {
         setSubmitError(result.error || "Error al crear la reserva")
         return
       }
-
-      // Enviar email de confirmación si se proporcionó email
       if (email.trim()) {
         enviarConfirmacionReserva({
           nombre: nombre.trim(),
@@ -173,17 +165,10 @@ export default function ReservasPage() {
           tipoMesa: selectedTable!.label,
         }).catch(err => console.error("Error sending confirmation email:", err))
       }
-
-      // Si se guardo correctamente, abrir WhatsApp
       const fechaStr = selectedDate!.toLocaleDateString("es-AR", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
+        weekday: "long", year: "numeric", month: "long", day: "numeric",
       })
-
       const req = requerimiento.trim() || "Sin requerimientos especiales"
-
       const message =
         `Hola CRUMBS, quiero hacer una reserva.\n\n` +
         `Datos de mi reserva:\n` +
@@ -196,7 +181,6 @@ export default function ReservasPage() {
         `Requerimiento especial: ${req}\n\n` +
         `Confirmo que lei y acepto el tiempo de tolerancia de la reserva.\n\n` +
         `Por favor, confirmen disponibilidad. Gracias.`
-
       setSubmitSuccess(true)
       window.location.href = `https://wa.me/5491136634236?text=${encodeURIComponent(message)}`
     })
@@ -210,11 +194,9 @@ export default function ReservasPage() {
     <main className="min-h-screen bg-background">
       <Navigation />
 
-      <ReservasHero />
+      <ReservasHero bannerImageUrl={bannerImageUrl} />
 
       <div className="max-w-4xl mx-auto px-6 pb-24 space-y-16">
-
-        {/* 1 - Selector de mesa */}
         <section>
           <SectionLabel number="01" title="Elegi tu mesa" />
           <TableSelector
@@ -229,7 +211,6 @@ export default function ReservasPage() {
           />
         </section>
 
-        {/* 2 - Fecha y disponibilidad */}
         <section>
           <SectionLabel number="02" title="Selecciona la fecha" />
           <DateSelector
@@ -252,12 +233,9 @@ export default function ReservasPage() {
               )}
             </div>
           )}
-          {errors.stock && (
-            <p className="mt-3 text-sm text-red-500">{errors.stock}</p>
-          )}
+          {errors.stock && <p className="mt-3 text-sm text-red-500">{errors.stock}</p>}
         </section>
 
-        {/* 3 - Horario */}
         <section>
           <SectionLabel number="03" title="Elegi un horario" />
           <TimeSelector
@@ -271,7 +249,6 @@ export default function ReservasPage() {
           />
         </section>
 
-        {/* 4 - Formulario */}
         <section>
           <SectionLabel number="04" title="Completa tus datos" />
           <ReservationForm
@@ -292,14 +269,12 @@ export default function ReservasPage() {
           />
         </section>
 
-        {/* Error de envío */}
         {submitError && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl text-center">
             {submitError}
           </div>
         )}
 
-        {/* 5 - Resumen + boton */}
         {isFormReady && (
           <section>
             <SectionLabel number="05" title="Confirma tu reserva" />
@@ -317,7 +292,6 @@ export default function ReservasPage() {
           </section>
         )}
 
-        {/* Boton siempre visible al final */}
         {!isFormReady && (
           <div className="flex justify-center">
             <button
@@ -337,6 +311,8 @@ export default function ReservasPage() {
     </main>
   )
 }
+
+export { ReservasClient }
 
 function SectionLabel({ number, title }: { number: string; title: string }) {
   return (
