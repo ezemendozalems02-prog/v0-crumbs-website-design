@@ -95,14 +95,7 @@ export default async function CafeteriaPage() {
 
       {/* Menu Section */}
       <section className="py-24 bg-card relative">
-        {/* Decorative stickers - distributed across all positions */}
-        <MenuSticker
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-23-BH9EN4k2OskfAcU381kbFBw4t5UT8a.png"
-          alt="manteca"
-          position="top-right"
-          size="lg"
-          opacity={0.08}
-        />
+        {/* Decorative stickers - only phrases */}
         <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-17-DL93wckbaL4QXnqP8o3gYPUhFCRa6e.png"
           alt="mood jardinense"
@@ -111,37 +104,16 @@ export default async function CafeteriaPage() {
           opacity={0.07}
         />
         <MenuSticker
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-19-OjPTdQiXrdlrKXdBJhxu4jqy2d7uyC.png"
-          alt="medialunas"
-          position="middle-left"
-          size="md"
-          opacity={0.1}
-        />
-        <MenuSticker
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-20-xSgoDhH3EPTf17pHC5B67zld6imCEI.png"
-          alt="preekntreno"
-          position="top-left-offset"
-          size="sm"
-          opacity={0.08}
-        />
-        <MenuSticker
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-21-Jyd86ytY9XlhfYmOpPvVcJQA5IRSM5.png"
-          alt="postentreno"
-          position="bottom-right-offset"
-          size="sm"
-          opacity={0.08}
-        />
-        <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-22-TMOr0qRmUyNXopNIF2q1sgo15UaU1e.png"
           alt="fresco frutal sin apuro"
-          position="middle-right"
+          position="top-right"
           size="md"
           opacity={0.08}
         />
         <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-24-PVHDAo3Pz9lG3eTBk1uF98fKkdQphf.png"
           alt="flecha decorativa"
-          position="bottom-center"
+          position="bottom-left"
           size="sm"
           opacity={0.07}
         />

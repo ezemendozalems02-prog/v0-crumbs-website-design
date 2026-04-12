@@ -85,7 +85,7 @@ export default async function CocinaPage() {
       )}
 
       <section className="py-24 bg-card relative">
-        {/* Decorative stickers - distributed across all positions */}
+        {/* Decorative stickers - only phrases and mascot */}
         <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-01-TR55dOy0XfY4rPIkB8fXGwzO7vy2ac.png"
           alt="Nuevo en CRUMBS"
@@ -108,13 +108,6 @@ export default async function CocinaPage() {
           opacity={0.07}
         />
         <MenuSticker
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-08-bKkh9XBF6n6nVQZnsQxJhUDLJfNbsq.png"
-          alt="hojas naturales"
-          position="middle-left"
-          size="md"
-          opacity={0.1}
-        />
-        <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-03-8DOaGHEELhaexA4fFi8jgwGxqUB7eh.png"
           alt="adictiva"
           position="middle-right"
@@ -122,30 +115,23 @@ export default async function CocinaPage() {
           opacity={0.08}
         />
         <MenuSticker
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-07-1ZPA9NbPFhvNDN8umxaSCbHgvrAA0Y.png"
-          alt="burrito"
-          position="bottom-left-offset"
-          size="md"
-          opacity={0.08}
-        />
-        <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-09-g0Rbfzc6mHsQ7f76uK4msMKGg36AuG.png"
           alt="gato CRUMBS"
-          position="bottom-right"
+          position="bottom-left"
           size="lg"
           opacity={0.07}
         />
         <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-04-XfclLxNXqJ8jNswuDHcFaAUp5d4PMW.png"
           alt="corazón"
-          position="bottom-center"
+          position="top-left-offset"
           size="sm"
           opacity={0.07}
         />
         <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-10-rG54BvIWcqwJuxC68UY4xXfP0ZqyOn.png"
           alt="consultá por otras opciones"
-          position="top-left-offset"
+          position="bottom-right"
           size="sm"
           opacity={0.08}
         />
