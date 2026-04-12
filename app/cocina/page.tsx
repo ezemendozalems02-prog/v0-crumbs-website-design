@@ -54,7 +54,7 @@ export default async function CocinaPage() {
   const descriptionText = seccion?.descripcion || "Sabores, platos y buenos momentos para cuando pinta algo rico"
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen page-content">
       <Navigation />
 
       {banner?.imagen_url ? (

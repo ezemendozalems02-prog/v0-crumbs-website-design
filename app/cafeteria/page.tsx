@@ -58,7 +58,7 @@ export default async function CafeteriaPage() {
   const heroTitle = banner?.titulo || "Desayunos & Cafetería"
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen page-content">
       <Navigation />
 
       {/* Hero Section */}

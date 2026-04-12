@@ -18,7 +18,7 @@ export default async function HomePage() {
   ])
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen page-content">
       <Navigation />
       <HomepageClient
         mainBanner={banners.length > 0 ? banners[0] : null}

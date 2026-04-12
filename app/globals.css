@@ -4,6 +4,13 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /*
+    Header height = py-4 (16px top + 16px bottom) + logo h-12 (48px) + border (1px) = 81px
+    Used to push page content below the fixed header on all viewports.
+    Add safe-area-inset-top for iOS notch/dynamic island support.
+  */
+  --header-height: 81px;
+
   /* CRUMBS Fonts */
   --font-inter-tight: 'Inter Tight', 'Inter Tight Fallback';
   --font-reenie-beanie: 'Reenie Beanie', 'Reenie Beanie Fallback';
@@ -101,6 +108,15 @@
   html {
     scroll-behavior: smooth;
   }
+}
+
+/*
+  Applied to the outermost <main> of every page that includes <Navigation />.
+  Reserves exactly the fixed header height so content never slides under it.
+  env(safe-area-inset-top) handles the iOS notch / dynamic island.
+*/
+.page-content {
+  padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
 }
 
 /* Smooth fade-in animation */

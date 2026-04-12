@@ -38,7 +38,7 @@ export function ContactoClient({ bannerImageUrl }: ContactoClientProps) {
   const heroImage = bannerImageUrl ?? "/images/nosotros-hero.jpg"
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen page-content">
       <Navigation />
 
       {/* Hero Section */}

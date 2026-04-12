@@ -134,7 +134,7 @@ function DeliveryInner({ liveMenu, bannerImageUrl }: Props) {
   const heroImage = bannerImageUrl ?? "/images/delivery-hero.jpg"
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen page-content">
       <Navigation />
 
       {bannerImageUrl ? (
@@ -163,7 +163,7 @@ function DeliveryInner({ liveMenu, bannerImageUrl }: Props) {
         </section>
       )}
 
-      <nav className="sticky top-[81px] z-30 bg-card border-b border-primary/10 shadow-sm">
+      <nav className="sticky z-30 bg-card border-b border-primary/10 shadow-sm" style={{ top: "var(--header-height)" }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center gap-2 py-4 overflow-x-auto scrollbar-hide">
             {categories.map((category) => (

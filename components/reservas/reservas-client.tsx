@@ -191,7 +191,7 @@ export function ReservasClient({ bannerImageUrl }: ReservasClientProps) {
     personas >= 1 && nombre.trim() && telefono.trim() && tolerancia
 
   return (
-    <main className="min-h-screen bg-background">
+      <main className="min-h-screen bg-background page-content">
       <Navigation />
 
       <ReservasHero bannerImageUrl={bannerImageUrl} />

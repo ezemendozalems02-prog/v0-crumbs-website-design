@@ -106,7 +106,7 @@ export function TrabajarClient({ bannerImageUrl }: TrabajarClientProps) {
   }
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background page-content">
       <Navigation />
 
       {/* Hero banner */}
