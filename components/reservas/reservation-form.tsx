@@ -1,6 +1,7 @@
 "use client"
 
 import { Users, User, Phone, Mail, FileText, Clock } from "lucide-react"
+import Image from "next/image"
 import type { TableOption } from "@/app/reservas/page"
 
 interface ReservationFormProps {
@@ -39,6 +40,14 @@ export function ReservationForm({
   const maxPersonas = table?.maxPersons ?? 15
   const minPersonas = table?.minPersons ?? 1
 
+  // Get the appropriate table image based on number of people
+  const getTableImage = (num: number) => {
+    if (num <= 2) return "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones%20liugares%20mesas-01-3UtCwmw52ozkytOTYJljzJ7q9gqXxc.jpg"
+    if (num <= 4) return "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones%20liugares%20mesas-02-4IrwZoL5CtkpwtpeAnsBiP8RJMMdV9.jpg"
+    if (num <= 6) return "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones%20liugares%20mesas-03-R8pkAxVyRFnD1A54ylByC16BmGHS1U.jpg"
+    return "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones%20liugares%20mesas-04-F6U4UAy7y7GIeEDSWvLYyizS4YNmV3.jpg"
+  }
+
   return (
     <div className="bg-card rounded-2xl p-6 md:p-8 border border-primary/10 space-y-6">
 
@@ -55,7 +64,7 @@ export function ReservationForm({
         </label>
 
         {table ? (
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-4 md:grid-cols-5 gap-3">
             {Array.from(
               { length: maxPersonas - minPersonas + 1 },
               (_, i) => i + minPersonas
@@ -63,13 +72,20 @@ export function ReservationForm({
               <button
                 key={n}
                 onClick={() => onPersonasChange(n)}
-                className={`w-11 h-11 rounded-full text-sm font-medium transition-all duration-200 ${
+                className={`relative p-3 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-1.5 ${
                   personas === n
-                    ? "bg-primary text-primary-foreground shadow-md scale-110"
-                    : "bg-background border border-primary/15 text-foreground hover:border-primary/40"
+                    ? "border-primary bg-primary/10 scale-105"
+                    : "border-primary/20 bg-background hover:border-primary/50"
                 }`}
               >
-                {n}
+                <Image
+                  src={getTableImage(n)}
+                  alt={`Mesa para ${n} personas`}
+                  width={60}
+                  height={60}
+                  className="w-12 h-12 object-contain"
+                />
+                <span className="text-xs font-semibold text-foreground">{n}</span>
               </button>
             ))}
           </div>
