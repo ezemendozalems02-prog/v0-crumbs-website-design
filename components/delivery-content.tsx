@@ -121,12 +121,13 @@ function mapMenuToCards(menu: MenuCategory[]): { category: string; products: Car
   })).filter((c) => c.products.length > 0)
 }
 
-interface Props { liveMenu: MenuCategory[] }
+interface Props { liveMenu: MenuCategory[]; bannerImageUrl?: string | null }
 
-function DeliveryInner({ liveMenu }: Props) {
+function DeliveryInner({ liveMenu, bannerImageUrl }: Props) {
   const sections = liveMenu.length > 0 ? mapMenuToCards(liveMenu) : staticDeliveryItems
   const categories = sections.map((s) => s.category)
   const [activeCategory, setActiveCategory] = useState(categories[0] ?? "")
+  const heroImage = bannerImageUrl ?? "/images/delivery-hero.jpg"
 
   return (
     <main className="min-h-screen">
@@ -134,13 +135,15 @@ function DeliveryInner({ liveMenu }: Props) {
 
       <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <Image src="/images/delivery-hero.jpg" alt="Delivery CRUMBS" fill className="object-cover" priority />
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/70" />
+          <Image src={heroImage} alt="Delivery CRUMBS" fill className="object-cover" priority unoptimized={heroImage.startsWith("https://hebbkx1anhila5yf")} />
+          {!bannerImageUrl && <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/70" />}
         </div>
-        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-          <span className="font-[family-name:var(--font-caveat)] text-2xl text-card/90 mb-4 block animate-fade-in">Comida rica, sin salir de casa</span>
-          <h1 className="font-[family-name:var(--font-dm-serif)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight animate-fade-in-up">Pedido Delivery</h1>
-        </div>
+        {!bannerImageUrl && (
+          <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
+            <span className="font-[family-name:var(--font-caveat)] text-2xl text-card/90 mb-4 block animate-fade-in">Comida rica, sin salir de casa</span>
+            <h1 className="font-[family-name:var(--font-dm-serif)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight animate-fade-in-up">Pedido Delivery</h1>
+          </div>
+        )}
       </section>
 
       <nav className="sticky top-[73px] z-30 bg-card border-b border-primary/10 shadow-sm">
@@ -172,10 +175,10 @@ function DeliveryInner({ liveMenu }: Props) {
   )
 }
 
-export function DeliveryContent({ liveMenu }: Props) {
+export function DeliveryContent({ liveMenu, bannerImageUrl }: Props) {
   return (
     <CartProvider>
-      <DeliveryInner liveMenu={liveMenu} />
+      <DeliveryInner liveMenu={liveMenu} bannerImageUrl={bannerImageUrl} />
     </CartProvider>
   )
 }

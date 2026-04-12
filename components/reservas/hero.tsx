@@ -1,8 +1,13 @@
 "use client"
 
+import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 
-export function ReservasHero() {
+interface ReservasHeroProps {
+  bannerImageUrl?: string | null
+}
+
+export function ReservasHero({ bannerImageUrl }: ReservasHeroProps) {
   const [visible, setVisible] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -10,6 +15,22 @@ export function ReservasHero() {
     const t = setTimeout(() => setVisible(true), 80)
     return () => clearTimeout(t)
   }, [])
+
+  // Si hay imagen de banner, mostrarla directamente como hero
+  if (bannerImageUrl) {
+    return (
+      <section className="relative h-[45vh] md:h-[50vh] overflow-hidden">
+        <Image
+          src={bannerImageUrl}
+          alt="Reservá tu mesa"
+          fill
+          className="object-cover"
+          priority
+          unoptimized={bannerImageUrl.startsWith("https://hebbkx1anhila5yf")}
+        />
+      </section>
+    )
+  }
 
   return (
     <section
