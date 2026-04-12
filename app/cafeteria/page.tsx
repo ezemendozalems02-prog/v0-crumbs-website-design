@@ -1,13 +1,10 @@
-import Image from "next/image"
-import { Navigation } from "@/components/navigation"
-import { Footer } from "@/components/footer"
-import { WhatsAppButton } from "@/components/whatsapp-button"
-import { getMenuByTipo } from "@/lib/menu-publico"
-import { MenuCategorySection } from "@/components/menu-category-section"
-import { MenuSticker } from "@/components/menu-sticker"
-import type { MenuCategory } from "@/lib/menu-publico"
-import { getBannersForPage } from "@/lib/public-content"
-import type { Banner } from "@/lib/admin-banners-types"
+import { Inter_Tight } from 'next/font/google'
+
+const interTight = Inter_Tight({ 
+  subsets: ["latin"],
+  weight: ["900"],
+  display: 'swap',
+});
 
 // Revalidar cada cambio (ISR con revalidación inmediata)
 export const revalidate = 0
@@ -86,7 +83,7 @@ export default async function CafeteriaPage() {
             <span className="font-[family-name:var(--font-reenie-beanie)] text-2xl text-card/90 mb-4 block animate-fade-in">
               {heroSubtitle}
             </span>
-            <h1 style={{ fontFamily: "'Inter Tight', sans-serif", fontWeight: 900 }} className="text-4xl md:text-6xl lg:text-7xl text-card leading-tight animate-fade-in-up uppercase">
+            <h1 className={`${interTight.className} text-4xl md:text-6xl lg:text-7xl text-card leading-tight animate-fade-in-up uppercase`}>
               {heroTitle}
             </h1>
           </div>

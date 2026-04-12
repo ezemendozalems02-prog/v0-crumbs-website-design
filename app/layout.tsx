@@ -1,26 +1,12 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter_Tight, Reenie_Beanie, Work_Sans } from 'next/font/google'
+import { Inter_Tight } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 const interTight = Inter_Tight({ 
   subsets: ["latin"],
-  variable: '--font-inter-tight',
+  weight: ["900"],
   display: 'swap',
-});
-
-const reenieBeanie = Reenie_Beanie({
-  weight: '400',
-  subsets: ["latin"],
-  variable: '--font-reenie-beanie',
-  display: 'swap',
-});
-
-const workSans = Work_Sans({
-  subsets: ["latin"],
-  variable: '--font-work-sans',
-  display: 'swap',
-  weight: ['400', '700', '800', '900'],
 });
 
 export const metadata: Metadata = {
@@ -59,7 +45,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`${interTight.variable} ${reenieBeanie.variable} ${workSans.variable}`}>
+    <html lang="es" className={interTight.className}>
       <body className="font-sans antialiased">
         {children}
         <Analytics />
