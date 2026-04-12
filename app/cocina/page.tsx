@@ -4,6 +4,7 @@ import { Footer } from "@/components/footer"
 import { WhatsAppButton } from "@/components/whatsapp-button"
 import { getMenuByTipo } from "@/lib/menu-publico"
 import { MenuCategorySection } from "@/components/menu-category-section"
+import { MenuSticker } from "@/components/menu-sticker"
 import type { MenuCategory } from "@/lib/menu-publico"
 import { getBannersForPage, getSeccionByClave } from "@/lib/public-content"
 import type { Banner } from "@/lib/admin-banners-types"
@@ -83,20 +84,45 @@ export default async function CocinaPage() {
         </section>
       )}
 
-      <section className="py-24 bg-card">
-        <div className="max-w-6xl mx-auto px-6">
+      <section className="py-24 bg-card relative">
+        {/* Decorative stickers - positioned in empty spaces */}
+        <MenuSticker
+          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-05-TI38zgku3UnP9yrnOM7TRsjiMdwGt4.png"
+          alt="equilibrio feliz"
+          position="top-right"
+          size="md"
+          opacity={0.08}
+        />
+        <MenuSticker
+          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-08-bKkh9XBF6n6nVQZnsQxJhUDLJfNbsq.png"
+          alt="hojas naturales"
+          position="bottom-left"
+          size="md"
+          opacity={0.1}
+          hideMobile={true}
+        />
+        <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
             <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-accent">{seccion?.subtitulo || "Cocina de estación"}</span>
             <p className="text-foreground/70 mt-4 max-w-2xl mx-auto">
               {descriptionText}
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 relative">
             {menuData.map((category, index) => (
               <MenuCategorySection key={category.id} category={category} index={index} />
             ))}
           </div>
-          <div className="mt-16 text-center">
+          <div className="mt-16 text-center relative">
+            {/* Additional stickers for visual interest */}
+            <MenuSticker
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-04-XfclLxNXqJ8jNswuDHcFaAUp5d4PMW.png"
+              alt="corazón"
+              position="top-left"
+              size="sm"
+              opacity={0.07}
+              hideMobile={true}
+            />
             <p className="text-sm text-foreground/50">Los precios pueden variar. Consultá por opciones sin TACC y alternativas vegetarianas.</p>
           </div>
         </div>
