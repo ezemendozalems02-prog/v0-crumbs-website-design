@@ -4,6 +4,7 @@ import { Footer } from "@/components/footer"
 import { WhatsAppButton } from "@/components/whatsapp-button"
 import { getMenuByTipo } from "@/lib/menu-publico"
 import { MenuCategorySection } from "@/components/menu-category-section"
+import { MenuSticker } from "@/components/menu-sticker"
 import type { MenuCategory } from "@/lib/menu-publico"
 import { getBannersForPage } from "@/lib/public-content"
 import type { Banner } from "@/lib/admin-banners-types"
@@ -93,8 +94,33 @@ export default async function CafeteriaPage() {
       )}
 
       {/* Menu Section */}
-      <section className="py-24 bg-card">
-        <div className="max-w-6xl mx-auto px-6">
+      <section className="py-24 bg-card relative">
+        {/* Decorative stickers - positioned in empty spaces */}
+        <MenuSticker
+          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-23-BH9EN4k2OskfAcU381kbFBw4t5UT8a.png"
+          alt="manteca"
+          position="top-right"
+          size="lg"
+          opacity={0.08}
+          hideMobile={true}
+        />
+        <MenuSticker
+          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-19-OjPTdQiXrdlrKXdBJhxu4jqy2d7uyC.png"
+          alt="medialunas"
+          position="bottom-left"
+          size="md"
+          opacity={0.1}
+          hideMobile={true}
+        />
+        <MenuSticker
+          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-17-DL93wckbaL4QXnqP8o3gYPUhFCRa6e.png"
+          alt="mood jardinense"
+          position="top-left"
+          size="sm"
+          opacity={0.07}
+          hideMobile={true}
+        />
+        <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
             <span className="font-[family-name:var(--font-caveat)] text-xl text-accent">
               Café de especialidad
@@ -104,13 +130,30 @@ export default async function CafeteriaPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 relative">
             {menuData.map((category, index) => (
               <MenuCategorySection key={category.id} category={category} index={index} />
             ))}
           </div>
 
-          <div className="mt-16 text-center">
+          <div className="mt-16 text-center relative">
+            {/* Additional stickers for footer area */}
+            <MenuSticker
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-20-xSgoDhH3EPTf17pHC5B67zld6imCEI.png"
+              alt="preekntreno"
+              position="top-left"
+              size="sm"
+              opacity={0.08}
+              hideMobile={true}
+            />
+            <MenuSticker
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-21-Jyd86ytY9XlhfYmOpPvVcJQA5IRSM5.png"
+              alt="postentreno"
+              position="bottom-right"
+              size="sm"
+              opacity={0.08}
+              hideMobile={true}
+            />
             <p className="text-sm text-foreground/50">
               Los precios pueden variar. Consultá por opciones sin TACC y alternativas vegetarianas.
             </p>
