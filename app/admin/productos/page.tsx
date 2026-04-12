@@ -103,9 +103,6 @@ export default function AdminProductosPage() {
            (!search.trim() || p.nombre.toLowerCase().includes(search.toLowerCase()))
   }
 
-  const productosCarta = sortProductos(applyExtraFilters(productos.filter(productosDeCartaFilters)))
-  const productosDelivery = sortProductos(applyExtraFilters(productos.filter(productosDeDeliveryFilters)))
-
   const categoriasDelivery = categorias.filter(c => c.tipo_menu === "delivery")
   const categoriasCarta = categorias.filter(c => c.tipo_menu === "desayuno" || c.tipo_menu === "almuerzo_cena")
 
@@ -131,6 +128,9 @@ export default function AdminProductosPage() {
   })
 
   const hasActiveFilters = search || filterDisp !== "todos" || filterTipo !== "todos" || filterCategoria !== "todas" || filterDestacado !== "todos" || sortBy !== "orden"
+
+  const productosCarta = sortProductos(applyExtraFilters(productos.filter(productosDeCartaFilters)))
+  const productosDelivery = sortProductos(applyExtraFilters(productos.filter(productosDeDeliveryFilters)))
 
   const clearFiltros = () => {
     setSearch("")
