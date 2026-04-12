@@ -6,7 +6,7 @@ import {
   type Producto, type Categoria,
 } from "@/lib/admin-productos"
 import { ProductoFormModal } from "@/components/admin/producto-form-modal"
-import { Plus, Search, RefreshCw, UtensilsCrossed, ToggleLeft, ToggleRight, Pencil, Trash2, Star, Package } from "lucide-react"
+import { Plus, Search, RefreshCw, UtensilsCrossed, ToggleLeft, ToggleRight, Pencil, Trash2, Star, Package, SlidersHorizontal, X, ArrowUpDown } from "lucide-react"
 
 const TIPO_LABEL: Record<string, string> = {
   desayuno: "Desayunos",
@@ -24,6 +24,10 @@ export default function AdminProductosPage() {
   const [search, setSearch] = useState("")
   const [filterDisp, setFilterDisp] = useState<"todos" | "disponible" | "no_disponible">("todos")
   const [filterTipo, setFilterTipo] = useState<"todos" | "carta" | "delivery">("todos")
+  const [filterCategoria, setFilterCategoria] = useState<string>("todas")
+  const [filterDestacado, setFilterDestacado] = useState<"todos" | "destacado" | "no_destacado">("todos")
+  const [sortBy, setSortBy] = useState<"orden" | "nombre_asc" | "nombre_desc" | "precio_asc" | "precio_desc" | "destacados">("orden")
+  const [showFiltros, setShowFiltros] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProducto, setEditingProducto] = useState<Producto | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -48,7 +52,7 @@ export default function AdminProductosPage() {
         if (filterTipo === "carta") filters.tipo_menu = "carta"
       }
       const [p, m, c] = await Promise.all([getProductos(filters), getMetricasProductos(), getCategorias()])
-      console.log("[v0] Loaded", p.length, "products with filters:", filters)
+
       setProductos(p)
       setMetricas(m)
       setCategorias(c)
@@ -99,11 +103,43 @@ export default function AdminProductosPage() {
            (!search.trim() || p.nombre.toLowerCase().includes(search.toLowerCase()))
   }
 
-  const productosCarta = productos.filter(productosDeCartaFilters)
-  const productosDelivery = productos.filter(productosDeDeliveryFilters)
+  const productosCarta = sortProductos(applyExtraFilters(productos.filter(productosDeCartaFilters)))
+  const productosDelivery = sortProductos(applyExtraFilters(productos.filter(productosDeDeliveryFilters)))
 
   const categoriasDelivery = categorias.filter(c => c.tipo_menu === "delivery")
   const categoriasCarta = categorias.filter(c => c.tipo_menu === "desayuno" || c.tipo_menu === "almuerzo_cena")
+
+  // Función de ordenamiento
+  const sortProductos = (arr: Producto[]) => {
+    const sorted = [...arr]
+    switch (sortBy) {
+      case "nombre_asc": return sorted.sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
+      case "nombre_desc": return sorted.sort((a, b) => b.nombre.localeCompare(a.nombre, "es"))
+      case "precio_asc": return sorted.sort((a, b) => a.precio - b.precio)
+      case "precio_desc": return sorted.sort((a, b) => b.precio - a.precio)
+      case "destacados": return sorted.sort((a, b) => (b.destacado ? 1 : 0) - (a.destacado ? 1 : 0))
+      default: return sorted.sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0))
+    }
+  }
+
+  // Filtro adicional por categoría y destacado
+  const applyExtraFilters = (arr: Producto[]) => arr.filter(p => {
+    if (filterCategoria !== "todas" && p.categoria_id !== filterCategoria) return false
+    if (filterDestacado === "destacado" && !p.destacado) return false
+    if (filterDestacado === "no_destacado" && p.destacado) return false
+    return true
+  })
+
+  const hasActiveFilters = search || filterDisp !== "todos" || filterTipo !== "todos" || filterCategoria !== "todas" || filterDestacado !== "todos" || sortBy !== "orden"
+
+  const clearFiltros = () => {
+    setSearch("")
+    setFilterDisp("todos")
+    setFilterTipo("todos")
+    setFilterCategoria("todas")
+    setFilterDestacado("todos")
+    setSortBy("orden")
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -151,40 +187,131 @@ export default function AdminProductosPage() {
         </div>
 
         {/* Filtros */}
-        <div className="bg-card rounded-2xl border border-border/40 p-4 flex flex-wrap gap-3 items-center">
-          <div className="relative flex-1 min-w-[180px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/40" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar producto..."
-              className="w-full pl-9 pr-4 py-2.5 bg-background border border-border/40 rounded-xl text-sm text-foreground placeholder:text-foreground/40 outline-none focus:border-primary/50 transition-colors"
-            />
+        <div className="bg-card rounded-2xl border border-border/40 p-4 space-y-3">
+          {/* Barra principal */}
+          <div className="flex flex-wrap gap-3 items-center">
+            <div className="relative flex-1 min-w-[180px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/40" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por nombre..."
+                className="w-full pl-9 pr-4 py-2.5 bg-background border border-border/40 rounded-xl text-sm text-foreground placeholder:text-foreground/40 outline-none focus:border-primary/50 transition-colors"
+              />
+            </div>
+            <button
+              onClick={() => setShowFiltros((v) => !v)}
+              className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-colors ${showFiltros || hasActiveFilters ? "bg-primary text-primary-foreground border-primary" : "bg-background border-border/40 text-foreground/60 hover:border-primary/40"}`}
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              Filtros
+              {hasActiveFilters && (
+                <span className="w-5 h-5 rounded-full bg-primary-foreground/20 text-xs flex items-center justify-center font-bold">
+                  {[search, filterDisp !== "todos", filterTipo !== "todos", filterCategoria !== "todas", filterDestacado !== "todos", sortBy !== "orden"].filter(Boolean).length}
+                </span>
+              )}
+            </button>
+            {hasActiveFilters && (
+              <button onClick={clearFiltros} className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-border/40 text-sm text-foreground/50 hover:text-red-600 hover:border-red-200 transition-colors">
+                <X className="w-3.5 h-3.5" />
+                Limpiar
+              </button>
+            )}
+            <button onClick={() => { setEditingProducto(null); setModalOpen(true) }} className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold">
+              <Plus className="w-4 h-4" />
+              Nuevo
+            </button>
           </div>
-          <select
-            value={filterTipo}
-            onChange={(e) => setFilterTipo(e.target.value as any)}
-            className="px-3 py-2.5 bg-background border border-border/40 rounded-xl text-sm text-foreground outline-none focus:border-primary/50 transition-colors"
-          >
-            <option value="todos">Todo</option>
-            <option value="carta">Carta</option>
-            <option value="delivery">Delivery</option>
-          </select>
-          <select
-            value={filterDisp}
-            onChange={(e) => setFilterDisp(e.target.value as any)}
-            className="px-3 py-2.5 bg-background border border-border/40 rounded-xl text-sm text-foreground outline-none focus:border-primary/50 transition-colors"
-          >
-            <option value="todos">Todos</option>
-            <option value="disponible">Disponibles</option>
-            <option value="no_disponible">No disponibles</option>
-          </select>
-          {/* Mobile: new button */}
-          <button onClick={() => { setEditingProducto(null); setModalOpen(true) }} className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold">
-            <Plus className="w-4 h-4" />
-            Nuevo
-          </button>
+
+          {/* Panel expandible */}
+          {showFiltros && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 pt-3 border-t border-border/30">
+              {/* Tipo */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/50 uppercase tracking-wide">Tipo</label>
+                <select
+                  value={filterTipo}
+                  onChange={(e) => { setFilterTipo(e.target.value as any); setFilterCategoria("todas") }}
+                  className="w-full px-3 py-2.5 bg-background border border-border/40 rounded-xl text-sm text-foreground outline-none focus:border-primary/50 transition-colors"
+                >
+                  <option value="todos">Todos</option>
+                  <option value="carta">Carta</option>
+                  <option value="delivery">Delivery</option>
+                </select>
+              </div>
+
+              {/* Categoría */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/50 uppercase tracking-wide">Categoría</label>
+                <select
+                  value={filterCategoria}
+                  onChange={(e) => setFilterCategoria(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-background border border-border/40 rounded-xl text-sm text-foreground outline-none focus:border-primary/50 transition-colors"
+                >
+                  <option value="todas">Todas</option>
+                  {filterTipo !== "delivery" && categoriasCarta.length > 0 && (
+                    <optgroup label="Carta">
+                      {categoriasCarta.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                    </optgroup>
+                  )}
+                  {filterTipo !== "carta" && categoriasDelivery.length > 0 && (
+                    <optgroup label="Delivery">
+                      {categoriasDelivery.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                    </optgroup>
+                  )}
+                </select>
+              </div>
+
+              {/* Disponibilidad */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/50 uppercase tracking-wide">Disponibilidad</label>
+                <select
+                  value={filterDisp}
+                  onChange={(e) => setFilterDisp(e.target.value as any)}
+                  className="w-full px-3 py-2.5 bg-background border border-border/40 rounded-xl text-sm text-foreground outline-none focus:border-primary/50 transition-colors"
+                >
+                  <option value="todos">Todos</option>
+                  <option value="disponible">Disponibles</option>
+                  <option value="no_disponible">No disponibles</option>
+                </select>
+              </div>
+
+              {/* Destacado */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/50 uppercase tracking-wide">Destacado</label>
+                <select
+                  value={filterDestacado}
+                  onChange={(e) => setFilterDestacado(e.target.value as any)}
+                  className="w-full px-3 py-2.5 bg-background border border-border/40 rounded-xl text-sm text-foreground outline-none focus:border-primary/50 transition-colors"
+                >
+                  <option value="todos">Todos</option>
+                  <option value="destacado">Solo destacados</option>
+                  <option value="no_destacado">Sin destacar</option>
+                </select>
+              </div>
+
+              {/* Ordenar */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/50 uppercase tracking-wide flex items-center gap-1">
+                  <ArrowUpDown className="w-3 h-3" />
+                  Ordenar por
+                </label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="w-full px-3 py-2.5 bg-background border border-border/40 rounded-xl text-sm text-foreground outline-none focus:border-primary/50 transition-colors"
+                >
+                  <option value="orden">Orden por defecto</option>
+                  <option value="nombre_asc">Nombre A → Z</option>
+                  <option value="nombre_desc">Nombre Z → A</option>
+                  <option value="precio_asc">Precio menor → mayor</option>
+                  <option value="precio_desc">Precio mayor → menor</option>
+                  <option value="destacados">Destacados primero</option>
+                </select>
+              </div>
+            </div>
+          )}
         </div>
 
         {isLoading ? (
