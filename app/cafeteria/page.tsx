@@ -102,7 +102,6 @@ export default async function CafeteriaPage() {
           position="top-right"
           size="lg"
           opacity={0.08}
-          hideMobile={true}
         />
         <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-19-OjPTdQiXrdlrKXdBJhxu4jqy2d7uyC.png"
@@ -110,7 +109,6 @@ export default async function CafeteriaPage() {
           position="bottom-left"
           size="md"
           opacity={0.1}
-          hideMobile={true}
         />
         <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-17-DL93wckbaL4QXnqP8o3gYPUhFCRa6e.png"
@@ -118,7 +116,6 @@ export default async function CafeteriaPage() {
           position="top-left"
           size="sm"
           opacity={0.07}
-          hideMobile={true}
         />
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
@@ -144,7 +141,6 @@ export default async function CafeteriaPage() {
               position="top-left"
               size="sm"
               opacity={0.08}
-              hideMobile={true}
             />
             <MenuSticker
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-21-Jyd86ytY9XlhfYmOpPvVcJQA5IRSM5.png"
@@ -152,7 +148,6 @@ export default async function CafeteriaPage() {
               position="bottom-right"
               size="sm"
               opacity={0.08}
-              hideMobile={true}
             />
             <p className="text-sm text-foreground/50">
               Los precios pueden variar. Consultá por opciones sin TACC y alternativas vegetarianas.

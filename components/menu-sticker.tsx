@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 interface MenuStickerProps {
   src: string
   alt: string
-  position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+  position: 'top-left' | 'top-right' | 'top-center' | 'bottom-left' | 'bottom-right' | 'bottom-center'
   size?: 'sm' | 'md' | 'lg'
   opacity?: number
   animate?: boolean
@@ -37,8 +37,10 @@ export function MenuSticker({
   const positionMap = {
     'top-left': 'top-4 left-4 md:top-8 md:left-8',
     'top-right': 'top-4 right-4 md:top-8 md:right-8',
+    'top-center': 'top-4 left-1/2 -translate-x-1/2 md:top-8',
     'bottom-left': 'bottom-4 left-4 md:bottom-8 md:left-8',
     'bottom-right': 'bottom-4 right-4 md:bottom-8 md:right-8',
+    'bottom-center': 'bottom-4 left-1/2 -translate-x-1/2 md:bottom-8',
   }
 
   const dimension = sizeMap[size]
