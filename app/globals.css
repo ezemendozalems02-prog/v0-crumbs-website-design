@@ -193,9 +193,9 @@
   animation: spinSlow 20s linear infinite;
 }
 
-/* Staggered animation delays */
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
+@layer components {
+  .font-work-sans-900 {
+    font-family: var(--font-work-sans);
+    font-weight: 900;
+  }
+}
