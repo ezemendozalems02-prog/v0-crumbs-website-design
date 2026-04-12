@@ -20,12 +20,9 @@ export function ImageUploadField({ value, onChange, label = 'Imagen del banner' 
     const file = e.target.files?.[0]
     if (!file) return
 
-    console.log(`[v0] File selected: ${file.name} (${file.type}, ${(file.size / 1024).toFixed(2)}KB)`)
-
     // Validar tipo
     if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
-      setError(`Tipo de archivo no permitido: ${file.type}. Use JPG, PNG o WebP.`)
-      console.log(`[v0] Invalid file type: ${file.type}`)
+      setError(`Tipo de archivo no permitido. Use JPG, PNG o WebP.`)
       return
     }
 
@@ -33,7 +30,6 @@ export function ImageUploadField({ value, onChange, label = 'Imagen del banner' 
     if (file.size > 10 * 1024 * 1024) {
       const sizeMB = (file.size / (1024 * 1024)).toFixed(2)
       setError(`Archivo demasiado grande: ${sizeMB}MB (máximo 10MB)`)
-      console.log(`[v0] File too large: ${sizeMB}MB`)
       return
     }
 
@@ -45,40 +41,29 @@ export function ImageUploadField({ value, onChange, label = 'Imagen del banner' 
     formData.append('file', file)
 
     try {
-      console.log('[v0] Starting upload...')
       const response = await fetch('/api/upload/image', {
         method: 'POST',
         body: formData,
       })
 
       const result = await response.json()
-      console.log(`[v0] Upload response status: ${response.status}`, result)
 
       if (!response.ok) {
-        const errorMsg = result.error || `Error HTTP ${response.status}`
-        setError(errorMsg)
-        console.error(`[v0] Upload failed: ${errorMsg}`)
+        setError(result.error || `Error HTTP ${response.status}`)
         return
       }
 
       if (!result.url) {
         setError('No se recibió URL de la imagen del servidor')
-        console.error('[v0] No URL in response:', result)
         return
       }
 
-      console.log(`[v0] Upload successful! URL: ${result.url}`)
       onChange(result.url)
       setUploadSuccess(true)
       setError(null)
-      
-      // Limpiar el input
-      if (inputRef.current) {
-        inputRef.current.value = ''
-      }
+      if (inputRef.current) inputRef.current.value = ''
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err)
-      console.error(`[v0] Upload exception: ${errorMsg}`, err)
       setError(`Error de conexión: ${errorMsg}`)
     } finally {
       setIsUploading(false)
