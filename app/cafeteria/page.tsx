@@ -86,7 +86,7 @@ export default async function CafeteriaPage() {
             <span className="font-[family-name:var(--font-reenie-beanie)] text-2xl text-card/90 mb-4 block animate-fade-in">
               {heroSubtitle}
             </span>
-            <h1 className="font-[family-name:'Work_Sans'] font-black text-4xl md:text-6xl lg:text-7xl text-card leading-tight animate-fade-in-up uppercase" style={{ fontWeight: 900 }}>
+            <h1 className="font-[family-name:var(--font-work-sans)] font-black text-4xl md:text-6xl lg:text-7xl text-card leading-tight animate-fade-in-up uppercase" style={{ fontWeight: 900 }}>
               {heroTitle}
             </h1>
           </div>
