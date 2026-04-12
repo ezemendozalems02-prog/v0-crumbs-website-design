@@ -85,7 +85,7 @@ export default async function CocinaPage() {
       )}
 
       <section className="py-24 bg-card relative">
-        {/* Decorative stickers - positioned in empty spaces */}
+        {/* Decorative stickers - distributed across all positions */}
         <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-01-TR55dOy0XfY4rPIkB8fXGwzO7vy2ac.png"
           alt="Nuevo en CRUMBS"
@@ -101,39 +101,53 @@ export default async function CocinaPage() {
           opacity={0.08}
         />
         <MenuSticker
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-08-bKkh9XBF6n6nVQZnsQxJhUDLJfNbsq.png"
-          alt="hojas naturales"
-          position="bottom-left"
-          size="md"
-          opacity={0.1}
-        />
-        <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-02-Fqq4Ow2vw7NDuNpv9l7UY8aUz7IfAD.png"
           alt="hechos con pan casero y paciencia"
-          position="top-right"
+          position="top-right-offset"
           size="sm"
           opacity={0.07}
         />
         <MenuSticker
+          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-08-bKkh9XBF6n6nVQZnsQxJhUDLJfNbsq.png"
+          alt="hojas naturales"
+          position="middle-left"
+          size="md"
+          opacity={0.1}
+        />
+        <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-03-8DOaGHEELhaexA4fFi8jgwGxqUB7eh.png"
           alt="adictiva"
-          position="bottom-right"
+          position="middle-right"
           size="sm"
           opacity={0.08}
         />
         <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-07-1ZPA9NbPFhvNDN8umxaSCbHgvrAA0Y.png"
           alt="burrito"
-          position="bottom-center"
+          position="bottom-left-offset"
           size="md"
           opacity={0.08}
         />
         <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-09-g0Rbfzc6mHsQ7f76uK4msMKGg36AuG.png"
           alt="gato CRUMBS"
-          position="top-center"
+          position="bottom-right"
           size="lg"
           opacity={0.07}
+        />
+        <MenuSticker
+          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-04-XfclLxNXqJ8jNswuDHcFaAUp5d4PMW.png"
+          alt="corazón"
+          position="bottom-center"
+          size="sm"
+          opacity={0.07}
+        />
+        <MenuSticker
+          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-10-rG54BvIWcqwJuxC68UY4xXfP0ZqyOn.png"
+          alt="consultá por otras opciones"
+          position="top-left-offset"
+          size="sm"
+          opacity={0.08}
         />
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
@@ -147,28 +161,11 @@ export default async function CocinaPage() {
               <MenuCategorySection key={category.id} category={category} index={index} />
             ))}
           </div>
-          <div className="mt-16 text-center relative">
-            {/* Additional stickers for visual interest */}
-            <MenuSticker
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-04-XfclLxNXqJ8jNswuDHcFaAUp5d4PMW.png"
-              alt="corazón"
-              position="top-left"
-              size="sm"
-              opacity={0.07}
-            />
-            <MenuSticker
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-10-rG54BvIWcqwJuxC68UY4xXfP0ZqyOn.png"
-              alt="consultá por otras opciones"
-              position="bottom-right"
-              size="sm"
-              opacity={0.08}
-            />
+          <div className="mt-16 text-center">
             <p className="text-sm text-foreground/50">Los precios pueden variar. Consultá por opciones sin TACC y alternativas vegetarianas.</p>
           </div>
         </div>
       </section>
-
-      <Footer />
       <WhatsAppButton />
     </main>
   )
