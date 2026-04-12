@@ -5,14 +5,18 @@ import type { Seccion } from "@/lib/admin-secciones-types"
 // Esto evita que el Data Cache de Next.js guarde los datos entre requests
 async function supabaseFetch<T>(
   table: string,
-  params: Record<string, string>
+  filters: Record<string, string>,
+  selectCols = "*"
 ): Promise<T[]> {
   const url = new URL(
     `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/${table}`
   )
 
+  // select siempre como primer param
+  url.searchParams.set("select", selectCols)
+
   // Agregar filtros como query params (formato PostgREST)
-  for (const [key, value] of Object.entries(params)) {
+  for (const [key, value] of Object.entries(filters)) {
     url.searchParams.set(key, value)
   }
 
@@ -23,11 +27,13 @@ async function supabaseFetch<T>(
       Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
       "Content-Type": "application/json",
       Accept: "application/json",
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+      Pragma: "no-cache",
     },
   })
 
   if (!res.ok) {
-    console.error(`[public-content] supabaseFetch error ${res.status}:`, await res.text())
+    console.error(`[public-content] supabaseFetch error ${res.status} on ${table}:`, await res.text())
     return []
   }
 
@@ -41,7 +47,6 @@ export async function getBannersForPage(pagina: string): Promise<Banner[]> {
       pagina: `eq.${pagina}`,
       activo: "eq.true",
       order: "orden.asc",
-      select: "*",
     })
     return data
   } catch (err) {
@@ -56,7 +61,6 @@ export async function getSeccionByClave(clave: string): Promise<Seccion | null> 
     const data = await supabaseFetch<Seccion>("secciones", {
       clave: `eq.${clave}`,
       activo: "eq.true",
-      select: "*",
       limit: "1",
     })
     return data[0] ?? null
@@ -73,7 +77,6 @@ export async function getSeccionesForPage(pagina: string): Promise<Seccion[]> {
       pagina: `eq.${pagina}`,
       activo: "eq.true",
       order: "nombre.asc",
-      select: "*",
     })
     return data
   } catch (err) {

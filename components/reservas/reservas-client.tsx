@@ -78,7 +78,7 @@ interface ReservasClientProps {
   bannerImageUrl?: string | null
 }
 
-export default function ReservasClient({ bannerImageUrl }: ReservasClientProps) {
+export function ReservasClient({ bannerImageUrl }: ReservasClientProps) {
   const [selectedTable, setSelectedTable] = useState<TableOption | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedTime, setSelectedTime] = useState<string>("")
@@ -312,7 +312,7 @@ export default function ReservasClient({ bannerImageUrl }: ReservasClientProps) 
   )
 }
 
-export { ReservasClient }
+
 
 function SectionLabel({ number, title }: { number: string; title: string }) {
   return (

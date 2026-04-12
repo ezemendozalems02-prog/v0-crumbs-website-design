@@ -135,7 +135,7 @@ function DeliveryInner({ liveMenu, bannerImageUrl }: Props) {
 
       <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <Image src={heroImage} alt="Delivery CRUMBS" fill className="object-cover" priority unoptimized={heroImage.startsWith("https://hebbkx1anhila5yf")} />
+          <Image src={heroImage} alt="Delivery CRUMBS" fill className="object-cover" priority unoptimized />
           {!bannerImageUrl && <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/70" />}
         </div>
         {!bannerImageUrl && (

@@ -33,6 +33,8 @@ export const PAGINAS_OPCIONES = [
   { value: "cafeteria", label: "Cafetería" },
   { value: "cocina", label: "Cocina" },
   { value: "delivery", label: "Delivery" },
+  { value: "reservas", label: "Reservas" },
+  { value: "trabajar", label: "Trabajar con nosotros" },
   { value: "contacto", label: "Contacto" },
   { value: "nosotros", label: "Nosotros" },
 ]

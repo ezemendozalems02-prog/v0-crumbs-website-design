@@ -26,7 +26,7 @@ export function ReservasHero({ bannerImageUrl }: ReservasHeroProps) {
           fill
           className="object-cover"
           priority
-          unoptimized={bannerImageUrl.startsWith("https://hebbkx1anhila5yf")}
+          unoptimized
         />
       </section>
     )

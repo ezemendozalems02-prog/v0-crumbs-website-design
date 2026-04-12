@@ -65,7 +65,7 @@ export default async function CocinaPage() {
             fill
             className="object-cover"
             priority
-            unoptimized={heroImage.startsWith("https://hebbkx1anhila5yf")}
+            unoptimized
           />
           {!banner?.imagen_url && (
             <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/70" />

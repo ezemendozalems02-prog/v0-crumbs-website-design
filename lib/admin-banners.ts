@@ -4,16 +4,27 @@ import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import type { Banner, BannerInput } from "@/lib/admin-banners-types"
 
+const ALL_PAGES = ["/", "/cafeteria", "/cocina", "/delivery", "/reservas", "/trabajar", "/contacto", "/nosotros"]
+
 const revalidateBannerPages = (pagina?: string) => {
-  // Revalidar layout completo de la página afectada
-  if (pagina === "inicio") revalidatePath("/", "layout")
-  if (pagina === "cafeteria") revalidatePath("/cafeteria", "layout")
-  if (pagina === "cocina") revalidatePath("/cocina", "layout")
-  // Revalidar sin saber la página: revalidar todo
-  if (!pagina) {
-    revalidatePath("/", "layout")
-    revalidatePath("/cafeteria", "layout")
-    revalidatePath("/cocina", "layout")
+  const map: Record<string, string> = {
+    inicio: "/",
+    cafeteria: "/cafeteria",
+    cocina: "/cocina",
+    delivery: "/delivery",
+    reservas: "/reservas",
+    trabajar: "/trabajar",
+    contacto: "/contacto",
+    nosotros: "/nosotros",
+  }
+
+  if (pagina && map[pagina]) {
+    revalidatePath(map[pagina], "layout")
+  } else {
+    // Revalidar todas las páginas si no se especifica
+    for (const path of ALL_PAGES) {
+      revalidatePath(path, "layout")
+    }
   }
   revalidatePath("/admin/banners", "page")
 }
