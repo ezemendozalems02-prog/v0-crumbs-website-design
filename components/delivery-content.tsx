@@ -67,8 +67,10 @@ function ProductCard({ product }: { product: CardItem }) {
   }
   return (
     <div className="group bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
-      <div className="relative aspect-[4/3] overflow-hidden">
-        <Image src={product.image} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+      <div className="relative w-full bg-background">
+        <div className="relative aspect-square sm:aspect-[4/3] overflow-hidden">
+          <Image src={product.image} alt={product.name} fill className="object-cover object-center group-hover:scale-105 transition-transform duration-500" />
+        </div>
         {itemInCart && (
           <div className="absolute top-3 right-3 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded-full">
             {itemInCart.quantity} en carrito
