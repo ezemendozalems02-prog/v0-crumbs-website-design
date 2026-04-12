@@ -119,10 +119,10 @@ export default async function CafeteriaPage() {
         />
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
-            <span className="font-[family-name:var(--font-caveat)] text-xl text-accent">
+            <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-accent">
               Café de especialidad
             </span>
-            <p className="text-foreground/70 mt-4 max-w-2xl mx-auto">
+            <p className="font-[family-name:var(--font-reenie-beanie)] text-foreground/70 mt-4 max-w-2xl mx-auto text-lg">
               Café, algo dulce y esos clasicos que siempre dan ganas
             </p>
           </div>
