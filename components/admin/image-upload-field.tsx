@@ -58,6 +58,7 @@ export function ImageUploadField({ value, onChange, label = 'Imagen del banner' 
         return
       }
 
+      console.log("[v0] ImageUploadField: upload OK, URL:", result.url)
       onChange(result.url)
       setUploadSuccess(true)
       setError(null)

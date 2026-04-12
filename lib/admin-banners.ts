@@ -1,8 +1,16 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import { revalidatePath } from "next/cache"
 import type { Banner, BannerInput } from "@/lib/admin-banners-types"
+
+// Service role client — bypasa RLS para operaciones de admin
+function getServiceClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) throw new Error("Faltan NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY")
+  return createSupabaseClient(url, key, { auth: { persistSession: false } })
+}
 
 const ALL_PAGES = ["/", "/cafeteria", "/cocina", "/delivery", "/reservas", "/trabajar", "/contacto", "/nosotros"]
 
@@ -30,7 +38,7 @@ const revalidateBannerPages = (pagina?: string) => {
 }
 
 export async function getBanners(pagina?: string): Promise<Banner[]> {
-  const supabase = await createClient()
+  const supabase = getServiceClient()
   let query = supabase
     .from("banners")
     .select("*")
@@ -41,14 +49,14 @@ export async function getBanners(pagina?: string): Promise<Banner[]> {
 
   const { data, error } = await query
   if (error) {
-    console.error("[admin-banners] getBanners error:", error)
+    console.error("[admin-banners] getBanners error:", error.message)
     return []
   }
   return data ?? []
 }
 
 export async function getBanner(id: string): Promise<Banner | null> {
-  const supabase = await createClient()
+  const supabase = getServiceClient()
   const { data, error } = await supabase
     .from("banners")
     .select("*")
@@ -59,60 +67,76 @@ export async function getBanner(id: string): Promise<Banner | null> {
 }
 
 export async function createBanner(input: BannerInput): Promise<{ success: boolean; id?: string; error?: string }> {
-  const supabase = await createClient()
+  const supabase = getServiceClient()
+  console.log("[v0] createBanner input imagen_url:", input.imagen_url ?? "(sin imagen)")
   const { data, error } = await supabase
     .from("banners")
     .insert(input)
     .select("id")
     .single()
-  if (error) return { success: false, error: error.message }
+  if (error) {
+    console.error("[v0] createBanner error:", error.message)
+    return { success: false, error: error.message }
+  }
+  console.log("[v0] createBanner success id:", data.id)
   revalidateBannerPages(input.pagina)
   return { success: true, id: data.id }
 }
 
 export async function updateBanner(id: string, input: Partial<BannerInput>): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
-  const banner = await getBanner(id)
-  const { error } = await supabase.from("banners").update(input).eq("id", id)
-  if (error) return { success: false, error: error.message }
-  if (banner) revalidateBannerPages(banner.pagina)
+  const supabase = getServiceClient()
+  console.log("[v0] updateBanner id:", id, "imagen_url:", input.imagen_url ?? "(sin cambio)")
+
+  // Verificar que el banner existe antes de actualizar
+  const existing = await getBanner(id)
+  if (!existing) {
+    console.error("[v0] updateBanner: banner no encontrado con id:", id)
+    return { success: false, error: "Banner no encontrado" }
+  }
+
+  const { data, error } = await supabase
+    .from("banners")
+    .update(input)
+    .eq("id", id)
+    .select("id, imagen_url")
+
+  if (error) {
+    console.error("[v0] updateBanner error:", error.message)
+    return { success: false, error: error.message }
+  }
+
+  if (!data || data.length === 0) {
+    console.error("[v0] updateBanner: 0 filas afectadas para id:", id)
+    return { success: false, error: "No se actualizó ningún registro. Verificar permisos o ID." }
+  }
+
+  console.log("[v0] updateBanner success. Nueva imagen_url en DB:", data[0]?.imagen_url ?? "(nulo)")
+  revalidateBannerPages(existing.pagina)
   return { success: true }
 }
 
 export async function toggleBannerActivo(id: string, activo: boolean): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
-  
-  // Obtener el banner para saber su página
+  const supabase = getServiceClient()
   const banner = await getBanner(id)
-  
   const { error } = await supabase.from("banners").update({ activo }).eq("id", id)
   if (error) return { success: false, error: error.message }
-  
-  // Revalidar la página del banner
   if (banner) revalidateBannerPages(banner.pagina)
-  
   return { success: true }
 }
 
 export async function updateBannerOrden(id: string, orden: number): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
+  const supabase = getServiceClient()
   const { error } = await supabase.from("banners").update({ orden }).eq("id", id)
   if (error) return { success: false, error: error.message }
   return { success: true }
 }
 
 export async function deleteBanner(id: string): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
-  
-  // Obtener el banner para saber su página antes de eliminarlo
+  const supabase = getServiceClient()
   const banner = await getBanner(id)
-  
   const { error } = await supabase.from("banners").delete().eq("id", id)
   if (error) return { success: false, error: error.message }
-  
-  // Revalidar la página del banner
   if (banner) revalidateBannerPages(banner.pagina)
-  
   return { success: true }
 }
 

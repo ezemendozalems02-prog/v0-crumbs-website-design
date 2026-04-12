@@ -81,9 +81,17 @@ export function BannerFormModal({ banner, onClose, onSaved }: BannerFormModalPro
         boton_link: form.boton_link?.trim() || undefined,
       }
 
+      console.log("[v0] BannerFormModal submit", {
+        op: banner ? "update" : "create",
+        id: banner?.id,
+        imagen_url: input.imagen_url ?? "(sin imagen)",
+      })
+
       const result = banner
         ? await updateBanner(banner.id, input)
         : await createBanner(input)
+
+      console.log("[v0] BannerFormModal result:", result)
 
       if (!result.success) {
         setError(result.error ?? 'Error al guardar')
