@@ -18,7 +18,7 @@ function useInView(threshold = 0.1) {
   return { ref, isInView }
 }
 
-function ProductoRow({ producto }: { producto: Producto }) {
+function ProductoRow({ producto, showTickers = false }: { producto: Producto; showTickers?: boolean }) {
   const hasVariantes = producto.variantes && producto.variantes.length > 0
   return (
     <div className="group flex items-start justify-between gap-4 py-3 hover:bg-background/50 rounded-lg px-3 -mx-3 transition-colors duration-300">
@@ -26,14 +26,14 @@ function ProductoRow({ producto }: { producto: Producto }) {
         <div className="flex items-baseline gap-2">
           <span className="font-medium text-foreground group-hover:text-primary transition-colors flex items-center gap-1">
             {producto.nombre}
-            {producto.destacado && <Star className="w-3 h-3 text-amber-500 fill-amber-500 inline-block" />}
+            {showTickers && producto.destacado && <Star className="w-3 h-3 text-amber-500 fill-amber-500 inline-block" />}
           </span>
           <span className="flex-1 border-b border-dotted border-foreground/20" />
         </div>
         {producto.descripcion && (
           <p className="text-sm text-foreground/60 mt-1">{producto.descripcion}</p>
         )}
-        {producto.etiquetas && producto.etiquetas.length > 0 && (
+        {showTickers && producto.etiquetas && producto.etiquetas.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
             {producto.etiquetas.map((e) => (
               <span key={e} className="text-xs bg-primary/8 text-primary/80 px-2 py-0.5 rounded-full">{e}</span>
@@ -66,6 +66,8 @@ interface Props {
 
 export function MenuCategorySection({ category, index }: Props) {
   const { ref, isInView } = useInView()
+  // Mostrar tickers solo si la categoría es "Figuras o Animales"
+  const showTickers = category.nombre === "Figuras o Animales"
   return (
     <div
       ref={ref}
@@ -77,7 +79,7 @@ export function MenuCategorySection({ category, index }: Props) {
       </h3>
       <div className="space-y-1">
         {category.productos.map((producto) => (
-          <ProductoRow key={producto.id} producto={producto} />
+          <ProductoRow key={producto.id} producto={producto} showTickers={showTickers} />
         ))}
       </div>
     </div>
