@@ -28,23 +28,20 @@ export function TableSelector({ options, selected, onSelect, error }: TableSelec
               }`}
             >
               {/* Image */}
-              <div className="relative aspect-[4/3] overflow-hidden">
+              <div className={`relative aspect-[4/3] overflow-hidden flex items-center justify-center transition-colors duration-300 ${
+                isActive ? "bg-primary/10" : "bg-muted/60 group-hover:bg-muted"
+              }`}>
                 <Image
                   src={opt.image}
                   alt={opt.label}
                   fill
-                  className={`object-cover transition-transform duration-500 ${
-                    isActive ? "scale-105" : "group-hover:scale-105"
-                  }`}
+                  className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
                   sizes="(max-width: 768px) 50vw, 25vw"
                 />
-                <div className={`absolute inset-0 transition-opacity duration-300 ${
-                  isActive ? "bg-primary/40" : "bg-primary/20 group-hover:bg-primary/30"
-                }`} />
 
                 {/* Selected check */}
                 {isActive && (
-                  <div className="absolute top-3 right-3 w-7 h-7 bg-primary rounded-full flex items-center justify-center shadow-md animate-scale-in">
+                  <div className="absolute top-3 right-3 w-7 h-7 bg-primary rounded-full flex items-center justify-center shadow-md animate-scale-in z-10">
                     <Check className="w-4 h-4 text-primary-foreground" />
                   </div>
                 )}

@@ -32,7 +32,7 @@ export const TABLE_OPTIONS: TableOption[] = [
     capacity: "Hasta 2 personas",
     maxPersons: 2,
     minPersons: 1,
-    image: "/images/mesa-2.jpg",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones%20liugares%20mesas-01-3UtCwmw52ozkytOTYJljzJ7q9gqXxc.jpg",
     tipoMesa: "mesa_2",
   },
   {
@@ -42,7 +42,7 @@ export const TABLE_OPTIONS: TableOption[] = [
     capacity: "Hasta 4 personas",
     maxPersons: 4,
     minPersons: 3,
-    image: "/images/mesa-4.jpg",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones%20liugares%20mesas-02-4IrwZoL5CtkpwtpeAnsBiP8RJMMdV9.jpg",
     tipoMesa: "mesa_4",
   },
   {
@@ -52,7 +52,7 @@ export const TABLE_OPTIONS: TableOption[] = [
     capacity: "Hasta 6 personas",
     maxPersons: 6,
     minPersons: 5,
-    image: "/images/mesa-6.jpg",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones%20liugares%20mesas-03-R8pkAxVyRFnD1A54ylByC16BmGHS1U.jpg",
     tipoMesa: "mesa_6",
   },
   {
@@ -62,7 +62,7 @@ export const TABLE_OPTIONS: TableOption[] = [
     capacity: "De 8 a 15 personas",
     maxPersons: 15,
     minPersons: 8,
-    image: "/images/mesa-8.jpg",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones%20liugares%20mesas-04-F6U4UAy7y7GIeEDSWvLYyizS4YNmV3.jpg",
     tipoMesa: "mesa_8_plus",
   },
 ]

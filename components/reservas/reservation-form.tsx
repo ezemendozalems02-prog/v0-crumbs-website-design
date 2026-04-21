@@ -39,14 +39,6 @@ export function ReservationForm({
   const maxPersonas = table?.maxPersons ?? 15
   const minPersonas = table?.minPersons ?? 1
 
-  // Get the appropriate table image based on number of people
-  const getTableImage = (num: number) => {
-    if (num <= 2) return "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones%20liugares%20mesas-01-3UtCwmw52ozkytOTYJljzJ7q9gqXxc.jpg"
-    if (num <= 4) return "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones%20liugares%20mesas-02-4IrwZoL5CtkpwtpeAnsBiP8RJMMdV9.jpg"
-    if (num <= 6) return "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones%20liugares%20mesas-03-R8pkAxVyRFnD1A54ylByC16BmGHS1U.jpg"
-    return "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones%20liugares%20mesas-04-F6U4UAy7y7GIeEDSWvLYyizS4YNmV3.jpg"
-  }
-
   return (
     <div className="bg-card rounded-2xl p-6 md:p-8 border border-primary/10 space-y-6">
 
@@ -71,18 +63,13 @@ export function ReservationForm({
               <button
                 key={n}
                 onClick={() => onPersonasChange(n)}
-                className={`relative p-3 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-1.5 ${
+                className={`relative px-3 py-3 rounded-xl border-2 transition-all duration-200 flex items-center justify-center min-h-[44px] ${
                   personas === n
-                    ? "border-primary bg-primary/10 scale-105"
-                    : "border-primary/20 bg-background hover:border-primary/50"
+                    ? "border-primary bg-primary/10 scale-105 text-primary"
+                    : "border-primary/20 bg-background hover:border-primary/50 text-foreground"
                 }`}
               >
-                <img
-                  src={getTableImage(n)}
-                  alt={`Mesa para ${n} personas`}
-                  className="w-12 h-12 object-contain"
-                />
-                <span className="text-xs font-semibold text-foreground">{n}</span>
+                <span className="text-sm font-semibold">{n}</span>
               </button>
             ))}
           </div>
