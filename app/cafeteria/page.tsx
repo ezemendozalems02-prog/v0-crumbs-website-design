@@ -103,13 +103,7 @@ export default async function CafeteriaPage() {
           size="sm"
           opacity={0.07}
         />
-        <MenuSticker
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-22-TMOr0qRmUyNXopNIF2q1sgo15UaU1e.png"
-          alt="fresco frutal sin apuro"
-          position="top-right"
-          size="md"
-          opacity={0.08}
-        />
+
         <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-cafeter%C3%ADa-24-PVHDAo3Pz9lG3eTBk1uF98fKkdQphf.png"
           alt="flecha decorativa"

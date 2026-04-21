@@ -100,20 +100,7 @@ export default async function CocinaPage() {
           size="md"
           opacity={0.08}
         />
-        <MenuSticker
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-02-Fqq4Ow2vw7NDuNpv9l7UY8aUz7IfAD.png"
-          alt="hechos con pan casero y paciencia"
-          position="top-right-offset"
-          size="sm"
-          opacity={0.07}
-        />
-        <MenuSticker
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-03-8DOaGHEELhaexA4fFi8jgwGxqUB7eh.png"
-          alt="adictiva"
-          position="middle-right"
-          size="sm"
-          opacity={0.08}
-        />
+
         <MenuSticker
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-09-g0Rbfzc6mHsQ7f76uK4msMKGg36AuG.png"
           alt="gato CRUMBS"
@@ -128,13 +115,7 @@ export default async function CocinaPage() {
           size="sm"
           opacity={0.07}
         />
-        <MenuSticker
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ilustraciones-almuerzo%20y%20cena-10-rG54BvIWcqwJuxC68UY4xXfP0ZqyOn.png"
-          alt="consultá por otras opciones"
-          position="bottom-right"
-          size="sm"
-          opacity={0.08}
-        />
+
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
             <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-accent">{seccion?.subtitulo || "Cocina de estación"}</span>
