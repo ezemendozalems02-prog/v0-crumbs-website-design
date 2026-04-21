@@ -25,6 +25,8 @@ type Toast = { id: number; message: string; type: "success" | "error" }
 export default function AdminReservasPage() {
   // Filtros
   const [fecha, setFecha] = useState(today())
+  const [fechaDesde, setFechaDesde] = useState("")
+  const [fechaHasta, setFechaHasta] = useState("")
   const [busqueda, setBusqueda] = useState("")
   const [horarioFiltro, setHorarioFiltro] = useState("")
 
@@ -56,11 +58,20 @@ export default function AdminReservasPage() {
   }
 
   const loadData = useCallback(async () => {
-    console.log("[ADMIN UI] Iniciando loadData con filtros:", { fecha, horarioFiltro, busqueda })
+    console.log("[ADMIN UI] Iniciando loadData con filtros:", { fecha, horarioFiltro, busqueda, fechaDesde, fechaHasta })
     setIsRefreshing(true)
     try {
       // Construir filtros dinámicos
-      const filtros: FiltrosAdmin = { fecha }
+      const filtros: FiltrosAdmin = {}
+      
+      // Si hay rango de fechas, usarlo; si no, usar fecha individual
+      if (fechaDesde && fechaHasta) {
+        filtros.fechaDesde = fechaDesde
+        filtros.fechaHasta = fechaHasta
+      } else {
+        filtros.fecha = fecha
+      }
+      
       if (horarioFiltro) filtros.horario = horarioFiltro
 
       // Si hay búsqueda, intenta primero por nombre, si no encuentra por teléfono
@@ -75,8 +86,8 @@ export default function AdminReservasPage() {
 
       const [r, m, d, u] = await Promise.all([
         getReservasAdmin(filtros),
-        getMetricasAdmin(fecha),
-        getDisponibilidadAdmin(fecha),
+        getMetricasAdmin(fechaDesde && fechaHasta ? fechaDesde : fecha),
+        getDisponibilidadAdmin(fechaDesde && fechaHasta ? fechaDesde : fecha),
         getUltimasReservas(5),
       ])
 
@@ -92,7 +103,7 @@ export default function AdminReservasPage() {
     } finally {
       setIsRefreshing(false)
     }
-  }, [fecha, horarioFiltro, busqueda, addToast])
+  }, [fecha, horarioFiltro, busqueda, fechaDesde, fechaHasta, addToast])
 
   // Initial load on mount ONLY
   useEffect(() => {
@@ -104,7 +115,7 @@ export default function AdminReservasPage() {
   useEffect(() => {
     console.log("[ADMIN UI] Filtros cambiaron, recargando...")
     loadData()
-  }, [fecha, horarioFiltro, busqueda]) // Nota: NO incluir loadData aquí
+  }, [fecha, horarioFiltro, busqueda, fechaDesde, fechaHasta]) // Nota: NO incluir loadData aquí
 
   const handleEliminar = async (id: string) => {
     if (!confirm("¿Eliminar esta reserva?")) return
@@ -226,7 +237,44 @@ export default function AdminReservasPage() {
           {/* Otros filtros */}
           <div className="lg:col-span-3 bg-card rounded-2xl border border-border/40 p-6">
             <h2 className="text-sm font-semibold text-foreground mb-4">Filtros adicionales</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Rango de fechas - Desde */}
+              <div>
+                <label className="text-xs font-medium text-foreground/60 block mb-2">Desde (opcional)</label>
+                <input
+                  type="date"
+                  value={fechaDesde}
+                  onChange={(e) => setFechaDesde(e.target.value)}
+                  className="w-full px-3 py-2 bg-background border border-border/40 rounded-lg text-sm focus:outline-none focus:border-primary/60"
+                />
+              </div>
+
+              {/* Rango de fechas - Hasta */}
+              <div>
+                <label className="text-xs font-medium text-foreground/60 block mb-2">Hasta (opcional)</label>
+                <input
+                  type="date"
+                  value={fechaHasta}
+                  onChange={(e) => setFechaHasta(e.target.value)}
+                  className="w-full px-3 py-2 bg-background border border-border/40 rounded-lg text-sm focus:outline-none focus:border-primary/60"
+                />
+              </div>
+
+              {/* Limpiar rango */}
+              {(fechaDesde || fechaHasta) && (
+                <div className="flex items-end">
+                  <button
+                    onClick={() => {
+                      setFechaDesde("")
+                      setFechaHasta("")
+                    }}
+                    className="w-full px-3 py-2 bg-red-50 text-red-600 text-sm font-medium rounded-lg hover:bg-red-100 transition-colors"
+                  >
+                    Limpiar rango
+                  </button>
+                </div>
+              )}
+
               {/* Horario */}
               <div>
                 <label className="text-xs font-medium text-foreground/60 block mb-2">Horario</label>
@@ -318,7 +366,21 @@ export default function AdminReservasPage() {
             {/* Reservas filtradas */}
             <div className="bg-card rounded-2xl border border-border/40 p-6">
               <h2 className="text-lg font-semibold text-foreground mb-4">
-                Reservas del {fechaFormato}
+                {fechaDesde && fechaHasta ? (
+                  <>
+                    Reservas del {new Date(fechaDesde + "T12:00:00").toLocaleDateString("es-AR", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                    })} al {new Date(fechaHasta + "T12:00:00").toLocaleDateString("es-AR", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  </>
+                ) : (
+                  <>Reservas del {fechaFormato}</>
+                )}
                 {busqueda && <span className="text-sm font-normal text-foreground/60"> • "{busqueda}"</span>}
                 {horarioFiltro && <span className="text-sm font-normal text-foreground/60"> • {horarioFiltro}</span>}
               </h2>

@@ -20,6 +20,8 @@ export interface Reserva {
 
 export interface FiltrosAdmin {
   fecha?: string
+  fechaDesde?: string
+  fechaHasta?: string
   nombre?: string
   telefono?: string
   horario?: string
@@ -118,9 +120,13 @@ export async function getReservasAdmin(filtros: FiltrosAdmin = {}): Promise<Rese
     .order("horario", { ascending: true })
     .order("created_at", { ascending: false })
 
-  if (filtros.fecha) {
+  // Filtro de fecha: puede ser fecha individual o rango
+  if (filtros.fechaDesde && filtros.fechaHasta) {
+    query = query.gte("fecha_reserva", filtros.fechaDesde).lte("fecha_reserva", filtros.fechaHasta)
+  } else if (filtros.fecha) {
     query = query.eq("fecha_reserva", filtros.fecha)
   }
+  
   if (filtros.horario) {
     query = query.eq("horario", filtros.horario)
   }
