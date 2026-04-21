@@ -28,7 +28,6 @@ export default function AdminLoginPage() {
       router.push('/admin/reservas')
     } catch (err) {
       setError('Error al iniciar sesión')
-      console.error('[v0] Login error:', err)
       setIsLoading(false)
     }
   }
