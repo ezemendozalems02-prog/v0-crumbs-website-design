@@ -10,7 +10,16 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'hebbkx1anhila5yf.public.blob.vercel-storage.com',
       },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+      },
     ],
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '15mb',
+    },
   },
 }
 
