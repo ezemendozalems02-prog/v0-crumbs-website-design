@@ -10,8 +10,44 @@ interface ImageUploadFieldProps {
   label?: string
 }
 
+// Comprime la imagen en el canvas del navegador antes de subirla.
+// Esto evita el límite de 4MB de Next.js en route handlers.
+function compressImage(file: File, maxWidthPx = 1800, quality = 0.85): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const img = new window.Image()
+    img.crossOrigin = 'anonymous'
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      let { width, height } = img
+      if (width > maxWidthPx) {
+        height = Math.round((height * maxWidthPx) / width)
+        width = maxWidthPx
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return reject(new Error('No se pudo crear canvas'))
+      ctx.drawImage(img, 0, 0, width, height)
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return reject(new Error('Error al comprimir imagen'))
+          const compressed = new File([blob], file.name, { type: 'image/jpeg' })
+          resolve(compressed)
+        },
+        'image/jpeg',
+        quality
+      )
+    }
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Error al cargar imagen')) }
+    img.src = url
+  })
+}
+
 export function ImageUploadField({ value, onChange, label = 'Imagen del banner' }: ImageUploadFieldProps) {
   const [isUploading, setIsUploading] = useState(false)
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -22,14 +58,13 @@ export function ImageUploadField({ value, onChange, label = 'Imagen del banner' 
 
     // Validar tipo
     if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
-      setError(`Tipo de archivo no permitido. Use JPG, PNG o WebP.`)
+      setError('Tipo de archivo no permitido. Use JPG, PNG o WebP.')
       return
     }
 
-    // Validar tamaño
-    if (file.size > 10 * 1024 * 1024) {
-      const sizeMB = (file.size / (1024 * 1024)).toFixed(2)
-      setError(`Archivo demasiado grande: ${sizeMB}MB (máximo 10MB)`)
+    // Validar tamaño original (máx 30MB antes de comprimir)
+    if (file.size > 30 * 1024 * 1024) {
+      setError('Archivo demasiado grande (máximo 30MB)')
       return
     }
 
@@ -37,37 +72,45 @@ export function ImageUploadField({ value, onChange, label = 'Imagen del banner' 
     setUploadSuccess(false)
     setIsUploading(true)
 
-    const formData = new FormData()
-    formData.append('file', file)
-
     try {
+      // Comprimir en el navegador antes de enviar al servidor
+      setUploadStatus('Procesando imagen...')
+      const compressed = await compressImage(file)
+
+      setUploadStatus('Subiendo imagen...')
+      const formData = new FormData()
+      formData.append('file', compressed)
+
       const response = await fetch('/api/upload/image', {
         method: 'POST',
         body: formData,
       })
 
+      // Verificar que la respuesta sea JSON antes de parsear
+      const contentType = response.headers.get('content-type') || ''
+      if (!contentType.includes('application/json')) {
+        const text = await response.text()
+        setError(`Error del servidor: ${text.slice(0, 100)}`)
+        return
+      }
+
       const result = await response.json()
 
-      if (!response.ok) {
+      if (!response.ok || !result.success) {
         setError(result.error || `Error HTTP ${response.status}`)
         return
       }
 
-      if (!result.url) {
-        setError('No se recibió URL de la imagen del servidor')
-        return
-      }
-
-      console.log("[v0] ImageUploadField: upload OK, URL:", result.url)
       onChange(result.url)
       setUploadSuccess(true)
       setError(null)
       if (inputRef.current) inputRef.current.value = ''
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err)
-      setError(`Error de conexión: ${errorMsg}`)
+      setError(`Error al subir: ${errorMsg}`)
     } finally {
       setIsUploading(false)
+      setUploadStatus(null)
     }
   }
 
@@ -118,7 +161,7 @@ export function ImageUploadField({ value, onChange, label = 'Imagen del banner' 
             {isUploading ? (
               <>
                 <Loader2 className="w-8 h-8 text-primary mb-2 animate-spin" />
-                <p className="text-sm text-foreground/60">Subiendo imagen...</p>
+                <p className="text-sm text-foreground/60">{uploadStatus ?? 'Procesando...'}</p>
               </>
             ) : (
               <>
