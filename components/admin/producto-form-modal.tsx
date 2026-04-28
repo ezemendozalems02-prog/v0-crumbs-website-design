@@ -151,6 +151,7 @@ export function ProductoFormModal({ producto, categorias, onClose, onSaved }: Pr
                   onChange={(e) => setPrecio(e.target.value)}
                   placeholder="0"
                   min="0"
+                  step="0.01"
                   className="w-full pl-7 pr-4 py-3 bg-background border border-border/40 rounded-xl text-sm text-foreground placeholder:text-foreground/30 outline-none focus:border-primary/60 transition-colors"
                 />
               </div>
@@ -241,6 +242,7 @@ export function ProductoFormModal({ producto, categorias, onClose, onSaved }: Pr
                       value={v.precio}
                       onChange={(e) => updateVariante(i, "precio", Number(e.target.value))}
                       min="0"
+                      step="0.01"
                       className="w-full pl-5 pr-2 py-1.5 bg-card border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary/50"
                     />
                   </div>
