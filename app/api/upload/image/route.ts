@@ -6,15 +6,6 @@ import { NextRequest, NextResponse } from 'next/server'
 export const maxDuration = 30
 export const dynamic = 'force-dynamic'
 
-// Necesario para que Next.js permita bodies grandes en esta ruta
-export const config = {
-  api: {
-    bodyParser: false,
-    responseLimit: false,
-    sizeLimit: '15mb',
-  },
-}
-
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
 const MAX_SIZE = 10 * 1024 * 1024 // 10MB
 const BUCKET = 'banners'
