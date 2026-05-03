@@ -99,7 +99,7 @@ export function NosotrosClient({ bannerImageUrl }: NosotrosClientProps) {
                 donde siempre haya algo rico esperándote.
               </p>
               <p>
-                En estos 9 años, se fue convirtiendo en ese plan al que volvés para arrancar el día con
+                En estos 10 años, se fue convirtiendo en ese plan al que volvés para arrancar el día con
                 un buen café, cortar al mediodía, estirar la tarde o cerrar la noche con algo para comer
                 y un buen trago.
               </p>
