@@ -73,7 +73,7 @@ export function Footer() {
               <div className="space-y-2">
                 <div>
                   <p className="text-sm font-medium text-primary-foreground/90">Cafetería</p>
-                  <p className="text-sm text-primary-foreground/70">9 a 20 hs</p>
+                  <p className="text-sm text-primary-foreground/70">8:30 a 20 hs</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-primary-foreground/90">Cocina</p>
