@@ -62,8 +62,6 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
     e.preventDefault()
     setError(null)
     if (!form.nombre.trim()) { setError('El nombre es obligatorio'); return }
-    if (!form.clave.trim()) { setError('La clave es obligatoria'); return }
-    if (!/^[a-z0-9_]+$/.test(form.clave)) { setError('La clave solo puede tener letras minúsculas, números y guiones bajos'); return }
 
     startTransition(async () => {
       const input: SeccionInput = {
@@ -120,23 +118,6 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
                   placeholder="Ej: Hero Principal"
                   className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">
-                  Clave única <span className="text-destructive">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.clave}
-                  onChange={e => set('clave', e.target.value)}
-                  placeholder="Ej: hero_principal"
-                  disabled={!!seccion}
-                  className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50 disabled:cursor-not-allowed font-mono"
-                />
-                <p className="text-xs text-foreground/50 mt-1">
-                  {seccion ? 'La clave no puede modificarse una vez creada' : 'Solo letras minúsculas, números y guiones bajos'}
-                </p>
               </div>
 
               <div>
