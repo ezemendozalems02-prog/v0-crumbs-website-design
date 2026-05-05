@@ -1,8 +1,18 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Instagram, MapPin, Clock } from "lucide-react"
+import { getConfiguracion } from "@/lib/admin-configuracion"
 
-export function Footer() {
+export async function Footer() {
+  const config = await getConfiguracion()
+
+  const horarioCafeteria = config["horario_cafeteria"] ?? "8:30 a 20 hs"
+  const horarioCocina = config["horario_cocina"] ?? "12 a 15:30 hs / 20 a 23:30 hs"
+  const direccion = config["direccion"] ?? "Ciudad Jardín, Buenos Aires, Argentina"
+  const instagram = config["instagram"] ?? "@crumbs"
+  const instagramHandle = instagram.startsWith("@") ? instagram : `@${instagram}`
+  const instagramUrl = `https://instagram.com/${instagramHandle.replace("@", "")}`
+
   return (
     <footer className="bg-primary text-primary-foreground">
       <div className="max-w-7xl mx-auto px-6 py-16">
@@ -59,8 +69,7 @@ export function Footer() {
             <div className="flex items-start gap-3">
               <MapPin className="w-5 h-5 mt-0.5 text-accent" />
               <div>
-                <p className="text-sm text-primary-foreground/90">Ciudad Jardín</p>
-                <p className="text-sm text-primary-foreground/70">Buenos Aires, Argentina</p>
+                <p className="text-sm text-primary-foreground/90">{direccion}</p>
               </div>
             </div>
           </div>
@@ -73,11 +82,11 @@ export function Footer() {
               <div className="space-y-2">
                 <div>
                   <p className="text-sm font-medium text-primary-foreground/90">Cafetería</p>
-                  <p className="text-sm text-primary-foreground/70">8:30 a 20 hs</p>
+                  <p className="text-sm text-primary-foreground/70">{horarioCafeteria}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-primary-foreground/90">Cocina</p>
-                  <p className="text-sm text-primary-foreground/70">12 a 15:30 hs / 20 a 23:30 hs</p>
+                  <p className="text-sm text-primary-foreground/70">{horarioCocina}</p>
                 </div>
               </div>
             </div>
@@ -90,13 +99,13 @@ export function Footer() {
             © {new Date().getFullYear()} CRUMBS. Todos los derechos reservados.
           </p>
           <a
-            href="https://instagram.com/crumbs"
+            href={instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
           >
             <Instagram className="w-5 h-5" />
-            @crumbs
+            {instagramHandle}
           </a>
         </div>
       </div>

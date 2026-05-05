@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, UtensilsCrossed, BookOpen, Tag, CalendarCheck, Briefcase, Grid3x3, Image as ImageIcon, LayoutTemplate } from "lucide-react"
+import { LayoutDashboard, UtensilsCrossed, BookOpen, Tag, CalendarCheck, Briefcase, Grid3x3, Image as ImageIcon, LayoutTemplate, Settings } from "lucide-react"
 import { AdminLogoutButton } from "@/components/admin/logout-button"
 
 const navItems = [
@@ -14,6 +14,7 @@ const navItems = [
   { href: "/admin/postulaciones",label: "Propuestas",         icon: Briefcase },
   { href: "/admin/banners",      label: "Banners",            icon: ImageIcon },
   { href: "/admin/secciones",    label: "Secciones",          icon: LayoutTemplate },
+  { href: "/admin/configuracion",label: "Configuración",      icon: Settings },
 ]
 
 export function AdminSidebar() {
