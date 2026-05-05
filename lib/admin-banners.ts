@@ -68,31 +68,21 @@ export async function getBanner(id: string): Promise<Banner | null> {
 
 export async function createBanner(input: BannerInput): Promise<{ success: boolean; id?: string; error?: string }> {
   const supabase = getServiceClient()
-  console.log("[v0] createBanner input imagen_url:", input.imagen_url ?? "(sin imagen)")
   const { data, error } = await supabase
     .from("banners")
     .insert(input)
     .select("id")
     .single()
-  if (error) {
-    console.error("[v0] createBanner error:", error.message)
-    return { success: false, error: error.message }
-  }
-  console.log("[v0] createBanner success id:", data.id)
+  if (error) return { success: false, error: error.message }
   revalidateBannerPages(input.pagina)
   return { success: true, id: data.id }
 }
 
 export async function updateBanner(id: string, input: Partial<BannerInput>): Promise<{ success: boolean; error?: string }> {
   const supabase = getServiceClient()
-  console.log("[v0] updateBanner id:", id, "imagen_url:", input.imagen_url ?? "(sin cambio)")
 
-  // Verificar que el banner existe antes de actualizar
   const existing = await getBanner(id)
-  if (!existing) {
-    console.error("[v0] updateBanner: banner no encontrado con id:", id)
-    return { success: false, error: "Banner no encontrado" }
-  }
+  if (!existing) return { success: false, error: "Banner no encontrado" }
 
   const { data, error } = await supabase
     .from("banners")
@@ -100,17 +90,12 @@ export async function updateBanner(id: string, input: Partial<BannerInput>): Pro
     .eq("id", id)
     .select("id, imagen_url")
 
-  if (error) {
-    console.error("[v0] updateBanner error:", error.message)
-    return { success: false, error: error.message }
-  }
+  if (error) return { success: false, error: error.message }
 
   if (!data || data.length === 0) {
-    console.error("[v0] updateBanner: 0 filas afectadas para id:", id)
     return { success: false, error: "No se actualizó ningún registro. Verificar permisos o ID." }
   }
 
-  console.log("[v0] updateBanner success. Nueva imagen_url en DB:", data[0]?.imagen_url ?? "(nulo)")
   revalidateBannerPages(existing.pagina)
   return { success: true }
 }

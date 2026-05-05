@@ -1,6 +1,13 @@
 "use server"
 
+import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
+
+const RUTAS_MENU = ["/", "/cafeteria", "/cocina", "/delivery", "/admin/productos", "/admin/categorias"]
+
+function revalidarMenu() {
+  for (const ruta of RUTAS_MENU) revalidatePath(ruta, "layout")
+}
 
 export type Categoria = {
   id: string
@@ -80,6 +87,7 @@ export async function toggleCategoriaActiva(id: string, activa: boolean): Promis
   const supabase = await createClient()
   const { error } = await supabase.from("categorias").update({ activa }).eq("id", id)
   if (error) return { success: false, error: error.message }
+  revalidarMenu()
   return { success: true }
 }
 
@@ -87,6 +95,7 @@ export async function deleteCategoria(id: string): Promise<{ success: boolean; e
   const supabase = await createClient()
   const { error } = await supabase.from("categorias").delete().eq("id", id)
   if (error) return { success: false, error: error.message }
+  revalidarMenu()
   return { success: true }
 }
 
@@ -140,6 +149,7 @@ export async function createProducto(input: ProductoInput, variantes: VarianteIn
     const { error: vErr } = await supabase.from("producto_variantes").insert(vars)
     if (vErr) return { success: false, error: vErr.message }
   }
+  revalidarMenu()
   return { success: true, id: data.id }
 }
 
@@ -155,6 +165,7 @@ export async function updateProducto(id: string, input: Partial<ProductoInput>, 
     const { error: vErr } = await supabase.from("producto_variantes").insert(vars)
     if (vErr) return { success: false, error: vErr.message }
   }
+  revalidarMenu()
   return { success: true }
 }
 
@@ -162,6 +173,7 @@ export async function toggleProductoDisponible(id: string, disponible: boolean):
   const supabase = await createClient()
   const { error } = await supabase.from("productos").update({ disponible }).eq("id", id)
   if (error) return { success: false, error: error.message }
+  revalidarMenu()
   return { success: true }
 }
 
@@ -169,6 +181,7 @@ export async function deleteProducto(id: string): Promise<{ success: boolean; er
   const supabase = await createClient()
   const { error } = await supabase.from("productos").delete().eq("id", id)
   if (error) return { success: false, error: error.message }
+  revalidarMenu()
   return { success: true }
 }
 

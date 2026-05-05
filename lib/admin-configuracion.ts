@@ -60,9 +60,10 @@ export async function updateConfiguracionBulk(
     return { success: false, error: failed.error.message }
   }
 
-  // Revalidar todas las páginas públicas que consumen configuración
-  revalidatePath("/", "layout")
-  revalidatePath("/contacto")
+  // Revalidar todas las páginas del sitio ya que el footer con horarios está en todas
+  for (const ruta of ["/", "/cafeteria", "/cocina", "/delivery", "/nosotros", "/reservas", "/contacto"]) {
+    revalidatePath(ruta, "layout")
+  }
 
   return { success: true }
 }

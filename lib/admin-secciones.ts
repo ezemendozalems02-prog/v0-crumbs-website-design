@@ -1,7 +1,17 @@
 "use server"
 
+import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
 import type { Seccion, SeccionInput } from "@/lib/admin-secciones-types"
+
+// Páginas públicas que usan secciones — se invalidan tras cada cambio
+const RUTAS_PUBLICAS = ["/", "/cafeteria", "/cocina", "/delivery", "/nosotros", "/reservas", "/admin/secciones"]
+
+function revalidarTodo() {
+  for (const ruta of RUTAS_PUBLICAS) {
+    revalidatePath(ruta)
+  }
+}
 
 export async function getSecciones(pagina?: string): Promise<Seccion[]> {
   const supabase = await createClient()
@@ -40,6 +50,7 @@ export async function createSeccion(input: SeccionInput): Promise<{ success: boo
     .select("id")
     .single()
   if (error) return { success: false, error: error.message }
+  revalidarTodo()
   return { success: true, id: data.id }
 }
 
@@ -47,6 +58,7 @@ export async function updateSeccion(id: string, input: Partial<SeccionInput>): P
   const supabase = await createClient()
   const { error } = await supabase.from("secciones").update(input).eq("id", id)
   if (error) return { success: false, error: error.message }
+  revalidarTodo()
   return { success: true }
 }
 
@@ -54,6 +66,7 @@ export async function toggleSeccionActiva(id: string, activo: boolean): Promise<
   const supabase = await createClient()
   const { error } = await supabase.from("secciones").update({ activo }).eq("id", id)
   if (error) return { success: false, error: error.message }
+  revalidarTodo()
   return { success: true }
 }
 
@@ -61,5 +74,6 @@ export async function deleteSeccion(id: string): Promise<{ success: boolean; err
   const supabase = await createClient()
   const { error } = await supabase.from("secciones").delete().eq("id", id)
   if (error) return { success: false, error: error.message }
+  revalidarTodo()
   return { success: true }
 }
