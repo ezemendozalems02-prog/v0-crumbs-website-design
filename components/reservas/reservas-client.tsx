@@ -1,9 +1,6 @@
 "use client"
 
 import { useState, useEffect, useTransition } from "react"
-import { Navigation } from "@/components/navigation"
-import { Footer } from "@/components/footer"
-import { WhatsAppButton } from "@/components/whatsapp-button"
 import { ReservasHero } from "@/components/reservas/hero"
 import { TableSelector } from "@/components/reservas/table-selector"
 import { DateSelector } from "@/components/reservas/date-selector"
@@ -191,9 +188,7 @@ export function ReservasClient({ bannerImageUrl }: ReservasClientProps) {
     personas >= 1 && nombre.trim() && telefono.trim() && tolerancia
 
   return (
-      <main className="min-h-screen bg-background page-content">
-      <Navigation />
-
+    <div className="bg-background">
       <ReservasHero bannerImageUrl={bannerImageUrl} />
 
       <div className="max-w-4xl mx-auto px-6 pb-24 space-y-16">
@@ -306,9 +301,7 @@ export function ReservasClient({ bannerImageUrl }: ReservasClientProps) {
         )}
       </div>
 
-      <Footer />
-      <WhatsAppButton />
-    </main>
+    </div>
   )
 }
 

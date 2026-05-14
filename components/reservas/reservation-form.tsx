@@ -1,7 +1,7 @@
 "use client"
 
 import { Users, User, Phone, Mail, FileText, Clock } from "lucide-react"
-import type { TableOption } from "@/app/reservas/page"
+import type { TableOption } from "@/components/reservas/reservas-client"
 
 interface ReservationFormProps {
   table: TableOption | null

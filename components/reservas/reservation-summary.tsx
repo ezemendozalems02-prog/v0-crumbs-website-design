@@ -1,7 +1,7 @@
 "use client"
 
 import { CalendarDays, Clock, Users, User, Phone, FileText, CheckCircle2, Armchair } from "lucide-react"
-import type { TableOption } from "@/app/reservas/page"
+import type { TableOption } from "@/components/reservas/reservas-client"
 
 interface ReservationSummaryProps {
   table: TableOption

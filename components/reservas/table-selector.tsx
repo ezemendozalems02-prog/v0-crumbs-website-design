@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { Check } from "lucide-react"
-import type { TableOption } from "@/app/reservas/page"
+import type { TableOption } from "@/components/reservas/reservas-client"
 
 interface TableSelectorProps {
   options: TableOption[]

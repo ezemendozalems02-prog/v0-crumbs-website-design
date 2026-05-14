@@ -1,10 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { Navigation } from "@/components/navigation"
-import { Footer } from "@/components/footer"
-import { Cart } from "@/components/cart"
-import { CartProvider, useCart } from "@/lib/cart-context"
+import { useCart } from "@/lib/cart-context"
 import { Plus, Check } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 import type { MenuCategory } from "@/lib/menu-publico"
@@ -127,16 +124,14 @@ function mapMenuToCards(menu: MenuCategory[]): { category: string; products: Car
 
 interface Props { liveMenu: MenuCategory[]; bannerImageUrl?: string | null }
 
-function DeliveryInner({ liveMenu, bannerImageUrl }: Props) {
+export function DeliveryContent({ liveMenu, bannerImageUrl }: Props) {
   const sections = liveMenu.length > 0 ? mapMenuToCards(liveMenu) : staticDeliveryItems
   const categories = sections.map((s) => s.category)
   const [activeCategory, setActiveCategory] = useState(categories[0] ?? "")
   const heroImage = bannerImageUrl ?? "/images/delivery-hero.jpg"
 
   return (
-    <main className="min-h-screen page-content">
-      <Navigation />
-
+    <div>
       {bannerImageUrl ? (
         <div className="w-full overflow-hidden" style={{ maxHeight: "520px" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -186,16 +181,6 @@ function DeliveryInner({ liveMenu, bannerImageUrl }: Props) {
         </div>
       </section>
 
-      <Footer />
-      <Cart />
-    </main>
-  )
-}
-
-export function DeliveryContent({ liveMenu, bannerImageUrl }: Props) {
-  return (
-    <CartProvider>
-      <DeliveryInner liveMenu={liveMenu} bannerImageUrl={bannerImageUrl} />
-    </CartProvider>
+    </div>
   )
 }
