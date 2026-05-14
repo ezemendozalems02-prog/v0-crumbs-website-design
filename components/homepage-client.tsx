@@ -50,7 +50,7 @@ export function HomepageClient({ mainBanner, experienceSection, locationSection 
   return (
     <>
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen md:h-screen flex items-center justify-center overflow-hidden pt-20 md:pt-0">
         <div className="absolute inset-0">
           <Image
             src={banner.imagen_url || "/images/hero-brunch.jpg"}
@@ -62,51 +62,51 @@ export function HomepageClient({ mainBanner, experienceSection, locationSection 
           <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/70" />
         </div>
 
-        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-          <span className="font-[family-name:var(--font-reenie-beanie)] text-xl md:text-2xl lg:text-3xl text-card/80 mb-6 block animate-fade-in tracking-wide">
+        <div className="relative z-10 text-center px-4 sm:px-6 max-w-4xl mx-auto w-full">
+          <span className="font-[family-name:var(--font-reenie-beanie)] text-lg sm:text-2xl lg:text-3xl text-card/80 mb-4 sm:mb-6 block animate-fade-in tracking-wide">
             {banner.subtitulo}
           </span>
-          <h1 className="font-[family-name:var(--font-dm-serif)] text-4xl md:text-6xl lg:text-7xl text-card leading-tight mb-6 animate-fade-in-up">
+          <h1 className="font-[family-name:var(--font-dm-serif)] text-3xl sm:text-5xl md:text-6xl lg:text-7xl text-card leading-tight mb-4 sm:mb-6 animate-fade-in-up">
             {banner.titulo}
           </h1>
-          <p className="text-lg md:text-xl text-card/90 mb-10 animate-fade-in-up delay-200">
+          <p className="text-base sm:text-lg md:text-xl text-card/90 mb-8 sm:mb-10 animate-fade-in-up delay-200 line-clamp-3 sm:line-clamp-none">
             {banner.descripcion}
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up delay-300 flex-wrap">
+          <div className="animate-fade-in-up delay-300 flex justify-center">
             <Link
               href={banner.boton_link || "/cafeteria"}
-              className="group bg-card text-primary px-8 py-4 rounded-full font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center gap-2"
+              className="group bg-card text-primary px-4 sm:px-8 py-3 sm:py-4 rounded-full font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base whitespace-nowrap"
             >
               {banner.boton_texto || "Ver carta"}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform hidden sm:inline" />
             </Link>
             <Link
               href="/cocina"
-              className="group bg-transparent border-2 border-card text-card px-8 py-4 rounded-full font-medium hover:bg-card hover:text-primary transition-all duration-300 flex items-center gap-2"
+              className="group bg-transparent border-2 border-card text-card px-4 sm:px-8 py-3 sm:py-4 rounded-full font-medium hover:bg-card hover:text-primary transition-all duration-300 flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base whitespace-nowrap"
             >
-              Ver carta de cocina
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              Cocina
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform hidden sm:inline" />
             </Link>
             <Link
               href="/delivery"
-              className="group bg-accent text-accent-foreground px-8 py-4 rounded-full font-medium hover:bg-secondary transition-all duration-300 flex items-center gap-2"
+              className="group bg-accent text-accent-foreground px-4 sm:px-8 py-3 sm:py-4 rounded-full font-medium hover:bg-secondary transition-all duration-300 flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base whitespace-nowrap"
             >
-              Pedir delivery
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              Delivery
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform hidden sm:inline" />
             </Link>
             <Link
               href="/reservas"
-              className="group bg-transparent border-2 border-accent text-card px-8 py-4 rounded-full font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center gap-2"
+              className="group bg-transparent border-2 border-accent text-card px-4 sm:px-8 py-3 sm:py-4 rounded-full font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base whitespace-nowrap"
             >
               Reservas
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform hidden sm:inline" />
             </Link>
           </div>
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce hidden md:flex flex-col items-center gap-2">
+        <div className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 animate-bounce hidden md:flex flex-col items-center gap-2">
           <p className="text-card/60 text-xs tracking-widest uppercase font-medium">Desplazá</p>
           <div className="w-5 h-8 border-2 border-card/40 rounded-full flex justify-center hover:border-card/60 transition-colors">
             <div className="w-1 h-2.5 bg-card/40 rounded-full mt-1.5 animate-pulse" />
