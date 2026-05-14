@@ -73,34 +73,34 @@ export function HomepageClient({ mainBanner, experienceSection, locationSection 
             {banner.descripcion}
           </p>
 
-          <div className="animate-fade-in-up delay-300 flex justify-center">
+          <div className="animate-fade-in-up delay-300 flex flex-col gap-3 sm:gap-4 w-full sm:w-auto items-center justify-center max-w-xs sm:max-w-none mx-auto">
             <Link
               href={banner.boton_link || "/cafeteria"}
-              className="group bg-card text-primary px-4 sm:px-8 py-3 sm:py-4 rounded-full font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base whitespace-nowrap"
+              className="group bg-card text-primary px-6 sm:px-8 py-4 sm:py-5 rounded-full font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center justify-center gap-2 text-base sm:text-lg w-full sm:w-auto"
             >
               {banner.boton_texto || "Ver carta"}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform hidden sm:inline" />
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform hidden sm:inline" />
             </Link>
             <Link
               href="/cocina"
-              className="group bg-transparent border-2 border-card text-card px-4 sm:px-8 py-3 sm:py-4 rounded-full font-medium hover:bg-card hover:text-primary transition-all duration-300 flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base whitespace-nowrap"
+              className="group bg-transparent border-2 border-card text-card px-6 sm:px-8 py-4 sm:py-5 rounded-full font-medium hover:bg-card hover:text-primary transition-all duration-300 flex items-center justify-center gap-2 text-base sm:text-lg w-full sm:w-auto"
             >
-              Cocina
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform hidden sm:inline" />
+              Ver carta de cocina
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform hidden sm:inline" />
             </Link>
             <Link
               href="/delivery"
-              className="group bg-accent text-accent-foreground px-4 sm:px-8 py-3 sm:py-4 rounded-full font-medium hover:bg-secondary transition-all duration-300 flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base whitespace-nowrap"
+              className="group bg-accent text-accent-foreground px-6 sm:px-8 py-4 sm:py-5 rounded-full font-medium hover:bg-secondary transition-all duration-300 flex items-center justify-center gap-2 text-base sm:text-lg w-full sm:w-auto"
             >
-              Delivery
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform hidden sm:inline" />
+              Pedir delivery
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform hidden sm:inline" />
             </Link>
             <Link
               href="/reservas"
-              className="group bg-transparent border-2 border-accent text-card px-4 sm:px-8 py-3 sm:py-4 rounded-full font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base whitespace-nowrap"
+              className="group bg-transparent border-2 border-accent text-card px-6 sm:px-8 py-4 sm:py-5 rounded-full font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center justify-center gap-2 text-base sm:text-lg w-full sm:w-auto"
             >
               Reservas
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform hidden sm:inline" />
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform hidden sm:inline" />
             </Link>
           </div>
         </div>
