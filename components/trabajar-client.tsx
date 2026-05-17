@@ -1,8 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { Navigation } from "@/components/navigation"
-import { Footer } from "@/components/footer"
 import { Upload, Send, FileText, Loader2 } from "lucide-react"
 
 interface TrabajarClientProps {
@@ -106,9 +104,7 @@ export function TrabajarClient({ bannerImageUrl }: TrabajarClientProps) {
   }
 
   return (
-    <main className="min-h-screen bg-background page-content">
-      <Navigation />
-
+    <div className="bg-background">
       {/* Hero banner */}
       {bannerImageUrl ? (
         <div className="w-full overflow-hidden" style={{ maxHeight: "520px" }}>
@@ -268,7 +264,6 @@ export function TrabajarClient({ bannerImageUrl }: TrabajarClientProps) {
         </div>
       </div>
 
-      <Footer />
-    </main>
+    </div>
   )
 }

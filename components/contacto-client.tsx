@@ -1,9 +1,6 @@
 "use client"
 
 import Image from "next/image"
-import { Navigation } from "@/components/navigation"
-import { Footer } from "@/components/footer"
-import { WhatsAppButton } from "@/components/whatsapp-button"
 import { MapPin, Clock, Phone, Instagram, MessageCircle } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { whatsappUrl } from "@/lib/whatsapp"
@@ -38,9 +35,7 @@ export function ContactoClient({ bannerImageUrl }: ContactoClientProps) {
   const heroImage = bannerImageUrl ?? "/images/nosotros-hero.jpg"
 
   return (
-    <main className="min-h-screen page-content">
-      <Navigation />
-
+    <div>
       {/* Hero Section */}
       {bannerImageUrl ? (
         <div className="w-full overflow-hidden" style={{ maxHeight: "520px" }}>
@@ -205,8 +200,6 @@ export function ContactoClient({ bannerImageUrl }: ContactoClientProps) {
         </div>
       </section>
 
-      <Footer />
-      <WhatsAppButton />
-    </main>
+    </div>
   )
 }
