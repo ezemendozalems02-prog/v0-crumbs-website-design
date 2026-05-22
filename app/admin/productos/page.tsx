@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useTransition, useCallback } from "react"
 import {
-  getProductos, deleteProducto, toggleProductoDisponible, getMetricasProductos, getCategorias,
+  getProductos, deleteProducto, toggleProductoDisponible, getMetricasProductos, getCategorias, reorderProductos,
   type Producto, type Categoria,
 } from "@/lib/admin-productos"
 import { ProductoFormModal } from "@/components/admin/producto-form-modal"
-import { Plus, Search, RefreshCw, UtensilsCrossed, ToggleLeft, ToggleRight, Pencil, Trash2, Star, Package, SlidersHorizontal, X, ArrowUpDown } from "lucide-react"
+import { Plus, Search, RefreshCw, UtensilsCrossed, ToggleLeft, ToggleRight, Pencil, Trash2, Star, Package, SlidersHorizontal, X, ArrowUpDown, ChevronUp, ChevronDown, GripVertical } from "lucide-react"
 
 const TIPO_LABEL: Record<string, string> = {
   desayuno: "Desayunos",
@@ -32,6 +32,7 @@ export default function AdminProductosPage() {
   const [editingProducto, setEditingProducto] = useState<Producto | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [togglingId, setTogglingId] = useState<string | null>(null)
+  const [reorderingId, setReorderingId] = useState<string | null>(null)
   const [toasts, setToasts] = useState<Toast[]>([])
   const [isLoading, startTransition] = useTransition()
 
@@ -79,6 +80,35 @@ export default function AdminProductosPage() {
   }
 
   const handleSaved = () => { setModalOpen(false); setEditingProducto(null); addToast("Producto guardado", "success"); loadData() }
+
+  // Mueve un producto una posición arriba o abajo dentro de su lista (carta o delivery)
+  const handleReorder = async (lista: Producto[], id: string, direction: "up" | "down") => {
+    const idx = lista.findIndex((p) => p.id === id)
+    if (idx < 0) return
+    if (direction === "up" && idx === 0) return
+    if (direction === "down" && idx === lista.length - 1) return
+    const newLista = [...lista]
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1
+    ;[newLista[idx], newLista[swapIdx]] = [newLista[swapIdx], newLista[idx]]
+    // Asigna órdenes consecutivos basados en la posición actual en el array
+    const items = newLista.map((p, i) => ({ id: p.id, orden: i + 1 }))
+    setReorderingId(id)
+    // Actualiza optimistamente el estado local para respuesta inmediata
+    setProductos((prev) => {
+      const updated = [...prev]
+      items.forEach(({ id: pid, orden }) => {
+        const found = updated.find((p) => p.id === pid)
+        if (found) found.orden = orden
+      })
+      return updated
+    })
+    const r = await reorderProductos(items)
+    setReorderingId(null)
+    if (!r.success) {
+      addToast(r.error ?? "Error al reordenar", "error")
+      loadData() // revertir si falla
+    }
+  }
 
   // Aplicar filtro de tipo antes de aplicar otros filtros
   const productosFiltroPorTipo = productos.filter((p) => {
@@ -348,23 +378,29 @@ export default function AdminProductosPage() {
                       productos={productosCarta}
                       deletingId={deletingId}
                       togglingId={togglingId}
+                      reorderingId={reorderingId}
                       onEdit={(p) => { setEditingProducto(p); setModalOpen(true) }}
                       onDelete={handleDelete}
                       onToggle={handleToggle}
+                      onReorder={(id, dir) => handleReorder(productosCarta, id, dir)}
                     />
                   </div>
 
                   {/* Mobile cards */}
                   <div className="lg:hidden space-y-3">
-                    {productosCarta.map((p) => (
+                    {productosCarta.map((p, idx) => (
                       <ProductoCard
                         key={p.id}
                         producto={p}
                         deletingId={deletingId}
                         togglingId={togglingId}
+                        reorderingId={reorderingId}
+                        isFirst={idx === 0}
+                        isLast={idx === productosCarta.length - 1}
                         onEdit={() => { setEditingProducto(p); setModalOpen(true) }}
                         onDelete={() => handleDelete(p.id, p.nombre)}
                         onToggle={() => handleToggle(p.id, p.disponible)}
+                        onReorder={(dir) => handleReorder(productosCarta, p.id, dir)}
                       />
                     ))}
                   </div>
@@ -400,23 +436,29 @@ export default function AdminProductosPage() {
                       productos={productosDelivery}
                       deletingId={deletingId}
                       togglingId={togglingId}
+                      reorderingId={reorderingId}
                       onEdit={(p) => { setEditingProducto(p); setModalOpen(true) }}
                       onDelete={handleDelete}
                       onToggle={handleToggle}
+                      onReorder={(id, dir) => handleReorder(productosDelivery, id, dir)}
                     />
                   </div>
 
                   {/* Mobile cards */}
                   <div className="lg:hidden space-y-3">
-                    {productosDelivery.map((p) => (
+                    {productosDelivery.map((p, idx) => (
                       <ProductoCard
                         key={p.id}
                         producto={p}
                         deletingId={deletingId}
                         togglingId={togglingId}
+                        reorderingId={reorderingId}
+                        isFirst={idx === 0}
+                        isLast={idx === productosDelivery.length - 1}
                         onEdit={() => { setEditingProducto(p); setModalOpen(true) }}
                         onDelete={() => handleDelete(p.id, p.nombre)}
                         onToggle={() => handleToggle(p.id, p.disponible)}
+                        onReorder={(dir) => handleReorder(productosDelivery, p.id, dir)}
                       />
                     ))}
                   </div>
@@ -464,30 +506,55 @@ function ProductosTable({
   productos,
   deletingId,
   togglingId,
+  reorderingId,
   onEdit,
   onDelete,
   onToggle,
+  onReorder,
 }: {
   productos: Producto[]
   deletingId: string | null
   togglingId: string | null
+  reorderingId: string | null
   onEdit: (p: Producto) => void
   onDelete: (id: string, nombre: string) => void
   onToggle: (id: string, current: boolean) => void
+  onReorder: (id: string, dir: "up" | "down") => void
 }) {
   return (
     <table className="w-full text-sm">
       <thead>
         <tr className="border-b border-border/30 bg-background/50">
-          {["Producto", "Categoría", "Precio", "Variantes", "Estado", ""].map((h) => (
-            <th key={h} className="text-left px-5 py-3.5 font-semibold text-foreground/60 text-xs uppercase tracking-wide first:pl-5 last:text-right">{h}</th>
+          {["Orden", "Producto", "Categoría", "Precio", "Variantes", "Estado", ""].map((h) => (
+            <th key={h} className="text-left px-4 py-3.5 font-semibold text-foreground/60 text-xs uppercase tracking-wide last:text-right">{h}</th>
           ))}
         </tr>
       </thead>
       <tbody className="divide-y divide-border/20">
-        {productos.map((p) => (
+        {productos.map((p, idx) => (
           <tr key={p.id} className="hover:bg-background/60 transition-colors">
-            <td className="px-5 py-4">
+            {/* Orden */}
+            <td className="px-4 py-3 w-16">
+              <div className="flex flex-col gap-0.5">
+                <button
+                  onClick={() => onReorder(p.id, "up")}
+                  disabled={idx === 0 || reorderingId === p.id}
+                  className="p-0.5 rounded text-foreground/30 hover:text-primary hover:bg-primary/10 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                  title="Subir"
+                >
+                  <ChevronUp className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => onReorder(p.id, "down")}
+                  disabled={idx === productos.length - 1 || reorderingId === p.id}
+                  className="p-0.5 rounded text-foreground/30 hover:text-primary hover:bg-primary/10 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                  title="Bajar"
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+            </td>
+            <td className="px-4 py-4">
               <div className="flex items-center gap-3">
                 {p.imagen_url ? (
                   <img src={p.imagen_url} alt={p.nombre} className="w-10 h-10 rounded-xl object-cover bg-background shrink-0" />
@@ -533,7 +600,7 @@ function ProductosTable({
                 )}
               </button>
             </td>
-            <td className="px-5 py-4">
+            <td className="px-4 py-4">
               <div className="flex items-center justify-end gap-1.5">
                 <button onClick={() => onEdit(p)} className="p-1.5 rounded-lg text-foreground/40 hover:text-primary hover:bg-primary/10 transition-colors" title="Editar">
                   <Pencil className="w-4 h-4" />
@@ -555,16 +622,24 @@ function ProductoCard({
   producto: p,
   deletingId,
   togglingId,
+  reorderingId,
+  isFirst,
+  isLast,
   onEdit,
   onDelete,
   onToggle,
+  onReorder,
 }: {
   producto: Producto
   deletingId: string | null
   togglingId: string | null
+  reorderingId: string | null
+  isFirst: boolean
+  isLast: boolean
   onEdit: () => void
   onDelete: () => void
   onToggle: () => void
+  onReorder: (dir: "up" | "down") => void
 }) {
   return (
     <div className="bg-card rounded-2xl border border-border/40 p-4">
@@ -583,6 +658,23 @@ function ProductoCard({
           </div>
           <p className="text-sm text-foreground/60">{p.categoria?.nombre}</p>
           <p className="text-sm font-medium text-primary mt-0.5">${p.precio.toLocaleString("es-AR")}</p>
+        </div>
+        {/* Reorder buttons mobile */}
+        <div className="flex flex-col gap-0.5 shrink-0">
+          <button
+            onClick={() => onReorder("up")}
+            disabled={isFirst || reorderingId === p.id}
+            className="p-1 rounded text-foreground/30 hover:text-primary hover:bg-primary/10 transition-colors disabled:opacity-20"
+          >
+            <ChevronUp className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onReorder("down")}
+            disabled={isLast || reorderingId === p.id}
+            className="p-1 rounded text-foreground/30 hover:text-primary hover:bg-primary/10 transition-colors disabled:opacity-20"
+          >
+            <ChevronDown className="w-4 h-4" />
+          </button>
         </div>
       </div>
       <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/20">

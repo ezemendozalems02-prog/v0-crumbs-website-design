@@ -185,6 +185,19 @@ export async function deleteProducto(id: string): Promise<{ success: boolean; er
   return { success: true }
 }
 
+// Recibe un array de { id, orden } y persiste el nuevo orden en bulk
+export async function reorderProductos(items: { id: string; orden: number }[]): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const updates = items.map(({ id, orden }) =>
+    supabase.from("productos").update({ orden }).eq("id", id)
+  )
+  const results = await Promise.all(updates)
+  const failed = results.find((r) => r.error)
+  if (failed?.error) return { success: false, error: failed.error.message }
+  revalidarMenu()
+  return { success: true }
+}
+
 export async function getMetricasProductos(): Promise<{
   total: number
   disponibles: number

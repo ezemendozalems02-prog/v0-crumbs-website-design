@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
-import { Menu, X, LayoutDashboard } from "lucide-react"
+import { Menu, X } from "lucide-react"
 
 const navLinks = [
   { href: "/", label: "Inicio" },
@@ -48,14 +48,7 @@ export function Navigation() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/admin/reservas"
-              className="flex items-center gap-1.5 text-xs font-medium text-foreground/50 hover:text-primary border border-border/40 hover:border-primary/40 px-3 py-1.5 rounded-full transition-all duration-300"
-              title="Panel Admin"
-            >
-              <LayoutDashboard className="w-3.5 h-3.5" />
-              Admin
-            </Link>
+
           </div>
 
           {/* Mobile Menu Button */}
@@ -86,14 +79,7 @@ export function Navigation() {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                href="/admin/reservas"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2 text-foreground/50 hover:text-primary transition-colors py-2 text-sm"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                Panel Admin
-              </Link>
+
             </div>
           </div>
         </div>
