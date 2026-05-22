@@ -5,9 +5,19 @@ import { createContext, useContext, useState, useCallback, type ReactNode } from
 export interface CartItem {
   id: string
   name: string
-  price: number
+  price: number // precio base sin extras
   quantity: number
   image?: string
+  // Extras seleccionados: array de { extra_id, extra_nombre, opcion_id, opcion_nombre, precio_adicional }
+  extras?: Array<{
+    extra_id: string
+    extra_nombre: string
+    opcion_id: string
+    opcion_nombre: string
+    precio_adicional: number
+  }>
+  // Precio unitario = price + sum(extras.precio_adicional)
+  precioUnitario?: number
 }
 
 interface CartContextType {
@@ -69,7 +79,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
-  const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const totalPrice = items.reduce((sum, item) => {
+    const unitPrice = item.precioUnitario ?? item.price
+    return sum + unitPrice * item.quantity
+  }, 0)
 
   return (
     <CartContext.Provider

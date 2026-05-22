@@ -42,6 +42,7 @@ export type Producto = {
   orden: number
   etiquetas: string[]
   variantes?: Variante[]
+  extras?: Extra[]
 }
 
 export type ProductoInput = {
@@ -61,6 +62,28 @@ export type VarianteInput = {
   precio: number
   disponible: boolean
   orden: number
+}
+
+// Extras/opcionales para productos (ej: salsa, tamaño, adicionales)
+export type Extra = {
+  id: string
+  producto_id: string
+  nombre: string // ej: "Salsa", "Tamaño"
+  tipo: "select" | "radio" | "checkbox" // select: elige una opción, radio: igual, checkbox: múltiples
+  requerido: boolean // ¿Es obligatorio seleccionar?
+  opciones: ExtraOpcion[] // Las opciones disponibles
+  orden: number
+}
+
+export type ExtraOpcion = {
+  id: string
+  nombre: string // ej: "Barbecue", "Picante", "Doble"
+  precio_adicional: number // ej: 50 para +$50
+  orden: number
+}
+
+export type ExtraInput = Omit<Extra, "id" | "producto_id" | "opciones"> & {
+  opciones: Omit<ExtraOpcion, "id">[]
 }
 
 // ---------- CATEGORÍAS ----------
@@ -227,3 +250,78 @@ export async function getMetricasProductos(): Promise<{
     por_categoria: Object.entries(catMap).map(([nombre, count]) => ({ nombre, count })),
   }
 }
+
+// ---------- EXTRAS/OPCIONALES ----------
+
+export async function getProductoExtras(producto_id: string): Promise<Extra[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from("producto_extras")
+    .select("*")
+    .eq("producto_id", producto_id)
+    .order("orden")
+  if (error) { console.error(error); return [] }
+  
+  // Fetch opciones para cada extra
+  const extras = data ?? []
+  const extrasConOpciones: Extra[] = []
+  
+  for (const extra of extras) {
+    const { data: opciones, error: opErr } = await supabase
+      .from("producto_extras_opciones")
+      .select("*")
+      .eq("extra_id", extra.id)
+      .order("orden")
+    if (opErr) { console.error(opErr); continue }
+    extrasConOpciones.push({ ...extra, opciones: opciones ?? [] })
+  }
+  
+  return extrasConOpciones
+}
+
+export async function saveProductoExtras(producto_id: string, extras: ExtraInput[]): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  
+  // Eliminar extras previas
+  await supabase.from("producto_extras").delete().eq("producto_id", producto_id)
+  
+  if (extras.length === 0) { revalidarMenu(); return { success: true } }
+  
+  // Crear nuevas extras
+  const extrasToInsert = extras.map((e, i) => ({
+    producto_id,
+    nombre: e.nombre,
+    tipo: e.tipo,
+    requerido: e.requerido,
+    orden: i,
+  }))
+  
+  const { data: insertedExtras, error: extrasErr } = await supabase
+    .from("producto_extras")
+    .insert(extrasToInsert)
+    .select("id")
+  
+  if (extrasErr) return { success: false, error: extrasErr.message }
+  
+  // Insertar opciones para cada extra
+  const opcionesInsert: any[] = []
+  insertedExtras?.forEach((extra, extraIdx) => {
+    extras[extraIdx]?.opciones.forEach((op, opIdx) => {
+      opcionesInsert.push({
+        extra_id: extra.id,
+        nombre: op.nombre,
+        precio_adicional: op.precio_adicional,
+        orden: opIdx,
+      })
+    })
+  })
+  
+  if (opcionesInsert.length > 0) {
+    const { error: opErr } = await supabase.from("producto_extras_opciones").insert(opcionesInsert)
+    if (opErr) return { success: false, error: opErr.message }
+  }
+  
+  revalidarMenu()
+  return { success: true }
+}
+

@@ -6,7 +6,8 @@ import {
   type Producto, type Categoria,
 } from "@/lib/admin-productos"
 import { ProductoFormModal } from "@/components/admin/producto-form-modal"
-import { Plus, Search, RefreshCw, UtensilsCrossed, ToggleLeft, ToggleRight, Pencil, Trash2, Star, Package, SlidersHorizontal, X, ArrowUpDown, ChevronUp, ChevronDown, GripVertical } from "lucide-react"
+import { SortableProductosTable } from "@/components/admin/sortable-productos-table"
+import { Plus, Search, RefreshCw, UtensilsCrossed, ToggleLeft, ToggleRight, Pencil, Trash2, Star, Package, SlidersHorizontal, X, GripVertical } from "lucide-react"
 
 const TIPO_LABEL: Record<string, string> = {
   desayuno: "Desayunos",
@@ -32,7 +33,6 @@ export default function AdminProductosPage() {
   const [editingProducto, setEditingProducto] = useState<Producto | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [togglingId, setTogglingId] = useState<string | null>(null)
-  const [reorderingId, setReorderingId] = useState<string | null>(null)
   const [toasts, setToasts] = useState<Toast[]>([])
   const [isLoading, startTransition] = useTransition()
 
@@ -81,33 +81,10 @@ export default function AdminProductosPage() {
 
   const handleSaved = () => { setModalOpen(false); setEditingProducto(null); addToast("Producto guardado", "success"); loadData() }
 
-  // Mueve un producto una posición arriba o abajo dentro de su lista (carta o delivery)
-  const handleReorder = async (lista: Producto[], id: string, direction: "up" | "down") => {
-    const idx = lista.findIndex((p) => p.id === id)
-    if (idx < 0) return
-    if (direction === "up" && idx === 0) return
-    if (direction === "down" && idx === lista.length - 1) return
-    const newLista = [...lista]
-    const swapIdx = direction === "up" ? idx - 1 : idx + 1
-    ;[newLista[idx], newLista[swapIdx]] = [newLista[swapIdx], newLista[idx]]
-    // Asigna órdenes consecutivos basados en la posición actual en el array
-    const items = newLista.map((p, i) => ({ id: p.id, orden: i + 1 }))
-    setReorderingId(id)
-    // Actualiza optimistamente el estado local para respuesta inmediata
-    setProductos((prev) => {
-      const updated = [...prev]
-      items.forEach(({ id: pid, orden }) => {
-        const found = updated.find((p) => p.id === pid)
-        if (found) found.orden = orden
-      })
-      return updated
-    })
+  const handleReorderProducts = async (items: { id: string; orden: number }[]) => {
     const r = await reorderProductos(items)
-    setReorderingId(null)
-    if (!r.success) {
-      addToast(r.error ?? "Error al reordenar", "error")
-      loadData() // revertir si falla
-    }
+    if (!r.success) addToast(r.error ?? "Error al reordenar", "error")
+    else { addToast("Orden actualizado", "success"); loadData() }
   }
 
   // Aplicar filtro de tipo antes de aplicar otros filtros
@@ -324,7 +301,7 @@ export default function AdminProductosPage() {
               {/* Ordenar */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground/50 uppercase tracking-wide flex items-center gap-1">
-                  <ArrowUpDown className="w-3 h-3" />
+                  <GripVertical className="w-3 h-3" />
                   Ordenar por
                 </label>
                 <select
@@ -372,38 +349,16 @@ export default function AdminProductosPage() {
                 </div>
               ) : (
                 <>
-                  {/* Desktop table */}
-                  <div className="hidden lg:block bg-card rounded-2xl border border-border/40 overflow-hidden">
-                    <ProductosTable
-                      productos={productosCarta}
-                      deletingId={deletingId}
-                      togglingId={togglingId}
-                      reorderingId={reorderingId}
-                      onEdit={(p) => { setEditingProducto(p); setModalOpen(true) }}
-                      onDelete={handleDelete}
-                      onToggle={handleToggle}
-                      onReorder={(id, dir) => handleReorder(productosCarta, id, dir)}
-                    />
-                  </div>
-
-                  {/* Mobile cards */}
-                  <div className="lg:hidden space-y-3">
-                    {productosCarta.map((p, idx) => (
-                      <ProductoCard
-                        key={p.id}
-                        producto={p}
-                        deletingId={deletingId}
-                        togglingId={togglingId}
-                        reorderingId={reorderingId}
-                        isFirst={idx === 0}
-                        isLast={idx === productosCarta.length - 1}
-                        onEdit={() => { setEditingProducto(p); setModalOpen(true) }}
-                        onDelete={() => handleDelete(p.id, p.nombre)}
-                        onToggle={() => handleToggle(p.id, p.disponible)}
-                        onReorder={(dir) => handleReorder(productosCarta, p.id, dir)}
-                      />
-                    ))}
-                  </div>
+                  {/* Drag & drop table */}
+                  <SortableProductosTable
+                    productos={productosCarta}
+                    deletingId={deletingId}
+                    togglingId={togglingId}
+                    onEdit={(p) => { setEditingProducto(p); setModalOpen(true) }}
+                    onDelete={handleDelete}
+                    onToggle={handleToggle}
+                    onReorder={handleReorderProducts}
+                  />
                 </>
               )}
             </section>
@@ -430,38 +385,16 @@ export default function AdminProductosPage() {
                 </div>
               ) : (
                 <>
-                  {/* Desktop table */}
-                  <div className="hidden lg:block bg-card rounded-2xl border border-border/40 overflow-hidden">
-                    <ProductosTable
-                      productos={productosDelivery}
-                      deletingId={deletingId}
-                      togglingId={togglingId}
-                      reorderingId={reorderingId}
-                      onEdit={(p) => { setEditingProducto(p); setModalOpen(true) }}
-                      onDelete={handleDelete}
-                      onToggle={handleToggle}
-                      onReorder={(id, dir) => handleReorder(productosDelivery, id, dir)}
-                    />
-                  </div>
-
-                  {/* Mobile cards */}
-                  <div className="lg:hidden space-y-3">
-                    {productosDelivery.map((p, idx) => (
-                      <ProductoCard
-                        key={p.id}
-                        producto={p}
-                        deletingId={deletingId}
-                        togglingId={togglingId}
-                        reorderingId={reorderingId}
-                        isFirst={idx === 0}
-                        isLast={idx === productosDelivery.length - 1}
-                        onEdit={() => { setEditingProducto(p); setModalOpen(true) }}
-                        onDelete={() => handleDelete(p.id, p.nombre)}
-                        onToggle={() => handleToggle(p.id, p.disponible)}
-                        onReorder={(dir) => handleReorder(productosDelivery, p.id, dir)}
-                      />
-                    ))}
-                  </div>
+                  {/* Drag & drop table */}
+                  <SortableProductosTable
+                    productos={productosDelivery}
+                    deletingId={deletingId}
+                    togglingId={togglingId}
+                    onEdit={(p) => { setEditingProducto(p); setModalOpen(true) }}
+                    onDelete={handleDelete}
+                    onToggle={handleToggle}
+                    onReorder={handleReorderProducts}
+                  />
                 </>
               )}
             </section>
@@ -501,191 +434,5 @@ export default function AdminProductosPage() {
   )
 }
 
-// Componente tabla reutilizable
-function ProductosTable({
-  productos,
-  deletingId,
-  togglingId,
-  reorderingId,
-  onEdit,
-  onDelete,
-  onToggle,
-  onReorder,
-}: {
-  productos: Producto[]
-  deletingId: string | null
-  togglingId: string | null
-  reorderingId: string | null
-  onEdit: (p: Producto) => void
-  onDelete: (id: string, nombre: string) => void
-  onToggle: (id: string, current: boolean) => void
-  onReorder: (id: string, dir: "up" | "down") => void
-}) {
-  return (
-    <table className="w-full text-sm">
-      <thead>
-        <tr className="border-b border-border/30 bg-background/50">
-          {["Orden", "Producto", "Categoría", "Precio", "Variantes", "Estado", ""].map((h) => (
-            <th key={h} className="text-left px-4 py-3.5 font-semibold text-foreground/60 text-xs uppercase tracking-wide last:text-right">{h}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-border/20">
-        {productos.map((p, idx) => (
-          <tr key={p.id} className="hover:bg-background/60 transition-colors">
-            {/* Orden */}
-            <td className="px-4 py-3 w-16">
-              <div className="flex flex-col gap-0.5">
-                <button
-                  onClick={() => onReorder(p.id, "up")}
-                  disabled={idx === 0 || reorderingId === p.id}
-                  className="p-0.5 rounded text-foreground/30 hover:text-primary hover:bg-primary/10 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
-                  title="Subir"
-                >
-                  <ChevronUp className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => onReorder(p.id, "down")}
-                  disabled={idx === productos.length - 1 || reorderingId === p.id}
-                  className="p-0.5 rounded text-foreground/30 hover:text-primary hover:bg-primary/10 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
-                  title="Bajar"
-                >
-                  <ChevronDown className="w-4 h-4" />
-                </button>
-              </div>
-            </td>
-            <td className="px-4 py-4">
-              <div className="flex items-center gap-3">
-                {p.imagen_url ? (
-                  <img src={p.imagen_url} alt={p.nombre} className="w-10 h-10 rounded-xl object-cover bg-background shrink-0" />
-                ) : (
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <UtensilsCrossed className="w-4 h-4 text-primary/50" />
-                  </div>
-                )}
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-medium text-foreground">{p.nombre}</span>
-                    {p.destacado && <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />}
-                  </div>
-                  {p.descripcion && <p className="text-xs text-foreground/50 mt-0.5 line-clamp-1">{p.descripcion}</p>}
-                </div>
-              </div>
-            </td>
-            <td className="px-4 py-4">
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                {p.categoria?.nombre ?? "—"}
-              </span>
-            </td>
-            <td className="px-4 py-4 font-medium text-foreground">
-              ${p.precio.toLocaleString("es-AR")}
-            </td>
-            <td className="px-4 py-4 text-foreground/60">
-              {p.variantes && p.variantes.length > 0 ? (
-                <span className="text-xs bg-background border border-border/40 rounded-lg px-2 py-1">
-                  {p.variantes.length} variante{p.variantes.length !== 1 ? "s" : ""}
-                </span>
-              ) : "—"}
-            </td>
-            <td className="px-4 py-4">
-              <button
-                onClick={() => onToggle(p.id, p.disponible)}
-                disabled={togglingId === p.id}
-                className="flex items-center gap-1.5 text-xs font-medium transition-colors disabled:opacity-40"
-              >
-                {p.disponible ? (
-                  <><ToggleRight className="w-5 h-5 text-emerald-600" /><span className="text-emerald-700">Disponible</span></>
-                ) : (
-                  <><ToggleLeft className="w-5 h-5 text-foreground/40" /><span className="text-foreground/50">No disponible</span></>
-                )}
-              </button>
-            </td>
-            <td className="px-4 py-4">
-              <div className="flex items-center justify-end gap-1.5">
-                <button onClick={() => onEdit(p)} className="p-1.5 rounded-lg text-foreground/40 hover:text-primary hover:bg-primary/10 transition-colors" title="Editar">
-                  <Pencil className="w-4 h-4" />
-                </button>
-                <button onClick={() => onDelete(p.id, p.nombre)} disabled={deletingId === p.id} className="p-1.5 rounded-lg text-foreground/40 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40" title="Eliminar">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  )
-}
 
-// Componente card reutilizable para mobile
-function ProductoCard({
-  producto: p,
-  deletingId,
-  togglingId,
-  reorderingId,
-  isFirst,
-  isLast,
-  onEdit,
-  onDelete,
-  onToggle,
-  onReorder,
-}: {
-  producto: Producto
-  deletingId: string | null
-  togglingId: string | null
-  reorderingId: string | null
-  isFirst: boolean
-  isLast: boolean
-  onEdit: () => void
-  onDelete: () => void
-  onToggle: () => void
-  onReorder: (dir: "up" | "down") => void
-}) {
-  return (
-    <div className="bg-card rounded-2xl border border-border/40 p-4">
-      <div className="flex items-start gap-3">
-        {p.imagen_url ? (
-          <img src={p.imagen_url} alt={p.nombre} className="w-12 h-12 rounded-xl object-cover shrink-0" />
-        ) : (
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <UtensilsCrossed className="w-5 h-5 text-primary/50" />
-          </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
-            <p className="font-semibold text-foreground truncate">{p.nombre}</p>
-            {p.destacado && <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" />}
-          </div>
-          <p className="text-sm text-foreground/60">{p.categoria?.nombre}</p>
-          <p className="text-sm font-medium text-primary mt-0.5">${p.precio.toLocaleString("es-AR")}</p>
-        </div>
-        {/* Reorder buttons mobile */}
-        <div className="flex flex-col gap-0.5 shrink-0">
-          <button
-            onClick={() => onReorder("up")}
-            disabled={isFirst || reorderingId === p.id}
-            className="p-1 rounded text-foreground/30 hover:text-primary hover:bg-primary/10 transition-colors disabled:opacity-20"
-          >
-            <ChevronUp className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onReorder("down")}
-            disabled={isLast || reorderingId === p.id}
-            className="p-1 rounded text-foreground/30 hover:text-primary hover:bg-primary/10 transition-colors disabled:opacity-20"
-          >
-            <ChevronDown className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/20">
-        <button onClick={onToggle} disabled={togglingId === p.id} className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-xl transition-colors ${p.disponible ? "bg-emerald-50 text-emerald-700" : "bg-background text-foreground/50"}`}>
-          {p.disponible ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
-          {p.disponible ? "Disponible" : "No disponible"}
-        </button>
-        <button onClick={onEdit} className="p-2 rounded-xl bg-primary/10 text-primary"><Pencil className="w-4 h-4" /></button>
-        <button onClick={onDelete} className="p-2 rounded-xl bg-red-50 text-red-600"><Trash2 className="w-4 h-4" /></button>
-      </div>
-    </div>
-  )
-}
 

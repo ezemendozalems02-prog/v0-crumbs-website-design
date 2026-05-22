@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useTransition } from "react"
-import { createProducto, updateProducto, type Producto, type Categoria, type VarianteInput } from "@/lib/admin-productos"
+import React, { useState, useTransition } from "react"
+import { createProducto, updateProducto, getProductoExtras, saveProductoExtras, type Producto, type Categoria, type VarianteInput, type ExtraInput } from "@/lib/admin-productos"
 import { ImageUploadField } from "./image-upload-field"
+import { ExtrasEditor } from "./extras-editor"
 import { X, Plus, Trash2, Star, GripVertical } from "lucide-react"
 
 interface Props {
@@ -37,12 +38,30 @@ export function ProductoFormModal({ producto, categorias, onClose, onSaved }: Pr
   const [variantes, setVariantes] = useState<VarianteInput[]>(
     producto?.variantes?.map((v) => ({ nombre: v.nombre, precio: v.precio, disponible: v.disponible, orden: v.orden })) ?? []
   )
+  const [extras, setExtras] = useState<ExtraInput[]>([])
+  const [extrasLoaded, setExtrasLoaded] = useState(!isEdit)
 
   const toggleEtiqueta = (e: string) => setEtiquetas((prev) => prev.includes(e) ? prev.filter((x) => x !== e) : [...prev, e])
   const addVariante = () => setVariantes((prev) => [...prev, { nombre: "", precio: 0, disponible: true, orden: prev.length }])
   const removeVariante = (i: number) => setVariantes((prev) => prev.filter((_, idx) => idx !== i))
   const updateVariante = (i: number, field: keyof VarianteInput, value: any) =>
     setVariantes((prev) => prev.map((v, idx) => idx === i ? { ...v, [field]: value } : v))
+
+  // Cargar extras si estamos editando
+  React.useEffect(() => {
+    if (isEdit && !extrasLoaded && producto?.id) {
+      getProductoExtras(producto.id).then((loaded) => {
+        setExtras(loaded.map((e) => ({
+          nombre: e.nombre,
+          tipo: e.tipo,
+          requerido: e.requerido,
+          orden: e.orden,
+          opciones: e.opciones.map((o) => ({ nombre: o.nombre, precio_adicional: o.precio_adicional, orden: o.orden })),
+        })))
+        setExtrasLoaded(true)
+      })
+    }
+  }, [])
 
   const handleSubmit = () => {
     if (!nombre.trim()) { setError("El nombre es requerido"); return }
@@ -66,8 +85,22 @@ export function ProductoFormModal({ producto, categorias, onClose, onSaved }: Pr
         ? await updateProducto(producto!.id, input, variantes)
         : await createProducto(input, variantes)
 
-      if (result.success) onSaved()
-      else setError(result.error ?? "Error al guardar")
+      if (!result.success) {
+        setError(result.error ?? "Error al guardar")
+        return
+      }
+
+      // Guardar extras también
+      const productoId = isEdit ? producto!.id : result.id!
+      if (productoId && extras.length > 0) {
+        const extrasResult = await saveProductoExtras(productoId, extras)
+        if (!extrasResult.success) {
+          setError(extrasResult.error ?? "Error al guardar extras")
+          return
+        }
+      }
+
+      onSaved()
     })
   }
 
@@ -258,6 +291,11 @@ export function ProductoFormModal({ producto, categorias, onClose, onSaved }: Pr
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Extras/Opcionales */}
+          <div className="border-t border-border/40 pt-6">
+            <ExtrasEditor extras={extras} onChange={setExtras} />
           </div>
         </div>
 

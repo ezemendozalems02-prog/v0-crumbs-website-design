@@ -6,6 +6,7 @@ import { Plus, Check } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 import type { MenuCategory } from "@/lib/menu-publico"
 import type { Producto } from "@/lib/admin-productos"
+import { ProductoOptionsModal } from "@/components/producto-options-modal"
 
 // Static fallback items for delivery
 const staticDeliveryItems: { category: string; products: { id: string; name: string; description: string; price: number; image: string }[] }[] = [
@@ -58,38 +59,55 @@ interface CardItem { id: string; name: string; description: string; price: numbe
 function ProductCard({ product }: { product: CardItem }) {
   const { addItem, items } = useCart()
   const [isAdded, setIsAdded] = useState(false)
+  const [showOptionsModal, setShowOptionsModal] = useState(false)
   const itemInCart = items.find((item) => item.id === product.id)
+  
   const handleAdd = () => {
-    addItem({ id: product.id, name: product.name, price: product.price, image: product.image })
-    setIsAdded(true)
-    setTimeout(() => setIsAdded(false), 1000)
+    // Abrir modal de opciones en lugar de agregar directamente
+    setShowOptionsModal(true)
   }
+  
   return (
-    <div className="group bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
-      <div className="relative w-full bg-background">
-        <div className="relative aspect-square sm:aspect-[4/3] overflow-hidden">
-          <Image src={product.image} alt={product.name} fill className="object-cover object-center group-hover:scale-105 transition-transform duration-500" />
-        </div>
-        {itemInCart && (
-          <div className="absolute top-3 right-3 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded-full">
-            {itemInCart.quantity} en carrito
+    <>
+      <div className="group bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+        <div className="relative w-full bg-background">
+          <div className="relative aspect-square sm:aspect-[4/3] overflow-hidden">
+            <Image src={product.image} alt={product.name} fill className="object-cover object-center group-hover:scale-105 transition-transform duration-500" />
           </div>
-        )}
-      </div>
-      <div className="p-5">
-        <h3 className="font-[family-name:var(--font-dm-serif)] text-lg text-primary mb-2">{product.name}</h3>
-        <p className="text-sm text-foreground/60 mb-4 line-clamp-2">{product.description}</p>
-        <div className="flex items-center justify-between">
-          <span className="font-medium text-accent text-lg">${product.price.toLocaleString("es-AR")}</span>
-          <button
-            onClick={handleAdd}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all duration-300 ${isAdded ? "bg-secondary text-secondary-foreground" : "bg-primary text-primary-foreground hover:bg-secondary"}`}
-          >
-            {isAdded ? <><Check className="w-4 h-4" />Agregado</> : <><Plus className="w-4 h-4" />Agregar</>}
-          </button>
+          {itemInCart && (
+            <div className="absolute top-3 right-3 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded-full">
+              {itemInCart.quantity} en carrito
+            </div>
+          )}
+        </div>
+        <div className="p-5">
+          <h3 className="font-[family-name:var(--font-dm-serif)] text-lg text-primary mb-2">{product.name}</h3>
+          <p className="text-sm text-foreground/60 mb-4 line-clamp-2">{product.description}</p>
+          <div className="flex items-center justify-between">
+            <span className="font-medium text-accent text-lg">${product.price.toLocaleString("es-AR")}</span>
+            <button
+              onClick={handleAdd}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all duration-300 ${isAdded ? "bg-secondary text-secondary-foreground" : "bg-primary text-primary-foreground hover:bg-secondary"}`}
+            >
+              {isAdded ? <><Check className="w-4 h-4" />Agregado</> : <><Plus className="w-4 h-4" />Agregar</>}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Opciones modal */}
+      <ProductoOptionsModal
+        isOpen={showOptionsModal}
+        onClose={() => setShowOptionsModal(false)}
+        producto={{
+          id: product.id,
+          nombre: product.name,
+          precio: product.price,
+          imagen_url: product.image,
+          extras: [], // Sin extras por ahora en delivery estático
+        }}
+      />
+    </>
   )
 }
 
