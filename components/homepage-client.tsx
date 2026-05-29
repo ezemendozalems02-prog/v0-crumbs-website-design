@@ -2,19 +2,17 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { Coffee, UtensilsCrossed, Wine, ArrowRight } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import { useInView } from "@/hooks/use-in-view"
-import type { Banner, Seccion } from "@/lib/admin-banners-types"
+import type { Banner } from "@/lib/admin-banners-types"
 import type { Seccion as SeccionContent, SeccionItem } from "@/lib/admin-secciones-types"
 
 interface HomepageClientProps {
   mainBanner: Banner | null
-  experienceSection: Seccion | null
   highlightsSection: SeccionContent | null
 }
 
-export function HomepageClient({ mainBanner, experienceSection, highlightsSection }: Omit<HomepageClientProps, 'locationSection'>) {
-  const experienceSectionInView = useInView()
+export function HomepageClient({ mainBanner, highlightsSection }: HomepageClientProps) {
   const highlightsSectionInView = useInView()
 
   // Defaults
@@ -92,64 +90,6 @@ export function HomepageClient({ mainBanner, experienceSection, highlightsSectio
         </div>
 
 
-      </section>
-
-      {/* Experience Section */}
-      <section
-        ref={experienceSectionInView.ref}
-        className="py-24 md:py-32 bg-card"
-      >
-        <div className="max-w-7xl mx-auto px-6">
-          <div className={`text-center mb-16 transition-all duration-700 ${experienceSectionInView.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-accent">
-              Nuestra experiencia
-            </span>
-            <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl md:text-5xl text-primary mt-2">
-              Un lugar para cada momento
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-            {[
-              {
-                icon: Coffee,
-                title: "Café de especialidad",
-                description: "Granos seleccionados, preparaciones cuidadas y una pausa para disfrutar sin apuro.",
-                delay: 0,
-              },
-              {
-                icon: UtensilsCrossed,
-                title: "Cocina fresca",
-                description: "Platos ricos, recetas de autor y una propuesta variada para disfrutar desde el desayuno hasta la cena.",
-                delay: 100,
-              },
-              {
-                icon: Wine,
-                title: "Coctelería de autor",
-                description: "Sabores frescos, combinaciones originales y una excusa perfecta para quedarse un rato más",
-                delay: 200,
-              },
-            ].map((item, index) => (
-              <div
-                key={index}
-                className={`group text-center p-8 rounded-2xl bg-background hover:bg-primary hover:shadow-xl transition-all duration-500 cursor-default ${
-                  experienceSectionInView.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                }`}
-                style={{ transitionDelay: `${item.delay + 200}ms` }}
-              >
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 group-hover:bg-card/20 mb-6 transition-colors duration-500">
-                  <item.icon className="w-8 h-8 text-primary group-hover:text-primary-foreground transition-colors duration-500" />
-                </div>
-                <h3 className="font-[family-name:var(--font-dm-serif)] text-xl text-primary group-hover:text-primary-foreground mb-4 transition-colors duration-500">
-                  {item.title}
-                </h3>
-                <p className="text-foreground/70 group-hover:text-primary-foreground/80 leading-relaxed transition-colors duration-500">
-                  {item.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
       </section>
 
       {/* Highlights Section */}
