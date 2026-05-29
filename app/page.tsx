@@ -11,10 +11,11 @@ export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   // Fetch data on the server
-  const [banners, experienceSection, locationSection] = await Promise.all([
+  const [banners, experienceSection, locationSection, highlightsSection] = await Promise.all([
     getBannersForPage("inicio").catch(() => []),
     getSeccionByClave("home-experience").catch(() => null),
     getSeccionByClave("home-location").catch(() => null),
+    getSeccionByClave("home-highlights").catch(() => null),
   ])
 
   return (
@@ -24,6 +25,7 @@ export default async function HomePage() {
         mainBanner={banners.length > 0 ? banners[0] : null}
         experienceSection={experienceSection}
         locationSection={locationSection}
+        highlightsSection={highlightsSection}
       />
       <Footer />
       <WhatsAppButton />

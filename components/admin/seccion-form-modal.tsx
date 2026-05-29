@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect, useTransition } from 'react'
-import { X, Loader2 } from 'lucide-react'
+import { X, Loader2, Plus, Trash2 } from 'lucide-react'
 import { ImageUploadField } from '@/components/admin/image-upload-field'
 import { createSeccion, updateSeccion } from '@/lib/admin-secciones'
-import type { Seccion, SeccionInput } from '@/lib/admin-secciones-types'
+import type { Seccion, SeccionInput, SeccionItem } from '@/lib/admin-secciones-types'
 import { PAGINAS_OPCIONES } from '@/lib/admin-secciones-types'
 
 interface SeccionFormModalProps {
@@ -13,6 +13,8 @@ interface SeccionFormModalProps {
   onSaved: () => void
 }
 
+const EMPTY_ITEM: SeccionItem = { imagen_url: '', titulo: '', subtitulo: '', link: '' }
+
 const EMPTY: SeccionInput = {
   clave: '',
   nombre: '',
@@ -20,14 +22,18 @@ const EMPTY: SeccionInput = {
   subtitulo: '',
   descripcion: '',
   imagen_url: '',
+  items_json: null,
   pagina: 'inicio',
   activo: true,
 }
 
 export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModalProps) {
   const [form, setForm] = useState<SeccionInput>(EMPTY)
+  const [items, setItems] = useState<SeccionItem[]>([])
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  // Secciones que usan la edición de múltiples items
+  const isItemsSection = form.clave === 'home-highlights' || form.clave.includes('highlights')
 
   useEffect(() => {
     if (seccion) {
@@ -38,11 +44,14 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
         subtitulo: seccion.subtitulo ?? '',
         descripcion: seccion.descripcion ?? '',
         imagen_url: seccion.imagen_url ?? '',
+        items_json: seccion.items_json ?? null,
         pagina: seccion.pagina,
         activo: seccion.activo,
       })
+      setItems(seccion.items_json ?? [])
     } else {
       setForm(EMPTY)
+      setItems([])
     }
   }, [seccion])
 
@@ -72,6 +81,7 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
         subtitulo: form.subtitulo?.trim() || undefined,
         descripcion: form.descripcion?.trim() || undefined,
         imagen_url: form.imagen_url?.trim() || undefined,
+        items_json: isItemsSection && items.length > 0 ? items : null,
       }
 
       const result = seccion
@@ -203,6 +213,94 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
               )}
             </div>
           </div>
+
+          {/* Editor de items (para secciones tipo highlights) */}
+          {isItemsSection && (
+            <div className="px-6 pb-4 space-y-4">
+              <div className="border-t border-border pt-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">Tarjetas de la sección</h3>
+                    <p className="text-xs text-foreground/50 mt-0.5">Cada tarjeta tiene imagen, título, subtítulo y un link opcional</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setItems(prev => [...prev, { ...EMPTY_ITEM }])}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-medium hover:bg-primary/20 transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Agregar tarjeta
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {items.map((item, idx) => (
+                    <div key={idx} className="p-4 bg-muted/40 rounded-xl border border-border/60 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-foreground/60 uppercase tracking-wide">Tarjeta {idx + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => setItems(prev => prev.filter((_, i) => i !== idx))}
+                          className="p-1 rounded hover:bg-destructive/10 transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-destructive/60" />
+                        </button>
+                      </div>
+
+                      {/* Imagen */}
+                      <ImageUploadField
+                        value={item.imagen_url || null}
+                        onChange={url => setItems(prev => prev.map((it, i) => i === idx ? { ...it, imagen_url: url ?? '' } : it))}
+                        label="Imagen de la tarjeta"
+                      />
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-foreground/70 mb-1">Título</label>
+                          <input
+                            type="text"
+                            value={item.titulo}
+                            onChange={e => setItems(prev => prev.map((it, i) => i === idx ? { ...it, titulo: e.target.value } : it))}
+                            placeholder="Ej: Hamburguesas"
+                            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-foreground/70 mb-1">Subtítulo</label>
+                          <input
+                            type="text"
+                            value={item.subtitulo}
+                            onChange={e => setItems(prev => prev.map((it, i) => i === idx ? { ...it, subtitulo: e.target.value } : it))}
+                            placeholder="Ej: Para comer con ganas"
+                            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-foreground/70 mb-1">
+                          Link <span className="text-foreground/40">(opcional — si lo dejás vacío la tarjeta no redirige a ningún lado)</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={item.link ?? ''}
+                          onChange={e => setItems(prev => prev.map((it, i) => i === idx ? { ...it, link: e.target.value } : it))}
+                          placeholder="Ej: /cocina o https://..."
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        />
+                      </div>
+                    </div>
+                  ))}
+
+                  {items.length === 0 && (
+                    <div className="text-center py-6 text-foreground/40 text-sm border-2 border-dashed border-border rounded-xl">
+                      No hay tarjetas. Hacé clic en "Agregar tarjeta" para comenzar.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {error && (
             <div className="mx-6 mb-4 px-4 py-3 bg-destructive/10 text-destructive text-sm rounded-xl">

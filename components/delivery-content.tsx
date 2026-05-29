@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { useCart } from "@/lib/cart-context"
-import { Plus, Check } from "lucide-react"
+import { Plus } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 import type { MenuCategory } from "@/lib/menu-publico"
 import type { Producto } from "@/lib/admin-productos"
@@ -54,17 +54,25 @@ function useInView(threshold = 0.1) {
   return { ref, isInView }
 }
 
-interface CardItem { id: string; name: string; description: string; price: number; image: string }
+import type { Extra } from "@/lib/admin-productos"
+
+interface CardItem { id: string; name: string; description: string; price: number; image: string; extras?: Extra[] }
 
 function ProductCard({ product }: { product: CardItem }) {
   const { addItem, items } = useCart()
-  const [isAdded, setIsAdded] = useState(false)
   const [showOptionsModal, setShowOptionsModal] = useState(false)
-  const itemInCart = items.find((item) => item.id === product.id)
+  const itemInCart = items.find((item) => item.id === product.id || item.id.startsWith(product.id + "_"))
+  const cartCount = items.filter((item) => item.id === product.id || item.id.startsWith(product.id + "_")).reduce((sum, i) => sum + i.quantity, 0)
+  const hasExtras = product.extras && product.extras.length > 0
   
   const handleAdd = () => {
-    // Abrir modal de opciones en lugar de agregar directamente
-    setShowOptionsModal(true)
+    if (hasExtras) {
+      // Abrir modal para elegir extras
+      setShowOptionsModal(true)
+    } else {
+      // Sin extras: agregar directo al carrito
+      addItem({ id: product.id, name: product.name, price: product.price, image: product.image, precioUnitario: product.price })
+    }
   }
   
   return (
@@ -74,39 +82,47 @@ function ProductCard({ product }: { product: CardItem }) {
           <div className="relative aspect-square sm:aspect-[4/3] overflow-hidden">
             <Image src={product.image} alt={product.name} fill className="object-cover object-center group-hover:scale-105 transition-transform duration-500" />
           </div>
-          {itemInCart && (
+          {cartCount > 0 && (
             <div className="absolute top-3 right-3 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded-full">
-              {itemInCart.quantity} en carrito
+              {cartCount} en carrito
             </div>
           )}
         </div>
         <div className="p-5">
           <h3 className="font-[family-name:var(--font-dm-serif)] text-lg text-primary mb-2">{product.name}</h3>
-          <p className="text-sm text-foreground/60 mb-4 line-clamp-2">{product.description}</p>
-          <div className="flex items-center justify-between">
+          <p className="text-sm text-foreground/60 mb-1 line-clamp-2">{product.description}</p>
+          {hasExtras && (
+            <p className="text-xs text-accent/80 mb-3 font-medium">
+              Personalizable — elige tus opciones
+            </p>
+          )}
+          <div className="flex items-center justify-between mt-3">
             <span className="font-medium text-accent text-lg">${product.price.toLocaleString("es-AR")}</span>
             <button
               onClick={handleAdd}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all duration-300 ${isAdded ? "bg-secondary text-secondary-foreground" : "bg-primary text-primary-foreground hover:bg-secondary"}`}
+              className="flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all duration-300 bg-primary text-primary-foreground hover:bg-secondary"
             >
-              {isAdded ? <><Check className="w-4 h-4" />Agregado</> : <><Plus className="w-4 h-4" />Agregar</>}
+              <Plus className="w-4 h-4" />
+              {hasExtras ? "Personalizar" : "Agregar"}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Opciones modal */}
-      <ProductoOptionsModal
-        isOpen={showOptionsModal}
-        onClose={() => setShowOptionsModal(false)}
-        producto={{
-          id: product.id,
-          nombre: product.name,
-          precio: product.price,
-          imagen_url: product.image,
-          extras: [], // Sin extras por ahora en delivery estático
-        }}
-      />
+      {/* Opciones modal — solo se monta si hay extras */}
+      {hasExtras && (
+        <ProductoOptionsModal
+          isOpen={showOptionsModal}
+          onClose={() => setShowOptionsModal(false)}
+          producto={{
+            id: product.id,
+            nombre: product.name,
+            precio: product.price,
+            imagen_url: product.image,
+            extras: product.extras,
+          }}
+        />
+      )}
     </>
   )
 }
@@ -136,6 +152,7 @@ function mapMenuToCards(menu: MenuCategory[]): { category: string; products: Car
       description: p.descripcion ?? "",
       price: p.precio,
       image: p.imagen_url ?? "/images/wrap-caesar.jpg",
+      extras: p.extras ?? [],
     })),
   })).filter((c) => c.products.length > 0)
 }

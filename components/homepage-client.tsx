@@ -5,14 +5,16 @@ import Link from "next/link"
 import { Coffee, UtensilsCrossed, Wine, ArrowRight } from "lucide-react"
 import { useInView } from "@/hooks/use-in-view"
 import type { Banner, Seccion } from "@/lib/admin-banners-types"
+import type { Seccion as SeccionContent, SeccionItem } from "@/lib/admin-secciones-types"
 
 interface HomepageClientProps {
   mainBanner: Banner | null
   experienceSection: Seccion | null
   locationSection: Seccion | null
+  highlightsSection: SeccionContent | null
 }
 
-export function HomepageClient({ mainBanner, experienceSection, locationSection }: HomepageClientProps) {
+export function HomepageClient({ mainBanner, experienceSection, locationSection, highlightsSection }: HomepageClientProps) {
   const experienceSectionInView = useInView()
   const highlightsSectionInView = useInView()
   const locationSectionInView = useInView()
@@ -105,13 +107,7 @@ export function HomepageClient({ mainBanner, experienceSection, locationSection 
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 animate-bounce hidden md:flex flex-col items-center gap-2">
-          <p className="text-card/60 text-xs tracking-widest uppercase font-medium">Desplazá</p>
-          <div className="w-5 h-8 border-2 border-card/40 rounded-full flex justify-center hover:border-card/60 transition-colors">
-            <div className="w-1 h-2.5 bg-card/40 rounded-full mt-1.5 animate-pulse" />
-          </div>
-        </div>
+
       </section>
 
       {/* Experience Section */}
@@ -173,56 +169,84 @@ export function HomepageClient({ mainBanner, experienceSection, locationSection 
       </section>
 
       {/* Highlights Section */}
-      <section
-        ref={highlightsSectionInView.ref}
-        className="py-24 md:py-32 bg-background"
-      >
-        <div className="max-w-7xl mx-auto px-6">
-          <div className={`text-center mb-16 transition-all duration-700 ${highlightsSectionInView.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-accent">
-              Destacados
-            </span>
-            <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl md:text-5xl text-primary mt-2">
-              Lo que nos hace únicos
-            </h2>
-          </div>
+      {(() => {
+        // Items: usar los de la BD o los defaults hardcodeados
+        const defaultItems: SeccionItem[] = [
+          { imagen_url: "/images/hamburguesa.jpg", titulo: "Hamburguesas", subtitulo: "Para comer con ganas" },
+          { imagen_url: "/images/brunch.jpg", titulo: "Brunch", subtitulo: "Un clásico para compartir" },
+          { imagen_url: "/images/cocktail.jpg", titulo: "Coctelería", subtitulo: "Para quedarse un rato más" },
+          { imagen_url: "/images/cafe.jpg", titulo: "Café", subtitulo: "La pausa favorita de todos" },
+        ]
+        const items = highlightsSection?.items_json?.length ? highlightsSection.items_json : defaultItems
+        const sectionTitulo = highlightsSection?.titulo ?? "Lo que nos hace únicos"
+        const sectionSubtitulo = highlightsSection?.subtitulo ?? "Destacados"
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { image: "/images/hamburguesa.jpg", title: "Hamburguesas", subtitle: "Para comer con ganas", link: "/cocina" },
-              { image: "/images/brunch.jpg", title: "Brunch", subtitle: "Un clásico para compartir", link: "/cafeteria" },
-              { image: "/images/cocktail.jpg", title: "Coctelería", subtitle: "Para quedarse un rato más", link: "/cocina" },
-              { image: "/images/cafe.jpg", title: "Café", subtitle: "La pausa favorita de todos", link: "/cafeteria" },
-            ].map((item, index) => (
-              <Link
-                key={index}
-                href={item.link}
-                className={`group relative aspect-[3/4] rounded-2xl overflow-hidden transition-all duration-700 ${
-                  highlightsSectionInView.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                }`}
-                style={{ transitionDelay: `${index * 100 + 200}ms` }}
-              >
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <span className="font-[family-name:var(--font-reenie-beanie)] text-lg text-card/80">
-                    {item.subtitle}
-                  </span>
-                  <h3 className="font-[family-name:var(--font-dm-serif)] text-2xl text-card">
-                    {item.title}
-                  </h3>
-                </div>
-                <div className="absolute inset-0 border-2 border-transparent group-hover:border-card/30 rounded-2xl transition-colors duration-300" />
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+        return (
+          <section
+            ref={highlightsSectionInView.ref}
+            className="py-24 md:py-32 bg-background"
+          >
+            <div className="max-w-7xl mx-auto px-6">
+              <div className={`text-center mb-16 transition-all duration-700 ${highlightsSectionInView.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-accent">
+                  {sectionSubtitulo}
+                </span>
+                <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl md:text-5xl text-primary mt-2">
+                  {sectionTitulo}
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {items.map((item, index) => {
+                  const inner = (
+                    <>
+                      <Image
+                        src={item.imagen_url || "/images/hero-brunch.jpg"}
+                        alt={item.titulo}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-6">
+                        <span className="font-[family-name:var(--font-reenie-beanie)] text-lg text-card/80">
+                          {item.subtitulo}
+                        </span>
+                        <h3 className="font-[family-name:var(--font-dm-serif)] text-2xl text-card">
+                          {item.titulo}
+                        </h3>
+                      </div>
+                      <div className="absolute inset-0 border-2 border-transparent group-hover:border-card/30 rounded-2xl transition-colors duration-300" />
+                    </>
+                  )
+
+                  const baseClass = `group relative aspect-[3/4] rounded-2xl overflow-hidden transition-all duration-700 ${
+                    highlightsSectionInView.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                  }`
+
+                  return item.link ? (
+                    <Link
+                      key={index}
+                      href={item.link}
+                      className={baseClass}
+                      style={{ transitionDelay: `${index * 100 + 200}ms` }}
+                    >
+                      {inner}
+                    </Link>
+                  ) : (
+                    <div
+                      key={index}
+                      className={baseClass}
+                      style={{ transitionDelay: `${index * 100 + 200}ms` }}
+                    >
+                      {inner}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </section>
+        )
+      })()}
 
       {/* Location Section */}
       <section
