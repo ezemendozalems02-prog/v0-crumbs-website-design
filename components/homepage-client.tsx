@@ -10,14 +10,12 @@ import type { Seccion as SeccionContent, SeccionItem } from "@/lib/admin-seccion
 interface HomepageClientProps {
   mainBanner: Banner | null
   experienceSection: Seccion | null
-  locationSection: Seccion | null
   highlightsSection: SeccionContent | null
 }
 
-export function HomepageClient({ mainBanner, experienceSection, locationSection, highlightsSection }: HomepageClientProps) {
+export function HomepageClient({ mainBanner, experienceSection, highlightsSection }: Omit<HomepageClientProps, 'locationSection'>) {
   const experienceSectionInView = useInView()
   const highlightsSectionInView = useInView()
-  const locationSectionInView = useInView()
 
   // Defaults
   const banner = mainBanner || {
@@ -31,20 +29,6 @@ export function HomepageClient({ mainBanner, experienceSection, locationSection,
     pagina: "inicio",
     activo: true,
     orden: 0,
-    created_at: "",
-    updated_at: "",
-  }
-
-  const locationData = locationSection || {
-    id: "",
-    clave: "home-location",
-    nombre: "Ubicación",
-    titulo: "Encontranos en Ciudad Jardín",
-    subtitulo: "Nos encontrás en",
-    descripcion: "Visítanos en nuestro local",
-    imagen_url: null,
-    pagina: "inicio",
-    activo: true,
     created_at: "",
     updated_at: "",
   }
@@ -247,87 +231,6 @@ export function HomepageClient({ mainBanner, experienceSection, locationSection,
           </section>
         )
       })()}
-
-      {/* Location Section */}
-      <section
-        ref={locationSectionInView.ref}
-        className="py-24 md:py-32 bg-card"
-      >
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Map */}
-            <div className={`aspect-video lg:aspect-square rounded-2xl overflow-hidden shadow-lg transition-all duration-700 cursor-pointer group ${locationSectionInView.isInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
-              <a
-                href="https://maps.app.goo.gl/NcWSJQM2me4j25RK9"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/15 transition-colors duration-300"
-              >
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3282.9449622372753!2d-58.45068!3d-34.604587!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bcb5c8b5c5c5c5%3A0x5c5c5c5c5c5c5c5c!2sCiudad%20Jard%C3%ADn%2C%20Buenos%20Aires!5e0!3m2!1ses!2sar!4v1704067200000"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Ubicación de CRUMBS en Ciudad Jardín"
-                  className="pointer-events-none"
-                />
-              </a>
-            </div>
-
-            {/* Info */}
-            <div className={`space-y-8 transition-all duration-700 delay-200 ${locationSectionInView.isInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
-              <div>
-                <span className="font-[family-name:var(--font-reenie-beanie)] text-xl text-accent">
-                  Visitanos
-                </span>
-                <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl md:text-5xl text-primary mt-2">
-                  {locationData.titulo}
-                </h2>
-              </div>
-
-              <div className="space-y-6">
-                <div className="flex items-start gap-4 p-6 rounded-xl bg-background">
-                  <span className="text-2xl text-accent">📍</span>
-                  <div>
-                    <h4 className="font-medium text-primary mb-1">Dirección</h4>
-                    <p className="text-foreground/70">Ciudad Jardín, Buenos Aires</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4 p-6 rounded-xl bg-background">
-                  <span className="text-2xl text-accent">🕐</span>
-                  <div>
-                    <h4 className="font-medium text-primary mb-3">Horarios</h4>
-                    <div className="space-y-2">
-                      <div>
-                        <span className="text-sm font-medium text-foreground">Cafetería</span>
-                        <p className="text-foreground/70">9 a 20 hs</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium text-foreground">Cocina</span>
-                        <p className="text-foreground/70">12 a 15:30 hs / 20 a 23:30 hs</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <a
-                href="https://maps.app.goo.gl/NcWSJQM2me4j25RK9"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full font-medium hover:bg-secondary transition-colors duration-300 group"
-              >
-                Cómo llegar
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
     </>
   )
 }
