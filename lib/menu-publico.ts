@@ -25,7 +25,14 @@ export async function getMenuByTipo(tipo_menu: "desayuno" | "almuerzo_cena" | "d
 
   const { data: productos, error: prodError } = await supabase
     .from("productos")
-    .select("*, variantes:producto_variantes(*)")
+    .select(`
+      *,
+      variantes:producto_variantes(*),
+      extras:producto_extras(
+        *,
+        opciones:producto_extras_opciones(*)
+      )
+    `)
     .in("categoria_id", categoriaIds)
     .eq("disponible", true)
     .order("orden")

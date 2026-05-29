@@ -90,9 +90,9 @@ export function ProductoFormModal({ producto, categorias, onClose, onSaved }: Pr
         return
       }
 
-      // Guardar extras también
+      // Guardar extras siempre (incluso vacío para limpiar los anteriores al editar)
       const productoId = isEdit ? producto!.id : result.id!
-      if (productoId && extras.length > 0) {
+      if (productoId) {
         const extrasResult = await saveProductoExtras(productoId, extras)
         if (!extrasResult.success) {
           setError(extrasResult.error ?? "Error al guardar extras")
