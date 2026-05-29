@@ -1,7 +1,7 @@
 "use client"
 
 import { useCart } from "@/lib/cart-context"
-import { X, Plus, Minus, ShoppingBag, MessageCircle, User, MapPin, Check } from "lucide-react"
+import { X, Plus, Minus, ShoppingBag, MessageCircle, User, MapPin, Check, Truck, Store } from "lucide-react"
 import { useState } from "react"
 import { whatsappUrl } from "@/lib/whatsapp"
 
@@ -10,10 +10,16 @@ export function Cart() {
 
   const [nombre, setNombre] = useState("")
   const [direccion, setDireccion] = useState("")
+  const [deliveryType, setDeliveryType] = useState<"retiro" | "envio">("retiro")
   const [errors, setErrors] = useState<{ nombre?: string; direccion?: string }>({})
 
+  const DELIVERY_COST = 1000
+  const deliveryCost = deliveryType === "envio" ? DELIVERY_COST : 0
+  const finalTotal = totalPrice + deliveryCost
+
   const nombreCompleto = nombre.trim().length > 0
-  const direccionCompleta = direccion.trim().length > 0
+  const direccionRequired = deliveryType === "envio"
+  const direccionCompleta = !direccionRequired || direccion.trim().length > 0
   const canCheckout = items.length > 0 && nombreCompleto && direccionCompleta
 
   const handleFinalize = () => {
@@ -25,7 +31,7 @@ export function Cart() {
     // Validate synchronously before any state mutation
     const newErrors: { nombre?: string; direccion?: string } = {}
     if (!trimmedNombre) newErrors.nombre = "Completá tu nombre"
-    if (!trimmedDireccion) newErrors.direccion = "Completá tu dirección"
+    if (deliveryType === "envio" && !trimmedDireccion) newErrors.direccion = "Completá tu dirección"
     if (snapshot.length === 0) return
 
     if (Object.keys(newErrors).length > 0) {
@@ -41,13 +47,19 @@ export function Cart() {
       )
       .join("\n")
 
-    const orderTotal = snapshot.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    const orderSubtotal = snapshot.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    const deliveryLine = deliveryType === "envio" ? `\nCargo por envío: $${DELIVERY_COST.toLocaleString("es-AR")}` : ""
+    const orderTotal = orderSubtotal + deliveryCost
+
+    const deliveryTypeText = deliveryType === "retiro" ? "Retiro en local" : "Envío a domicilio"
+    const deliveryInfo = deliveryType === "retiro" ? "(Retiro en local)" : `(Envío a: ${trimmedDireccion})`
 
     const message =
       `Hola Crumbs, quiero hacer este pedido:\n` +
       `Nombre: ${trimmedNombre}\n` +
-      `Dirección: ${trimmedDireccion}\n\n` +
-      `Pedido:\n${itemsList}\n\n` +
+      `Método de entrega: ${deliveryTypeText} ${deliveryInfo}\n\n` +
+      `Pedido:\n${itemsList}\n` +
+      `Subtotal: $${orderSubtotal.toLocaleString("es-AR")}${deliveryLine}\n\n` +
       `Total: $${orderTotal.toLocaleString("es-AR")}`
 
     // Use location.href so Safari iOS never blocks it as a popup.
@@ -177,10 +189,10 @@ export function Cart() {
             <div className="px-6 pb-6">
               <div className="border-t border-primary/10 pt-6">
                 <p className="font-[family-name:var(--font-dm-serif)] text-base text-primary mb-4">
-                  Datos para la entrega
+                  Datos para el pedido
                 </p>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {/* Nombre */}
                   <div>
                     <div className="relative flex items-center">
@@ -210,34 +222,70 @@ export function Cart() {
                     )}
                   </div>
 
-                  {/* Dirección */}
+                  {/* Método de entrega */}
                   <div>
-                    <div className="relative flex items-center">
-                      <MapPin className="absolute left-3.5 w-4 h-4 text-foreground/40 pointer-events-none" />
-                      <input
-                        type="text"
-                        value={direccion}
-                        onChange={(e) => {
-                          setDireccion(e.target.value)
-                          if (e.target.value.trim()) setErrors((prev) => ({ ...prev, direccion: undefined }))
+                    <label className="text-xs font-medium text-foreground/70 mb-2 block">Método de entrega</label>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDeliveryType("retiro")
+                          setErrors((prev) => ({ ...prev, direccion: undefined }))
                         }}
-                        placeholder="Escribí tu dirección"
-                        className={`w-full pl-10 pr-10 py-3 bg-background border rounded-xl text-sm text-foreground placeholder:text-foreground/40 outline-none transition-colors duration-200 focus:border-primary/60 ${
-                          errors.direccion
-                            ? "border-red-400"
-                            : direccionCompleta
-                            ? "border-primary/30"
-                            : "border-primary/15"
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
+                          deliveryType === "retiro"
+                            ? "bg-primary text-primary-foreground shadow-md"
+                            : "bg-background border border-primary/20 text-foreground hover:border-primary/40"
                         }`}
-                      />
-                      {direccionCompleta && (
-                        <Check className="absolute right-3.5 w-4 h-4 text-emerald-500 pointer-events-none" />
+                      >
+                        <Store className="w-4 h-4" />
+                        Retiro en local
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryType("envio")}
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
+                          deliveryType === "envio"
+                            ? "bg-primary text-primary-foreground shadow-md"
+                            : "bg-background border border-primary/20 text-foreground hover:border-primary/40"
+                        }`}
+                      >
+                        <Truck className="w-4 h-4" />
+                        Envío
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Dirección — solo si es envío */}
+                  {deliveryType === "envio" && (
+                    <div>
+                      <div className="relative flex items-center">
+                        <MapPin className="absolute left-3.5 w-4 h-4 text-foreground/40 pointer-events-none" />
+                        <input
+                          type="text"
+                          value={direccion}
+                          onChange={(e) => {
+                            setDireccion(e.target.value)
+                            if (e.target.value.trim()) setErrors((prev) => ({ ...prev, direccion: undefined }))
+                          }}
+                          placeholder="Escribí tu dirección"
+                          className={`w-full pl-10 pr-10 py-3 bg-background border rounded-xl text-sm text-foreground placeholder:text-foreground/40 outline-none transition-colors duration-200 focus:border-primary/60 ${
+                            errors.direccion
+                              ? "border-red-400"
+                              : direccionCompleta
+                              ? "border-primary/30"
+                              : "border-primary/15"
+                          }`}
+                        />
+                        {direccionCompleta && direccion.trim().length > 0 && (
+                          <Check className="absolute right-3.5 w-4 h-4 text-emerald-500 pointer-events-none" />
+                        )}
+                      </div>
+                      {errors.direccion && (
+                        <p className="text-xs text-red-400 mt-1.5 pl-1">{errors.direccion}</p>
                       )}
                     </div>
-                    {errors.direccion && (
-                      <p className="text-xs text-red-400 mt-1.5 pl-1">{errors.direccion}</p>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -250,10 +298,23 @@ export function Cart() {
             className="flex-none border-t border-primary/10 bg-card px-6 pt-5 space-y-4"
             style={{ paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
           >
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-foreground/70">Subtotal</span>
+                <span className="text-foreground">${totalPrice.toLocaleString("es-AR")}</span>
+              </div>
+              {deliveryType === "envio" && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-foreground/70">Cargo por envío</span>
+                  <span className="text-accent">+${DELIVERY_COST.toLocaleString("es-AR")}</span>
+                </div>
+              )}
+            </div>
+
             <div className="flex items-center justify-between">
-              <span className="text-foreground/70">Total</span>
+              <span className="text-foreground/70 font-medium">Total</span>
               <span className="font-[family-name:var(--font-dm-serif)] text-2xl text-primary">
-                ${totalPrice.toLocaleString("es-AR")}
+                ${finalTotal.toLocaleString("es-AR")}
               </span>
             </div>
 
