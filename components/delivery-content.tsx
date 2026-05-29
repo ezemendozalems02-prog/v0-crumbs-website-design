@@ -88,22 +88,23 @@ function ProductCard({ product }: { product: CardItem }) {
             </div>
           )}
         </div>
-        <div className="p-5">
-          <h3 className="font-[family-name:var(--font-dm-serif)] text-lg text-primary mb-2">{product.name}</h3>
-          <p className="text-sm text-foreground/60 mb-1 line-clamp-2">{product.description}</p>
+        <div className="p-4 sm:p-5">
+          <h3 className="font-[family-name:var(--font-dm-serif)] text-base sm:text-lg text-primary mb-1 sm:mb-2">{product.name}</h3>
+          <p className="text-xs sm:text-sm text-foreground/60 mb-2 line-clamp-2">{product.description}</p>
           {hasExtras && (
             <p className="text-xs text-accent/80 mb-3 font-medium">
               Personalizable — elige tus opciones
             </p>
           )}
           <div className="flex items-center justify-between mt-3">
-            <span className="font-medium text-accent text-lg">${product.price.toLocaleString("es-AR")}</span>
+            <span className="font-medium text-accent text-base sm:text-lg">${product.price.toLocaleString("es-AR")}</span>
             <button
               onClick={handleAdd}
-              className="flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all duration-300 bg-primary text-primary-foreground hover:bg-secondary"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full font-medium text-sm sm:text-base transition-all duration-300 bg-primary text-primary-foreground hover:bg-secondary"
             >
               <Plus className="w-4 h-4" />
-              {hasExtras ? "Personalizar" : "Agregar"}
+              <span className="hidden sm:inline">{hasExtras ? "Personalizar" : "Agregar"}</span>
+              <span className="sm:hidden">{hasExtras ? "Pers." : "Agreg."}</span>
             </button>
           </div>
         </div>
@@ -136,7 +137,7 @@ function CategorySection({ category, products }: { category: string; products: C
       className="scroll-mt-32"
     >
       <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl text-primary mb-8">{category}</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {products.map((product) => <ProductCard key={product.id} product={product} />)}
       </div>
     </div>
