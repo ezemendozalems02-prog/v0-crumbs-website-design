@@ -15,12 +15,16 @@ interface ProductoOptionsModalProps {
     imagen_url?: string | null
     extras?: Extra[]
   }
+  varianteSeleccionada?: string
+  onFinish?: () => void
 }
 
 export function ProductoOptionsModal({
   isOpen,
   onClose,
   producto,
+  varianteSeleccionada,
+  onFinish,
 }: ProductoOptionsModalProps) {
   const { addItem } = useCart()
   const [quantity, setQuantity] = useState(1)
@@ -88,18 +92,23 @@ export function ProductoOptionsModal({
       return
     }
 
+    const extrasText = Object.values(selectedExtras).length > 0 ? ` (${Object.values(selectedExtras).map((e) => e.opcion_nombre).join(", ")})` : ""
+    const varianteText = varianteSeleccionada ? ` - ${varianteSeleccionada}` : ""
+    
     addItem({
       id: `${producto.id}_${Object.values(selectedExtras)
         .map((e) => e.opcion_id)
-        .join("_")}`,
-      name: `${producto.nombre}${Object.values(selectedExtras).length > 0 ? ` (${Object.values(selectedExtras).map((e) => e.opcion_nombre).join(", ")})` : ""}`,
+        .join("_")}${varianteSeleccionada ? `_${varianteSeleccionada}` : ""}`,
+      name: `${producto.nombre}${varianteText}${extrasText}`,
       price: producto.precio,
       image: producto.imagen_url ?? undefined,
       extras: Object.values(selectedExtras),
+      variante: varianteSeleccionada,
       precioUnitario: totalPrice,
     })
 
     onClose()
+    onFinish?.()
     setQuantity(1)
     setSelectedExtras({})
   }
@@ -110,7 +119,10 @@ export function ProductoOptionsModal({
         {/* Header */}
         <div className="sticky top-0 bg-background border-b border-border/20 px-6 py-4 flex items-start justify-between">
           <div>
-            <h2 className="font-bold text-lg text-foreground">{producto.nombre}</h2>
+            <h2 className="font-bold text-lg text-foreground">
+              {producto.nombre}
+              {varianteSeleccionada && <span className="text-sm text-accent ml-2">— {varianteSeleccionada}</span>}
+            </h2>
             <p className="text-sm text-foreground/60">${producto.precio.toLocaleString("es-AR")}</p>
           </div>
           <button

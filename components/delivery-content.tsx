@@ -2,10 +2,10 @@
 
 import Image from "next/image"
 import { useCart } from "@/lib/cart-context"
-import { Plus } from "lucide-react"
+import { Plus, X } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 import type { MenuCategory } from "@/lib/menu-publico"
-import type { Producto } from "@/lib/admin-productos"
+import type { Producto, Variante } from "@/lib/admin-productos"
 import { ProductoOptionsModal } from "@/components/producto-options-modal"
 
 // Static fallback items for delivery
@@ -58,34 +58,103 @@ import type { Extra, Variante } from "@/lib/admin-productos"
 
 interface CardItem { id: string; name: string; description: string; price: number; image: string; extras?: Extra[]; variantes?: Variante[] }
 
+// Modal para seleccionar variantes
+function VariantesModal({
+  isOpen,
+  onClose,
+  product,
+  onSelectVariante,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  product: CardItem
+  onSelectVariante: (variante: Variante) => void
+}) {
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center">
+      <div className="bg-card w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="font-[family-name:var(--font-dm-serif)] text-2xl text-primary">{product.name}</h2>
+          <button
+            onClick={onClose}
+            className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-background transition-colors"
+          >
+            <X className="w-5 h-5 text-foreground/60" />
+          </button>
+        </div>
+
+        <p className="text-sm text-foreground/70 mb-6">{product.description}</p>
+
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-foreground/60 uppercase mb-3">Elige tu variante:</p>
+          {product.variantes?.map((variante) => (
+            <button
+              key={variante.id}
+              onClick={() => onSelectVariante(variante)}
+              className="w-full flex items-center justify-between p-4 rounded-xl border border-primary/20 bg-background hover:bg-primary/5 hover:border-primary/40 transition-colors duration-300 text-left"
+            >
+              <span className="font-medium text-primary">{variante.nombre}</span>
+              <span className="font-medium text-accent">${variante.precio.toLocaleString("es-AR")}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ProductCard({ product }: { product: CardItem }) {
   const { addItem, items } = useCart()
+  const [showVariantesModal, setShowVariantesModal] = useState(false)
   const [showOptionsModal, setShowOptionsModal] = useState(false)
+  const [selectedVariante, setSelectedVariante] = useState<Variante | null>(null)
   const itemInCart = items.find((item) => item.id === product.id || item.id.startsWith(product.id + "_"))
   const cartCount = items.filter((item) => item.id === product.id || item.id.startsWith(product.id + "_")).reduce((sum, i) => sum + i.quantity, 0)
   const hasExtras = product.extras && product.extras.length > 0
   const hasVariantes = product.variantes && product.variantes.length > 0
   
-  // Calcular rango de precios si hay variantes
+  // Mostrar solo el precio más bajo
   let priceDisplay = `$${product.price.toLocaleString("es-AR")}`
   if (hasVariantes) {
     const variantePrices = product.variantes.map(v => v.precio)
     const minPrice = Math.min(product.price, ...variantePrices)
-    const maxPrice = Math.max(product.price, ...variantePrices)
-    if (minPrice !== maxPrice) {
-      priceDisplay = `$${minPrice.toLocaleString("es-AR")} - $${maxPrice.toLocaleString("es-AR")}`
-    } else {
-      priceDisplay = `$${minPrice.toLocaleString("es-AR")}`
-    }
+    priceDisplay = `$${minPrice.toLocaleString("es-AR")}`
   }
   
   const handleAdd = () => {
-    if (hasExtras) {
-      // Abrir modal para elegir extras
+    // Si hay variantes, mostrar selector primero
+    if (hasVariantes) {
+      setShowVariantesModal(true)
+    } else if (hasExtras) {
+      // Si solo hay extras, abrir modal de extras
       setShowOptionsModal(true)
     } else {
-      // Sin extras: agregar directo al carrito
+      // Sin variantes ni extras: agregar directo
       addItem({ id: product.id, name: product.name, price: product.price, image: product.image, precioUnitario: product.price })
+    }
+  }
+
+  const handleVarianteSelected = (variante: Variante) => {
+    setSelectedVariante(variante)
+    setShowVariantesModal(false)
+    
+    // Si hay extras, abrir modal de extras con la variante seleccionada
+    if (hasExtras) {
+      setShowOptionsModal(true)
+    } else {
+      // Sin extras: agregar directo con la variante
+      const itemId = `${product.id}_${variante.id}`
+      addItem({
+        id: itemId,
+        name: `${product.name} - ${variante.nombre}`,
+        price: variante.precio,
+        image: product.image,
+        precioUnitario: variante.precio,
+        variante: variante.nombre,
+      })
+      setSelectedVariante(null)
     }
   }
   
@@ -111,16 +180,11 @@ function ProductCard({ product }: { product: CardItem }) {
             </p>
           )}
           <div className="flex items-center justify-between mt-3">
-            <div className="flex flex-col">
-              <span className="font-medium text-accent text-base sm:text-lg">{priceDisplay}</span>
-              {hasVariantes && (
-                <span className="text-xs text-foreground/50 mt-0.5">Con variantes</span>
-              )}
-            </div>
+            <span className="font-medium text-accent text-base sm:text-lg">{priceDisplay}</span>
             <button
               onClick={handleAdd}
               className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full transition-all duration-300 bg-primary text-primary-foreground hover:bg-secondary"
-              title={hasExtras ? "Personalizar" : "Agregar"}
+              title={hasVariantes ? "Elegir variante" : hasExtras ? "Personalizar" : "Agregar"}
             >
               <Plus className="w-5 h-5" />
             </button>
@@ -128,18 +192,33 @@ function ProductCard({ product }: { product: CardItem }) {
         </div>
       </div>
 
-      {/* Opciones modal — solo se monta si hay extras */}
+      {/* Modal de variantes */}
+      {hasVariantes && (
+        <VariantesModal
+          isOpen={showVariantesModal}
+          onClose={() => setShowVariantesModal(false)}
+          product={product}
+          onSelectVariante={handleVarianteSelected}
+        />
+      )}
+
+      {/* Modal de opciones/extras — con variante preseleccionada si aplica */}
       {hasExtras && (
         <ProductoOptionsModal
           isOpen={showOptionsModal}
-          onClose={() => setShowOptionsModal(false)}
+          onClose={() => {
+            setShowOptionsModal(false)
+            setSelectedVariante(null)
+          }}
           producto={{
             id: product.id,
             nombre: product.name,
-            precio: product.price,
+            precio: selectedVariante ? selectedVariante.precio : product.price,
             imagen_url: product.image,
             extras: product.extras,
           }}
+          varianteSeleccionada={selectedVariante?.nombre}
+          onFinish={() => setSelectedVariante(null)}
         />
       )}
     </>
