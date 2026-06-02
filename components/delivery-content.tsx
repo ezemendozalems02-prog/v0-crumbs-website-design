@@ -100,11 +100,10 @@ function ProductCard({ product }: { product: CardItem }) {
             <span className="font-medium text-accent text-base sm:text-lg">${product.price.toLocaleString("es-AR")}</span>
             <button
               onClick={handleAdd}
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full font-medium text-sm sm:text-base transition-all duration-300 bg-primary text-primary-foreground hover:bg-secondary"
+              className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full transition-all duration-300 bg-primary text-primary-foreground hover:bg-secondary"
+              title={hasExtras ? "Personalizar" : "Agregar"}
             >
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">{hasExtras ? "Personalizar" : "Agregar"}</span>
-              <span className="sm:hidden">{hasExtras ? "Pers." : "Agreg."}</span>
+              <Plus className="w-5 h-5" />
             </button>
           </div>
         </div>
