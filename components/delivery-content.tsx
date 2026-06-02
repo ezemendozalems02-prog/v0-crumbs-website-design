@@ -54,9 +54,9 @@ function useInView(threshold = 0.1) {
   return { ref, isInView }
 }
 
-import type { Extra } from "@/lib/admin-productos"
+import type { Extra, Variante } from "@/lib/admin-productos"
 
-interface CardItem { id: string; name: string; description: string; price: number; image: string; extras?: Extra[] }
+interface CardItem { id: string; name: string; description: string; price: number; image: string; extras?: Extra[]; variantes?: Variante[] }
 
 function ProductCard({ product }: { product: CardItem }) {
   const { addItem, items } = useCart()
@@ -64,6 +64,20 @@ function ProductCard({ product }: { product: CardItem }) {
   const itemInCart = items.find((item) => item.id === product.id || item.id.startsWith(product.id + "_"))
   const cartCount = items.filter((item) => item.id === product.id || item.id.startsWith(product.id + "_")).reduce((sum, i) => sum + i.quantity, 0)
   const hasExtras = product.extras && product.extras.length > 0
+  const hasVariantes = product.variantes && product.variantes.length > 0
+  
+  // Calcular rango de precios si hay variantes
+  let priceDisplay = `$${product.price.toLocaleString("es-AR")}`
+  if (hasVariantes) {
+    const variantePrices = product.variantes.map(v => v.precio)
+    const minPrice = Math.min(product.price, ...variantePrices)
+    const maxPrice = Math.max(product.price, ...variantePrices)
+    if (minPrice !== maxPrice) {
+      priceDisplay = `$${minPrice.toLocaleString("es-AR")} - $${maxPrice.toLocaleString("es-AR")}`
+    } else {
+      priceDisplay = `$${minPrice.toLocaleString("es-AR")}`
+    }
+  }
   
   const handleAdd = () => {
     if (hasExtras) {
@@ -97,7 +111,12 @@ function ProductCard({ product }: { product: CardItem }) {
             </p>
           )}
           <div className="flex items-center justify-between mt-3">
-            <span className="font-medium text-accent text-base sm:text-lg">${product.price.toLocaleString("es-AR")}</span>
+            <div className="flex flex-col">
+              <span className="font-medium text-accent text-base sm:text-lg">{priceDisplay}</span>
+              {hasVariantes && (
+                <span className="text-xs text-foreground/50 mt-0.5">Con variantes</span>
+              )}
+            </div>
             <button
               onClick={handleAdd}
               className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full transition-all duration-300 bg-primary text-primary-foreground hover:bg-secondary"
@@ -153,6 +172,7 @@ function mapMenuToCards(menu: MenuCategory[]): { category: string; products: Car
       price: p.precio,
       image: p.imagen_url ?? "/images/wrap-caesar.jpg",
       extras: p.extras ?? [],
+      variantes: p.variantes ?? [],
     })),
   })).filter((c) => c.products.length > 0)
 }
