@@ -146,12 +146,22 @@ function ProductCard({ product }: { product: CardItem }) {
   )
 }
 
+// Sanitizar string para ID válido en CSS (remover acentos y caracteres especiales)
+function sanitizeId(str: string): string {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remover acentos
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "") // Remover caracteres especiales
+}
+
 function CategorySection({ category, products }: { category: string; products: CardItem[] }) {
   const { ref, isInView } = useInView()
   return (
     <div
       ref={ref}
-      id={category.toLowerCase().replace(/\s+/g, "-")}
+      id={sanitizeId(category)}
       className="scroll-mt-32"
     >
       <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl text-primary mb-8">{category}</h2>
