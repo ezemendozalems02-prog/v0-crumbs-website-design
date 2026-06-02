@@ -229,7 +229,7 @@ export function DeliveryContent({ liveMenu, bannerImageUrl }: Props) {
             {categories.map((category) => (
               <a
                 key={category}
-                href={`#${category.toLowerCase().replace(/\s+/g, "-")}`}
+                href={`#${sanitizeId(category)}`}
                 onClick={() => setActiveCategory(category)}
                 className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors duration-300 ${activeCategory === category ? "bg-primary text-primary-foreground" : "bg-background text-foreground/70 hover:bg-primary/10 hover:text-primary"}`}
               >
