@@ -3,7 +3,7 @@
  * ALL WhatsApp links across the site must import from here.
  */
 
-export const WHATSAPP_NUMBER = "5491136634236"
+export const WHATSAPP_NUMBER = "5491172476661"
 
 /** Returns a wa.me URL with an optional pre-filled message */
 export function whatsappUrl(message?: string): string {

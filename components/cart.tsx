@@ -64,7 +64,7 @@ export function Cart() {
 
     // Use location.href so Safari iOS never blocks it as a popup.
     // This must happen before any setState call to stay within the user gesture.
-    const url = `https://wa.me/5491136634236?text=${encodeURIComponent(message)}`
+    const url = `https://wa.me/5491172476661?text=${encodeURIComponent(message)}`
     window.location.href = url
 
     // State cleanup after navigation is triggered

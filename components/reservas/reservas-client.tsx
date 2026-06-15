@@ -179,7 +179,7 @@ export function ReservasClient({ bannerImageUrl }: ReservasClientProps) {
         `Confirmo que lei y acepto el tiempo de tolerancia de la reserva.\n\n` +
         `Por favor, confirmen disponibilidad. Gracias.`
       setSubmitSuccess(true)
-      window.location.href = `https://wa.me/5491136634236?text=${encodeURIComponent(message)}`
+      window.location.href = `https://wa.me/5491172476661?text=${encodeURIComponent(message)}`
     })
   }
 
