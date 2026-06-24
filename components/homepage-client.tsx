@@ -94,14 +94,9 @@ export function HomepageClient({ mainBanner, highlightsSection }: HomepageClient
 
       {/* Highlights Section */}
       {(() => {
-        // Items: usar los de la BD o los defaults hardcodeados
-        const defaultItems: SeccionItem[] = [
-          { imagen_url: "/images/hamburguesa.jpg", titulo: "Hamburguesas", subtitulo: "Para comer con ganas" },
-          { imagen_url: "/images/brunch.jpg", titulo: "Brunch", subtitulo: "Un clásico para compartir" },
-          { imagen_url: "/images/cocktail.jpg", titulo: "Coctelería", subtitulo: "Para quedarse un rato más" },
-          { imagen_url: "/images/cafe.jpg", titulo: "Café", subtitulo: "La pausa favorita de todos" },
-        ]
-        const items = highlightsSection?.items_json?.length ? highlightsSection.items_json : defaultItems
+        // NUNCA usar fallback a defaultItems — eso pisa los cambios guardados en la DB
+        // Los items SIEMPRE vienen de la DB, nunca de hardcode
+        const items = highlightsSection?.items_json ?? []
         const sectionTitulo = highlightsSection?.titulo ?? "Lo que nos hace únicos"
         const sectionSubtitulo = highlightsSection?.subtitulo ?? "Destacados"
 
