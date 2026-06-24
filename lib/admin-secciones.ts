@@ -71,16 +71,11 @@ export async function updateSeccion(id: string, input: Partial<SeccionInput>): P
     payload.items_json = payload.items_json
   }
 
-  console.log("[admin-secciones] updateSeccion sending payload:", JSON.stringify({ id, payload: { ...payload, items_json: payload.items_json ? `[${(payload.items_json as any[]).length} items]` : null } }))
-
   const { error, data } = await supabase.from("secciones").update(payload).eq("id", id).select("id, clave, items_json")
   if (error) {
     console.error("[admin-secciones] updateSeccion error:", error)
     return { success: false, error: error.message }
   }
-
-  const savedData = Array.isArray(data) ? data[0] : data
-  console.log("[admin-secciones] updateSeccion success, data saved:", JSON.stringify({ id: savedData?.id, clave: savedData?.clave, items_length: (savedData?.items_json as any[])?.length }))
 
   revalidarTodo()
   return { success: true }

@@ -1,3 +1,4 @@
+import { unstable_noStore as noStore } from 'next/cache'
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { WhatsAppButton } from "@/components/whatsapp-button"
@@ -10,7 +11,8 @@ export const revalidate = 0
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
-  // Fetch data on the server
+  noStore()
+  // Fetch data on the server - SIEMPRE FRESCO
   const [banners, highlightsSection] = await Promise.all([
     getBannersForPage("inicio").catch(() => []),
     getSeccionByClave("home-highlights").catch(() => null),
