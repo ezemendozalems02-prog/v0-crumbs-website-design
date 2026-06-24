@@ -1,3 +1,4 @@
+import { createClient } from "@/lib/supabase/server"
 import type { Banner } from "@/lib/admin-banners-types"
 import type { Seccion } from "@/lib/admin-secciones-types"
 
@@ -55,15 +56,22 @@ export async function getBannersForPage(pagina: string): Promise<Banner[]> {
   }
 }
 
-// Traer una sección por clave — sin caché
+// Traer una sección por clave — siempre fresco, usando el cliente de Supabase
 export async function getSeccionByClave(clave: string): Promise<Seccion | null> {
   try {
-    const data = await supabaseFetch<Seccion>("secciones", {
-      clave: `eq.${clave}`,
-      activo: "eq.true",
-      limit: "1",
-    })
-    return data[0] ?? null
+    // Usamos el cliente de Supabase (no fetch) para evitar el Data Cache de Next.js
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from("secciones")
+      .select("*")
+      .eq("clave", clave)
+      .eq("activo", true)
+      .maybeSingle()
+    if (error) {
+      console.error("[public-content] getSeccionByClave error:", error.message)
+      return null
+    }
+    return data
   } catch (err) {
     console.error("[public-content] getSeccionByClave exception:", err)
     return null
