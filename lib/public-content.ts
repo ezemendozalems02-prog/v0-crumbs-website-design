@@ -58,11 +58,26 @@ export async function getBannersForPage(pagina: string): Promise<Banner[]> {
 // Traer una sección por clave — sin caché
 export async function getSeccionByClave(clave: string): Promise<Seccion | null> {
   try {
-    const data = await supabaseFetch<Seccion>("secciones", {
-      clave: `eq.${clave}`,
-      activo: "eq.true",
-      limit: "1",
+    const url = new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/secciones`)
+    url.searchParams.set("select", "*")
+    url.searchParams.set("clave", `eq.${clave}`)
+    url.searchParams.set("activo", "eq.true")
+    url.searchParams.set("limit", "1")
+
+    const res = await fetch(url.toString(), {
+      cache: "no-store",
+      headers: {
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+        Pragma: "no-cache",
+      },
     })
+
+    if (!res.ok) return null
+    const data: Seccion[] = await res.json()
     return data[0] ?? null
   } catch (err) {
     console.error("[public-content] getSeccionByClave exception:", err)

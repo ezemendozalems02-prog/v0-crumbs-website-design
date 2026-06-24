@@ -59,8 +59,23 @@ export async function createSeccion(input: SeccionInput): Promise<{ success: boo
 
 export async function updateSeccion(id: string, input: Partial<SeccionInput>): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
-  const { error } = await supabase.from("secciones").update(input).eq("id", id)
-  if (error) return { success: false, error: error.message }
+
+  // Asegurar que items_json se guarde como objeto nativo JSONB, no como string
+  const payload: Record<string, unknown> = { ...input }
+  if (payload.items_json !== undefined && payload.items_json !== null) {
+    // Si por alguna razón llega como string, parsear
+    if (typeof payload.items_json === "string") {
+      try { payload.items_json = JSON.parse(payload.items_json) } catch { payload.items_json = [] }
+    }
+    // Forzar cast a JSONB pasando el array tal cual (el cliente de Supabase lo serializa)
+    payload.items_json = payload.items_json
+  }
+
+  const { error } = await supabase.from("secciones").update(payload).eq("id", id)
+  if (error) {
+    console.error("[admin-secciones] updateSeccion error:", error)
+    return { success: false, error: error.message }
+  }
   revalidarTodo()
   return { success: true }
 }
