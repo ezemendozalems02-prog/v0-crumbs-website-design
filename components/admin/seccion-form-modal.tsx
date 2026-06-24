@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useEffect, useTransition, useRef } from 'react'
 import { X, Loader2, Plus, Trash2 } from 'lucide-react'
 import { ImageUploadField } from '@/components/admin/image-upload-field'
 import { createSeccion, updateSeccion } from '@/lib/admin-secciones'
@@ -30,6 +30,7 @@ const EMPTY: SeccionInput = {
 export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModalProps) {
   const [form, setForm] = useState<SeccionInput>(EMPTY)
   const [items, setItems] = useState<SeccionItem[]>([])
+  const itemsRef = useRef<SeccionItem[]>([])
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   // Secciones que usan la edición de múltiples items
@@ -48,12 +49,24 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
         pagina: seccion.pagina,
         activo: seccion.activo,
       })
-      setItems(seccion.items_json ?? [])
+      const initial = seccion.items_json ?? []
+      setItems(initial)
+      itemsRef.current = initial
     } else {
       setForm(EMPTY)
       setItems([])
+      itemsRef.current = []
     }
   }, [seccion])
+
+  // Mantener ref siempre sincronizado con el estado
+  const updateItems = (updater: SeccionItem[] | ((prev: SeccionItem[]) => SeccionItem[])) => {
+    setItems(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      itemsRef.current = next
+      return next
+    })
+  }
 
   const set = (key: keyof SeccionInput, value: string | boolean) =>
     setForm(prev => ({ ...prev, [key]: value }))
@@ -81,7 +94,8 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
         subtitulo: form.subtitulo?.trim() || undefined,
         descripcion: form.descripcion?.trim() || undefined,
         imagen_url: form.imagen_url?.trim() || undefined,
-        items_json: isItemsSection && items.length > 0 ? items : null,
+        // Usar ref para garantizar el valor más reciente independientemente de closures de React
+        items_json: isItemsSection && itemsRef.current.length > 0 ? itemsRef.current : null,
       }
 
       const result = seccion
@@ -225,7 +239,7 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
                   </div>
                   <button
                     type="button"
-                    onClick={() => setItems(prev => [...prev, { ...EMPTY_ITEM }])}
+                    onClick={() => updateItems(prev => [...prev, { ...EMPTY_ITEM }])}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-medium hover:bg-primary/20 transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -240,7 +254,7 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
                         <span className="text-xs font-semibold text-foreground/60 uppercase tracking-wide">Tarjeta {idx + 1}</span>
                         <button
                           type="button"
-                          onClick={() => setItems(prev => prev.filter((_, i) => i !== idx))}
+                          onClick={() => updateItems(prev => prev.filter((_, i) => i !== idx))}
                           className="p-1 rounded hover:bg-destructive/10 transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5 text-destructive/60" />
@@ -250,7 +264,7 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
                       {/* Imagen */}
                       <ImageUploadField
                         value={item.imagen_url || null}
-                        onChange={url => setItems(prev => prev.map((it, i) => i === idx ? { ...it, imagen_url: url ?? '' } : it))}
+                        onChange={url => updateItems(prev => prev.map((it, i) => i === idx ? { ...it, imagen_url: url ?? '' } : it))}
                         label="Imagen de la tarjeta"
                       />
 
@@ -260,7 +274,7 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
                           <input
                             type="text"
                             value={item.titulo}
-                            onChange={e => setItems(prev => prev.map((it, i) => i === idx ? { ...it, titulo: e.target.value } : it))}
+                            onChange={e => updateItems(prev => prev.map((it, i) => i === idx ? { ...it, titulo: e.target.value } : it))}
                             placeholder="Ej: Hamburguesas"
                             className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                           />
@@ -270,7 +284,7 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
                           <input
                             type="text"
                             value={item.subtitulo}
-                            onChange={e => setItems(prev => prev.map((it, i) => i === idx ? { ...it, subtitulo: e.target.value } : it))}
+                            onChange={e => updateItems(prev => prev.map((it, i) => i === idx ? { ...it, subtitulo: e.target.value } : it))}
                             placeholder="Ej: Para comer con ganas"
                             className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                           />
@@ -284,7 +298,7 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
                         <input
                           type="text"
                           value={item.link ?? ''}
-                          onChange={e => setItems(prev => prev.map((it, i) => i === idx ? { ...it, link: e.target.value } : it))}
+                            onChange={e => updateItems(prev => prev.map((it, i) => i === idx ? { ...it, link: e.target.value } : it))}
                           placeholder="Ej: /cocina o https://..."
                           className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                         />
