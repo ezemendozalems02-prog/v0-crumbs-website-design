@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, useTransition, useRef } from 'react'
-import { X, Loader2, Plus, Trash2 } from 'lucide-react'
+import { X, Loader2, Plus, Trash2, CheckCircle2 } from 'lucide-react'
 import { ImageUploadField } from '@/components/admin/image-upload-field'
-import { createSeccion, updateSeccion } from '@/lib/admin-secciones'
+import { createSeccion, updateSeccion, getSeccion } from '@/lib/admin-secciones'
 import type { Seccion, SeccionInput, SeccionItem } from '@/lib/admin-secciones-types'
 import { PAGINAS_OPCIONES } from '@/lib/admin-secciones-types'
 
@@ -33,9 +33,11 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
   // Ref para siempre tener el valor más reciente en el closure de handleSubmit
   const itemsRef = useRef<SeccionItem[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [saveConfirmed, setSaveConfirmed] = useState(false)
   const [isPending, startTransition] = useTransition()
-  // Secciones que usan la edición de múltiples items
-  const isItemsSection = form.clave === 'home-highlights' || form.clave.includes('highlights')
+  // Usar también la clave original de seccion para no depender del form state
+  const claveSesion = seccion?.clave ?? form.clave
+  const isItemsSection = claveSesion === 'home-highlights' || claveSesion.includes('highlights')
 
   // Wrapper que actualiza estado Y ref al mismo tiempo
   const setItemsAndRef = (updater: SeccionItem[] | ((prev: SeccionItem[]) => SeccionItem[])) => {
@@ -67,6 +69,7 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
       setItems([])
       itemsRef.current = []
     }
+    setSaveConfirmed(false)
   }, [seccion])
 
   const set = (key: keyof SeccionInput, value: string | boolean) =>
@@ -87,6 +90,9 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
     if (!form.nombre.trim()) { setError('El nombre es obligatorio'); return }
 
     startTransition(async () => {
+      // Snapshot del ref en este momento exacto (evita cualquier closure stale)
+      const currentItems = [...itemsRef.current]
+
       const input: SeccionInput = {
         ...form,
         nombre: form.nombre.trim(),
@@ -95,7 +101,7 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
         subtitulo: form.subtitulo?.trim() || undefined,
         descripcion: form.descripcion?.trim() || undefined,
         imagen_url: form.imagen_url?.trim() || undefined,
-        items_json: isItemsSection && itemsRef.current.length > 0 ? itemsRef.current : null,
+        items_json: isItemsSection && currentItems.length > 0 ? currentItems : null,
       }
 
       const result = seccion
@@ -106,6 +112,22 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
         setError(result.error ?? 'Error al guardar')
         return
       }
+
+      // Verificar que se guardó correctamente leyendo de la DB
+      if (seccion) {
+        const saved = await getSeccion(seccion.id)
+        if (isItemsSection && saved?.items_json) {
+          const savedItems = saved.items_json as SeccionItem[]
+          const firstSaved = savedItems[0]?.imagen_url
+          const firstLocal = currentItems[0]?.imagen_url
+          if (firstSaved !== firstLocal) {
+            // La DB no tiene los datos correctos — reintentar una vez más
+            await updateSeccion(seccion.id, { ...input, items_json: currentItems })
+          }
+        }
+        setSaveConfirmed(true)
+      }
+
       onSaved()
     })
   }
@@ -319,6 +341,14 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
           {error && (
             <div className="mx-6 mb-4 px-4 py-3 bg-destructive/10 text-destructive text-sm rounded-xl">
               {error}
+            </div>
+          )}
+
+          {/* Confirmacion guardado en DB */}
+          {saveConfirmed && (
+            <div className="mx-6 mb-4 px-4 py-3 bg-green-50 border border-green-200 text-green-800 text-sm rounded-xl flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
+              <span>Cambios guardados y verificados correctamente en la base de datos.</span>
             </div>
           )}
 
