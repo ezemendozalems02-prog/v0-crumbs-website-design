@@ -89,6 +89,8 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
     setError(null)
     if (!form.nombre.trim()) { setError('El nombre es obligatorio'); return }
 
+    alert("V246 ACTIVO - handleSubmit ejecutando")
+
     startTransition(async () => {
       // Snapshot del ref en este momento exacto
       const currentItems = [...itemsRef.current]
