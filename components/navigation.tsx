@@ -8,7 +8,7 @@ import { Menu, X } from "lucide-react"
 const navLinks = [
   { href: "/", label: "Inicio" },
   { href: "/nosotros", label: "Nosotros" },
-  { href: "/delivery", label: "Delivery" },
+  { href: "/delivery", label: "Pedir delivery o Take away" },
   { href: "/reservas", label: "Reservas", highlight: true },
   { href: "/contacto", label: "Contacto" },
   { href: "/trabaja-con-nosotros", label: "Trabajá con nosotros" },

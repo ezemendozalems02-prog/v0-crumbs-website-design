@@ -8,9 +8,12 @@ import type { Seccion, SeccionInput } from "@/lib/admin-secciones-types"
 const RUTAS_PUBLICAS = ["/", "/cafeteria", "/cocina", "/delivery", "/nosotros", "/reservas", "/admin/secciones"]
 
 function revalidarTodo() {
+  // Revalidar todas las rutas públicas
   for (const ruta of RUTAS_PUBLICAS) {
-    revalidatePath(ruta)
+    revalidatePath(ruta, "layout")
   }
+  // Fuerza revalidación del layout raíz también
+  revalidatePath("/", "layout")
 }
 
 export async function getSecciones(pagina?: string): Promise<Seccion[]> {
