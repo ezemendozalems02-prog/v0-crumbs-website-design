@@ -60,18 +60,20 @@ export async function createSeccion(input: SeccionInput): Promise<{ success: boo
 export async function updateSeccion(id: string, input: Partial<SeccionInput>): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
 
-  // Asegurar que items_json se guarde como objeto nativo JSONB, no como string
-  const payload: Record<string, unknown> = { ...input }
-  if (payload.items_json !== undefined && payload.items_json !== null) {
-    // Si por alguna razón llega como string, parsear
-    if (typeof payload.items_json === "string") {
-      try { payload.items_json = JSON.parse(payload.items_json) } catch { payload.items_json = [] }
+  // Construir payload para UPDATE
+  const payload: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(input)) {
+    if (key === 'items_json' && value !== undefined && value !== null) {
+      // items_json se envía como JSON array/object — Supabase lo convertirá a JSONB
+      payload[key] = value
+    } else if (value !== undefined) {
+      payload[key] = value
     }
-    // Forzar cast a JSONB pasando el array tal cual (el cliente de Supabase lo serializa)
-    payload.items_json = payload.items_json
   }
 
-  const { error, data } = await supabase.from("secciones").update(payload).eq("id", id).select("id, clave, items_json")
+  // Usar rpc o query raw para asegurar que JSONB se guarde correctamente
+  // Si items_json existe, lo mandamos como está; Supabase JS lo serializa a JSON y PostgreSQL lo almacena como JSONB
+  const { error } = await supabase.from("secciones").update(payload).eq("id", id)
   if (error) {
     console.error("[admin-secciones] updateSeccion error:", error)
     return { success: false, error: error.message }
