@@ -101,7 +101,9 @@ export function HomepageClient({ mainBanner, highlightsSection }: HomepageClient
           { imagen_url: "/images/cocktail.jpg", titulo: "Coctelería", subtitulo: "Para quedarse un rato más" },
           { imagen_url: "/images/cafe.jpg", titulo: "Café", subtitulo: "La pausa favorita de todos" },
         ]
-        const items = highlightsSection?.items_json?.length ? highlightsSection.items_json : defaultItems
+        // Usar items_json de la DB directamente, sin fallback a defaultItems
+        // Esto garantiza que los cambios en el admin se vean reflejados inmediatamente
+        const items = highlightsSection?.items_json || defaultItems
         const sectionTitulo = highlightsSection?.titulo ?? "Lo que nos hace únicos"
         const sectionSubtitulo = highlightsSection?.subtitulo ?? "Destacados"
 
@@ -122,6 +124,8 @@ export function HomepageClient({ mainBanner, highlightsSection }: HomepageClient
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {items.map((item, index) => {
+                  // Key única que cambia cuando la imagen cambia, forzando re-render
+                  const itemKey = `${item.titulo}-${item.imagen_url}-${index}`
                   const inner = (
                     <>
                       <Image
@@ -149,7 +153,7 @@ export function HomepageClient({ mainBanner, highlightsSection }: HomepageClient
 
                   return item.link ? (
                     <Link
-                      key={index}
+                      key={itemKey}
                       href={item.link}
                       className={baseClass}
                       style={{ transitionDelay: `${index * 100 + 200}ms` }}
@@ -158,7 +162,7 @@ export function HomepageClient({ mainBanner, highlightsSection }: HomepageClient
                     </Link>
                   ) : (
                     <div
-                      key={index}
+                      key={itemKey}
                       className={baseClass}
                       style={{ transitionDelay: `${index * 100 + 200}ms` }}
                     >

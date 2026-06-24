@@ -98,9 +98,13 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
         items_json: isItemsSection && itemsRef.current.length > 0 ? itemsRef.current : null,
       }
 
+      console.log('[v0] Guardando sección:', { clave: input.clave, itemsCount: input.items_json?.length, items: input.items_json })
+
       const result = seccion
         ? await updateSeccion(seccion.id, input)
         : await createSeccion(input)
+
+      console.log('[v0] Resultado del guardado:', result)
 
       if (!result.success) {
         setError(result.error ?? 'Error al guardar')
