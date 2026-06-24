@@ -57,12 +57,14 @@ export async function createSeccion(input: SeccionInput): Promise<{ success: boo
   return { success: true, id: data.id }
 }
 
-export async function updateSeccion(id: string, input: Partial<SeccionInput>): Promise<{ success: boolean; error?: string }> {
+export async function updateSeccion(id: string, input: Partial<SeccionInput>): Promise<{ success: boolean; data?: Seccion; error?: string }> {
   const supabase = await createClient()
-  const { error } = await supabase.from("secciones").update(input).eq("id", id)
+  console.log("[v0] updateSeccion input.items_json:", input.items_json ? `${(input.items_json as any).length} items` : "null")
+  const { data, error } = await supabase.from("secciones").update(input).eq("id", id).select().single()
   if (error) return { success: false, error: error.message }
+  console.log("[v0] updateSeccion saved data.items_json:", data?.items_json ? `${(data.items_json as any).length} items` : "null")
   revalidarTodo()
-  return { success: true }
+  return { success: true, data }
 }
 
 export async function toggleSeccionActiva(id: string, activo: boolean): Promise<{ success: boolean; error?: string }> {

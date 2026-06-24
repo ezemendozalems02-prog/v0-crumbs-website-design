@@ -90,7 +90,7 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
     if (!form.nombre.trim()) { setError('El nombre es obligatorio'); return }
 
     startTransition(async () => {
-      // Snapshot del ref en este momento exacto (evita cualquier closure stale)
+      // Snapshot del ref en este momento exacto
       const currentItems = [...itemsRef.current]
 
       const input: SeccionInput = {
@@ -104,6 +104,8 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
         items_json: isItemsSection && currentItems.length > 0 ? currentItems : null,
       }
 
+      console.log("[v0] ITEMS QUE SE VAN A GUARDAR:", currentItems.map(i => ({ titulo: i.titulo, imagen_url: i.imagen_url })))
+
       const result = seccion
         ? await updateSeccion(seccion.id, input)
         : await createSeccion(input)
@@ -113,18 +115,17 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
         return
       }
 
-      // Verificar que se guardó correctamente leyendo de la DB
-      if (seccion) {
-        const saved = await getSeccion(seccion.id)
-        if (isItemsSection && saved?.items_json) {
-          const savedItems = saved.items_json as SeccionItem[]
-          const firstSaved = savedItems[0]?.imagen_url
-          const firstLocal = currentItems[0]?.imagen_url
-          if (firstSaved !== firstLocal) {
-            // La DB no tiene los datos correctos — reintentar una vez más
-            await updateSeccion(seccion.id, { ...input, items_json: currentItems })
-          }
-        }
+      console.log("[v0] DATA DEVUELTA POR SUPABASE:", result.data?.items_json ? `${(result.data.items_json as any).length} items` : "null")
+
+      // Si actualizamos sección existente, reemplazar estado local con data de DB
+      if (seccion && result.data) {
+        const savedItems = result.data.items_json as SeccionItem[]
+        console.log("[v0] ITEMS GUARDADOS EN DB:", savedItems.map(i => ({ titulo: i.titulo, imagen_url: i.imagen_url })))
+        
+        // Actualizar todo con lo que devolvió Supabase
+        setItems(savedItems)
+        itemsRef.current = savedItems
+        setForm(result.data)
         setSaveConfirmed(true)
       }
 
