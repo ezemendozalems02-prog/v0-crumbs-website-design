@@ -76,7 +76,7 @@ export function HomepageClient({ mainBanner, highlightsSection }: HomepageClient
               href="/delivery"
               className="group bg-accent text-accent-foreground px-6 sm:px-8 py-4 sm:py-5 rounded-full font-medium hover:bg-secondary transition-all duration-300 flex items-center justify-center gap-2 text-base sm:text-lg w-full sm:w-auto"
             >
-              Pedir delivery
+              Pedir delivery o Take away
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform hidden sm:inline" />
             </Link>
             <Link
