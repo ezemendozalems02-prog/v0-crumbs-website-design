@@ -20,9 +20,6 @@ async function supabaseFetch<T>(
     url.searchParams.set(key, value)
   }
 
-  // Agregar timestamp para forzar que nunca cachee (evita CDN y navegador cache)
-  url.searchParams.set("_t", Date.now().toString())
-
   const res = await fetch(url.toString(), {
     cache: "no-store",
     headers: {
@@ -61,7 +58,6 @@ export async function getBannersForPage(pagina: string): Promise<Banner[]> {
 // Traer una sección por clave — sin caché
 export async function getSeccionByClave(clave: string): Promise<Seccion | null> {
   try {
-    // Usar supabaseFetch que ya maneja no-store, headers, etc.
     const data = await supabaseFetch<Seccion>("secciones", {
       clave: `eq.${clave}`,
       activo: "eq.true",

@@ -59,26 +59,8 @@ export async function createSeccion(input: SeccionInput): Promise<{ success: boo
 
 export async function updateSeccion(id: string, input: Partial<SeccionInput>): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
-
-  // Construir payload para UPDATE
-  const payload: Record<string, unknown> = {}
-  for (const [key, value] of Object.entries(input)) {
-    if (key === 'items_json' && value !== undefined && value !== null) {
-      // items_json se envía como JSON array/object — Supabase lo convertirá a JSONB
-      payload[key] = value
-    } else if (value !== undefined) {
-      payload[key] = value
-    }
-  }
-
-  // Usar rpc o query raw para asegurar que JSONB se guarde correctamente
-  // Si items_json existe, lo mandamos como está; Supabase JS lo serializa a JSON y PostgreSQL lo almacena como JSONB
-  const { error } = await supabase.from("secciones").update(payload).eq("id", id)
-  if (error) {
-    console.error("[admin-secciones] updateSeccion error:", error)
-    return { success: false, error: error.message }
-  }
-
+  const { error } = await supabase.from("secciones").update(input).eq("id", id)
+  if (error) return { success: false, error: error.message }
   revalidarTodo()
   return { success: true }
 }
