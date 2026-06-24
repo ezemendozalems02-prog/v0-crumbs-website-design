@@ -66,7 +66,7 @@ export async function getSeccionByClave(clave: string): Promise<Seccion | null> 
       clave: `eq.${clave}`,
       activo: "eq.true",
       limit: "1",
-    }, "*")
+    })
     return data[0] ?? null
   } catch (err) {
     console.error("[public-content] getSeccionByClave exception:", err)
