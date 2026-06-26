@@ -94,9 +94,20 @@ export function HomepageClient({ mainBanner, highlightsSection }: HomepageClient
 
       {/* Highlights Section */}
       {(() => {
-        // NUNCA usar fallback a defaultItems — eso pisa los cambios guardados en la DB
-        // Los items SIEMPRE vienen de la DB, nunca de hardcode
-        const items = highlightsSection?.items_json ?? []
+        // Fallback solo cuando no hay ninguna card activa configurada en la DB —
+        // nunca pisa cards reales, solo evita que la sección quede vacía.
+        const FALLBACK_ITEMS: SeccionItem[] = [
+          { imagen_url: "/images/hamburguesa.jpg", titulo: "Hamburguesas", subtitulo: "Para comer con ganas" },
+          { imagen_url: "/images/brunch.jpg", titulo: "Brunch", subtitulo: "Un clásico para compartir" },
+          { imagen_url: "/images/cocktail.jpg", titulo: "Coctelería", subtitulo: "Para quedarse un rato más" },
+          { imagen_url: "/images/cafe.jpg", titulo: "Café", subtitulo: "La pausa favorita de todos" },
+        ]
+
+        const activeItems = (highlightsSection?.items_json ?? [])
+          .filter(item => item.is_active !== false)
+          .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+
+        const items = activeItems.length > 0 ? activeItems : FALLBACK_ITEMS
         const sectionTitulo = highlightsSection?.titulo ?? "Lo que nos hace únicos"
         const sectionSubtitulo = highlightsSection?.subtitulo ?? "Destacados"
 

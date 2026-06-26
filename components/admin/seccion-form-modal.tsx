@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useTransition, useRef } from 'react'
-import { X, Loader2, Plus, Trash2, CheckCircle2 } from 'lucide-react'
+import { X, Loader2, Plus, Trash2, CheckCircle2, ChevronUp, ChevronDown } from 'lucide-react'
 import { ImageUploadField } from '@/components/admin/image-upload-field'
 import { createSeccion, updateSeccion, getSeccion } from '@/lib/admin-secciones'
 import type { Seccion, SeccionInput, SeccionItem } from '@/lib/admin-secciones-types'
@@ -13,7 +13,7 @@ interface SeccionFormModalProps {
   onSaved: () => void
 }
 
-const EMPTY_ITEM: SeccionItem = { imagen_url: '', titulo: '', subtitulo: '', link: '' }
+const EMPTY_ITEM: SeccionItem = { imagen_url: '', titulo: '', subtitulo: '', link: '', is_active: true }
 
 const EMPTY: SeccionInput = {
   clave: '',
@@ -44,6 +44,16 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
     setItems(prev => {
       const next = typeof updater === 'function' ? updater(prev) : updater
       itemsRef.current = next
+      return next
+    })
+  }
+
+  const moveItem = (idx: number, direction: -1 | 1) => {
+    setItemsAndRef(prev => {
+      const targetIdx = idx + direction
+      if (targetIdx < 0 || targetIdx >= prev.length) return prev
+      const next = [...prev]
+      ;[next[idx], next[targetIdx]] = [next[targetIdx], next[idx]]
       return next
     })
   }
@@ -89,11 +99,9 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
     setError(null)
     if (!form.nombre.trim()) { setError('El nombre es obligatorio'); return }
 
-    alert("V246 ACTIVO - handleSubmit ejecutando")
-
     startTransition(async () => {
-      // Snapshot del ref en este momento exacto
-      const currentItems = [...itemsRef.current]
+      // Snapshot del ref en este momento exacto, con sort_order normalizado a la posición actual
+      const currentItems = itemsRef.current.map((item, idx) => ({ ...item, sort_order: idx }))
 
       const input: SeccionInput = {
         ...form,
@@ -106,8 +114,6 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
         items_json: isItemsSection && currentItems.length > 0 ? currentItems : null,
       }
 
-      console.log("[v0] ITEMS QUE SE VAN A GUARDAR:", currentItems.map(i => ({ titulo: i.titulo, imagen_url: i.imagen_url })))
-
       const result = seccion
         ? await updateSeccion(seccion.id, input)
         : await createSeccion(input)
@@ -117,14 +123,9 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
         return
       }
 
-      console.log("[v0] DATA DEVUELTA POR SUPABASE:", result.data?.items_json ? `${(result.data.items_json as any).length} items` : "null")
-
       // Si actualizamos sección existente, reemplazar estado local con data de DB
       if (seccion && result.data) {
-        const savedItems = result.data.items_json as SeccionItem[]
-        console.log("[v0] ITEMS GUARDADOS EN DB:", savedItems.map(i => ({ titulo: i.titulo, imagen_url: i.imagen_url })))
-        
-        // Actualizar todo con lo que devolvió Supabase
+        const savedItems = (result.data.items_json as SeccionItem[]) ?? []
         setItems(savedItems)
         itemsRef.current = savedItems
         setForm(result.data)
@@ -274,17 +275,50 @@ export function SeccionFormModal({ seccion, onClose, onSaved }: SeccionFormModal
 
                 <div className="space-y-4">
                   {items.map((item, idx) => (
-                    <div key={idx} className="p-4 bg-muted/40 rounded-xl border border-border/60 space-y-3">
+                    <div key={idx} className={`p-4 bg-muted/40 rounded-xl border border-border/60 space-y-3 transition-opacity ${item.is_active === false ? 'opacity-60' : ''}`}>
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-foreground/60 uppercase tracking-wide">Tarjeta {idx + 1}</span>
-                        <button
-                          type="button"
-                          onClick={() => setItemsAndRef(prev => prev.filter((_, i) => i !== idx))}
-                          className="p-1 rounded hover:bg-destructive/10 transition-colors"
-                        >
-                          <Trash2 className="w-3.5 h-3.5 text-destructive/60" />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => moveItem(idx, -1)}
+                            disabled={idx === 0}
+                            className="p-1 rounded hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            title="Subir"
+                          >
+                            <ChevronUp className="w-3.5 h-3.5 text-foreground/60" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveItem(idx, 1)}
+                            disabled={idx === items.length - 1}
+                            className="p-1 rounded hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            title="Bajar"
+                          >
+                            <ChevronDown className="w-3.5 h-3.5 text-foreground/60" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setItemsAndRef(prev => prev.filter((_, i) => i !== idx))}
+                            className="p-1 rounded hover:bg-destructive/10 transition-colors"
+                            title="Eliminar"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-destructive/60" />
+                          </button>
+                        </div>
                       </div>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <div
+                          onClick={() => setItemsAndRef(prev => prev.map((it, i) => i === idx ? { ...it, is_active: it.is_active === false } : it))}
+                          className={`relative w-9 h-[18px] rounded-full transition-colors cursor-pointer ${item.is_active !== false ? 'bg-primary' : 'bg-foreground/20'}`}
+                        >
+                          <span className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-white rounded-full shadow transition-transform ${item.is_active !== false ? 'translate-x-[18px]' : 'translate-x-0'}`} />
+                        </div>
+                        <span className="text-xs font-medium text-foreground/70">
+                          {item.is_active !== false ? 'Tarjeta activa' : 'Tarjeta inactiva'}
+                        </span>
+                      </label>
 
                       {/* Imagen */}
                       <ImageUploadField

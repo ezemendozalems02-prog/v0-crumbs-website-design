@@ -7,6 +7,8 @@ export type SeccionItem = {
   titulo: string
   subtitulo: string
   link?: string // Opcional: si se define, la tarjeta es clickeable
+  is_active?: boolean // Default true si no esta definido (compatibilidad con items guardados antes de este campo)
+  sort_order?: number // Default = indice en el array si no esta definido
 }
 
 export type Seccion = {
