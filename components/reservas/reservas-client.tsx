@@ -9,6 +9,7 @@ import { ReservationForm } from "@/components/reservas/reservation-form"
 import { ReservationSummary } from "@/components/reservas/reservation-summary"
 import { AvailabilityBadge } from "@/components/reservas/availability-badge"
 import { getDisponibilidad, crearReserva, enviarConfirmacionReserva } from "@/lib/reservas"
+import type { ReservationTime } from "@/lib/admin-horarios-types"
 
 export type TableOption = {
   id: "2" | "4" | "6" | "8+"
@@ -64,18 +65,14 @@ export const TABLE_OPTIONS: TableOption[] = [
   },
 ]
 
-export const HORARIOS = [
-  "12:00", "12:30", "13:00", "13:30",
-  "20:00", "20:30", "21:00", "21:30", "22:00",
-]
-
 export const STOCK_TOTAL = 100
 
 interface ReservasClientProps {
   bannerImageUrl?: string | null
+  horarios: ReservationTime[]
 }
 
-export function ReservasClient({ bannerImageUrl }: ReservasClientProps) {
+export function ReservasClient({ bannerImageUrl, horarios }: ReservasClientProps) {
   const [selectedTable, setSelectedTable] = useState<TableOption | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedTime, setSelectedTime] = useState<string>("")
@@ -234,7 +231,7 @@ export function ReservasClient({ bannerImageUrl }: ReservasClientProps) {
         <section>
           <SectionLabel number="03" title="Elegi un horario" />
           <TimeSelector
-            horarios={HORARIOS}
+            horarios={horarios}
             selected={selectedTime}
             onSelect={(h) => {
               setSelectedTime(h)

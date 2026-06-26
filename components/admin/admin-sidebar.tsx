@@ -3,11 +3,12 @@
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, UtensilsCrossed, BookOpen, Tag, CalendarCheck, Briefcase, Grid3x3, Image as ImageIcon, LayoutTemplate, Settings } from "lucide-react"
+import { LayoutDashboard, UtensilsCrossed, BookOpen, Tag, CalendarCheck, Briefcase, Grid3x3, Image as ImageIcon, LayoutTemplate, Settings, Clock } from "lucide-react"
 import { AdminLogoutButton } from "@/components/admin/logout-button"
 
 const navItems = [
   { href: "/admin/reservas",     label: "Reservas",          icon: CalendarCheck },
+  { href: "/admin/horarios",     label: "Horarios",          icon: Clock },
   { href: "/admin/productos",    label: "Productos",          icon: UtensilsCrossed },
   { href: "/admin/categorias",   label: "Categorías",         icon: Tag },
   { href: "/admin/mesas",        label: "Mesas",              icon: Grid3x3 },

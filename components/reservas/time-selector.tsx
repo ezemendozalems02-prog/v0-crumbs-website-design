@@ -1,31 +1,37 @@
 "use client"
 
+import type { ReservationTime } from "@/lib/admin-horarios-types"
+import { MEAL_TYPE_OPCIONES } from "@/lib/admin-horarios-types"
+
 interface TimeSelectorProps {
-  horarios: string[]
+  horarios: ReservationTime[]
   selected: string
   onSelect: (h: string) => void
   error?: string
 }
 
-const TURNO_ALMUERZO = ["12:00", "12:30", "13:00", "13:30"]
-const TURNO_CENA = ["20:00", "20:30", "21:00", "21:30", "22:00"]
-
 export function TimeSelector({ horarios, selected, onSelect, error }: TimeSelectorProps) {
   return (
     <div>
       <div className="space-y-6">
-        <TimeGroup
-          label="Almuerzo"
-          times={TURNO_ALMUERZO}
-          selected={selected}
-          onSelect={onSelect}
-        />
-        <TimeGroup
-          label="Cena"
-          times={TURNO_CENA}
-          selected={selected}
-          onSelect={onSelect}
-        />
+        {MEAL_TYPE_OPCIONES.map(({ value, label }) => {
+          const times = horarios
+            .filter((h) => h.meal_type === value)
+            .sort((a, b) => a.sort_order - b.sort_order || a.time.localeCompare(b.time))
+            .map((h) => h.time)
+
+          if (times.length === 0) return null
+
+          return (
+            <TimeGroup
+              key={value}
+              label={label}
+              times={times}
+              selected={selected}
+              onSelect={onSelect}
+            />
+          )
+        })}
       </div>
       {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
     </div>
