@@ -173,7 +173,7 @@ function ProductCard({ product }: { product: CardItem }) {
         </div>
         <div className="p-4 sm:p-5">
           <h3 className="font-[family-name:var(--font-dm-serif)] text-base sm:text-lg text-primary mb-1 sm:mb-2">{product.name}</h3>
-          <p className="text-xs sm:text-sm text-foreground/60 mb-2 line-clamp-2">{product.description}</p>
+          <p className="text-xs sm:text-sm text-foreground/60 mb-2 line-clamp-4 sm:line-clamp-2">{product.description}</p>
           {hasExtras && (
             <p className="text-xs text-accent/80 mb-3 font-medium">
               Personalizable — elige tus opciones
