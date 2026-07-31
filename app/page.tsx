@@ -4,16 +4,15 @@ import { WhatsAppButton } from "@/components/whatsapp-button"
 import { HomepageClient } from "@/components/homepage-client"
 import { getBannersForPage, getSeccionByClave } from "@/lib/public-content"
 
-// Revalidar cada cambio (ISR con revalidación inmediata)
-export const revalidate = 0
-// Force dynamic rendering - sin caché estático
-export const dynamic = 'force-dynamic'
+// ISR: cachear por 1 hora, pero invalidar on-demand cuando el admin guarda
+// Esto reduce egress de 2000 queries/día a ~5-10
+export const revalidate = 3600
 
 export default async function HomePage() {
-  // Fetch data on the server
+  // Fetch data on the server with ISR tags para on-demand revalidation
   const [banners, highlightsSection] = await Promise.all([
-    getBannersForPage("inicio").catch(() => []),
-    getSeccionByClave("home-highlights").catch(() => null),
+    getBannersForPage("inicio", { tags: ['banners', 'banners-inicio'] }).catch(() => []),
+    getSeccionByClave("home-highlights", { tags: ['secciones', 'secciones-highlights'] }).catch(() => null),
   ])
 
   return (

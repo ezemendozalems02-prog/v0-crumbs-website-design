@@ -1,7 +1,7 @@
 "use server"
 
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import type { Banner, BannerInput } from "@/lib/admin-banners-types"
 
 // Service role client — bypasa RLS para operaciones de admin
@@ -12,27 +12,11 @@ function getServiceClient() {
   return createSupabaseClient(url, key, { auth: { persistSession: false } })
 }
 
-const ALL_PAGES = ["/", "/cafeteria", "/cocina", "/delivery", "/reservas", "/trabajar", "/contacto", "/nosotros"]
-
 const revalidateBannerPages = (pagina?: string) => {
-  const map: Record<string, string> = {
-    inicio: "/",
-    cafeteria: "/cafeteria",
-    cocina: "/cocina",
-    delivery: "/delivery",
-    reservas: "/reservas",
-    trabajar: "/trabajar",
-    contacto: "/contacto",
-    nosotros: "/nosotros",
-  }
-
-  if (pagina && map[pagina]) {
-    revalidatePath(map[pagina], "layout")
-  } else {
-    // Revalidar todas las páginas si no se especifica
-    for (const path of ALL_PAGES) {
-      revalidatePath(path, "layout")
-    }
+  // Usar revalidateTag para on-demand revalidation (mucho más eficiente)
+  revalidateTag("banners")
+  if (pagina) {
+    revalidateTag(`banners-${pagina}`)
   }
   revalidatePath("/admin/banners", "page")
 }

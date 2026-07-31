@@ -2,12 +2,13 @@ import { createClient } from "@/lib/supabase/server"
 import type { Banner } from "@/lib/admin-banners-types"
 import type { Seccion } from "@/lib/admin-secciones-types"
 
-// Hacer fetch directo a la API REST de Supabase con cache: 'no-store'
-// Esto evita que el Data Cache de Next.js guarde los datos entre requests
+// Hacer fetch directo a la API REST de Supabase con ISR tags
+// Con tags, permite on-demand revalidation cuando el admin guarda
 async function supabaseFetch<T>(
   table: string,
   filters: Record<string, string>,
-  selectCols = "*"
+  selectCols = "*",
+  tags?: string[]
 ): Promise<T[]> {
   const url = new URL(
     `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/${table}`
@@ -22,14 +23,12 @@ async function supabaseFetch<T>(
   }
 
   const res = await fetch(url.toString(), {
-    cache: "no-store",
+    next: { revalidate: 3600, tags: tags || [] },
     headers: {
       apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
       "Content-Type": "application/json",
       Accept: "application/json",
-      "Cache-Control": "no-store, no-cache, must-revalidate",
-      Pragma: "no-cache",
     },
   })
 
@@ -41,14 +40,17 @@ async function supabaseFetch<T>(
   return res.json()
 }
 
-// Traer banners de una página específica — sin caché
-export async function getBannersForPage(pagina: string): Promise<Banner[]> {
+// Traer banners de una página específica — con ISR tags para on-demand revalidation
+export async function getBannersForPage(
+  pagina: string,
+  options?: { tags?: string[] }
+): Promise<Banner[]> {
   try {
     const data = await supabaseFetch<Banner>("banners", {
       pagina: `eq.${pagina}`,
       activo: "eq.true",
       order: "orden.asc",
-    })
+    }, "*", options?.tags)
     return data
   } catch (err) {
     console.error("[public-content] getBannersForPage exception:", err)
@@ -56,22 +58,18 @@ export async function getBannersForPage(pagina: string): Promise<Banner[]> {
   }
 }
 
-// Traer una sección por clave — siempre fresco, usando el cliente de Supabase
-export async function getSeccionByClave(clave: string): Promise<Seccion | null> {
+// Traer una sección por clave — con ISR tags para on-demand revalidation
+export async function getSeccionByClave(
+  clave: string,
+  options?: { tags?: string[] }
+): Promise<Seccion | null> {
   try {
-    // Usamos el cliente de Supabase (no fetch) para evitar el Data Cache de Next.js
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from("secciones")
-      .select("*")
-      .eq("clave", clave)
-      .eq("activo", true)
-      .maybeSingle()
-    if (error) {
-      console.error("[public-content] getSeccionByClave error:", error.message)
-      return null
-    }
-    return data
+    // Usar fetch con tags en lugar de cliente Supabase para permitir ISR
+    const data = await supabaseFetch<Seccion>("secciones", {
+      clave: `eq.${clave}`,
+      activo: "eq.true",
+    }, "*", options?.tags)
+    return data[0] ?? null
   } catch (err) {
     console.error("[public-content] getSeccionByClave exception:", err)
     return null

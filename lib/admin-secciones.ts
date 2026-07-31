@@ -1,19 +1,17 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
 import type { Seccion, SeccionInput } from "@/lib/admin-secciones-types"
 
-// Páginas públicas que usan secciones — se invalidan tras cada cambio
-const RUTAS_PUBLICAS = ["/", "/cafeteria", "/cocina", "/delivery", "/nosotros", "/reservas", "/admin/secciones"]
-
+// Función mejorada: invalidar por tags (mucho más eficiente que revalidatePath)
 function revalidarTodo() {
-  // Revalidar todas las rutas públicas
-  for (const ruta of RUTAS_PUBLICAS) {
-    revalidatePath(ruta, "layout")
-  }
-  // Fuerza revalidación del layout raíz también
-  revalidatePath("/", "layout")
+  // Invalidar por tags en lugar de todas las rutas
+  // Esto es mucho más eficiente: solo regenera lo que depende de esos tags
+  revalidateTag("secciones")
+  revalidateTag("banners")
+  // También mantener revalidatePath para admin panel
+  revalidatePath("/admin/secciones", "page")
 }
 
 export async function getSecciones(pagina?: string): Promise<Seccion[]> {
