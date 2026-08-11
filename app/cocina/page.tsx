@@ -9,10 +9,9 @@ import type { MenuCategory } from "@/lib/menu-publico"
 import { getBannersForPage, getSeccionByClave } from "@/lib/public-content"
 import type { Banner } from "@/lib/admin-banners-types"
 
-// Revalidar cada cambio (ISR con revalidación inmediata)
-export const revalidate = 0
-// Force dynamic rendering - sin caché estático
-export const dynamic = 'force-dynamic'
+// ISR: revalida cada 60s. Los cambios del admin (banners/secciones/menú) se
+// reflejan al instante vía revalidatePath(), sin esperar la ventana de ISR.
+export const revalidate = 60
 
 const staticMenuData: MenuCategory[] = [
   {

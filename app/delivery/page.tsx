@@ -6,7 +6,9 @@ import { Cart } from "@/components/cart"
 import { CartProvider } from "@/lib/cart-context"
 import { DeliveryContent } from "@/components/delivery-content"
 
-export const dynamic = "force-dynamic"
+// ISR: revalida cada 60s. Los cambios del admin (banners/menú) se reflejan
+// al instante vía revalidatePath(), sin esperar la ventana de ISR.
+export const revalidate = 60
 
 export default async function DeliveryPage() {
   const [liveMenu, banners] = await Promise.all([

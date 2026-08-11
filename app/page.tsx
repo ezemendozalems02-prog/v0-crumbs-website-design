@@ -4,10 +4,9 @@ import { WhatsAppButton } from "@/components/whatsapp-button"
 import { HomepageClient } from "@/components/homepage-client"
 import { getBannersForPage, getSeccionByClave } from "@/lib/public-content"
 
-// Revalidar cada cambio (ISR con revalidación inmediata)
-export const revalidate = 0
-// Force dynamic rendering - sin caché estático
-export const dynamic = 'force-dynamic'
+// ISR: revalida cada 60s. Los cambios del admin (banners/secciones) se
+// reflejan al instante vía revalidatePath(), sin esperar la ventana de ISR.
+export const revalidate = 60
 
 export default async function HomePage() {
   // Fetch data on the server

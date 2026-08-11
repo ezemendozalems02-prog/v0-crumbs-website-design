@@ -4,7 +4,9 @@ import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { WhatsAppButton } from "@/components/whatsapp-button"
 
-export const dynamic = "force-dynamic"
+// ISR: revalida cada 60s. Los cambios del admin (banners) se reflejan al
+// instante vía revalidatePath(), sin esperar la ventana de ISR.
+export const revalidate = 60
 
 export default async function ContactoPage() {
   const banners = await getBannersForPage("contacto")

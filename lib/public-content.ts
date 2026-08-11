@@ -1,9 +1,12 @@
-import { createClient } from "@/lib/supabase/server"
 import type { Banner } from "@/lib/admin-banners-types"
 import type { Seccion } from "@/lib/admin-secciones-types"
 
-// Hacer fetch directo a la API REST de Supabase con cache: 'no-store'
-// Esto evita que el Data Cache de Next.js guarde los datos entre requests
+// Hacer fetch directo a la API REST de Supabase.
+// Next.js 15+ no cachea fetch() por defecto (cambio de default respecto a
+// versiones previas), por eso se declara next.revalidate explícito acá para
+// que quede sujeto a la Data Cache de Next con la misma ventana que el ISR
+// de las páginas (60s). La invalidación puntual al guardar en el admin sigue
+// haciéndose vía revalidatePath() en lib/admin-banners.ts / lib/admin-secciones.ts.
 async function supabaseFetch<T>(
   table: string,
   filters: Record<string, string>,
@@ -22,14 +25,12 @@ async function supabaseFetch<T>(
   }
 
   const res = await fetch(url.toString(), {
-    cache: "no-store",
+    next: { revalidate: 60 },
     headers: {
       apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
       "Content-Type": "application/json",
       Accept: "application/json",
-      "Cache-Control": "no-store, no-cache, must-revalidate",
-      Pragma: "no-cache",
     },
   })
 
@@ -56,22 +57,16 @@ export async function getBannersForPage(pagina: string): Promise<Banner[]> {
   }
 }
 
-// Traer una sección por clave — siempre fresco, usando el cliente de Supabase
+// Traer una sección por clave — consulta pública sin cookies (mismo patrón
+// que getBannersForPage). La tabla "secciones" tiene RLS pública de solo
+// lectura (scripts/009_fix_secciones_rls.sql), no depende de sesión.
 export async function getSeccionByClave(clave: string): Promise<Seccion | null> {
   try {
-    // Usamos el cliente de Supabase (no fetch) para evitar el Data Cache de Next.js
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from("secciones")
-      .select("*")
-      .eq("clave", clave)
-      .eq("activo", true)
-      .maybeSingle()
-    if (error) {
-      console.error("[public-content] getSeccionByClave error:", error.message)
-      return null
-    }
-    return data
+    const data = await supabaseFetch<Seccion>("secciones", {
+      clave: `eq.${clave}`,
+      activo: "eq.true",
+    })
+    return data[0] ?? null
   } catch (err) {
     console.error("[public-content] getSeccionByClave exception:", err)
     return null

@@ -5,7 +5,9 @@ import { Footer } from "@/components/footer"
 import { WhatsAppButton } from "@/components/whatsapp-button"
 import { ReservasClient } from "@/components/reservas/reservas-client"
 
-export const dynamic = "force-dynamic"
+// ISR: revalida cada 60s. Los cambios del admin (banners/horarios) se
+// reflejan al instante vía revalidatePath(), sin esperar la ventana de ISR.
+export const revalidate = 60
 
 export default async function ReservasPage() {
   const [banners, horarios] = await Promise.all([

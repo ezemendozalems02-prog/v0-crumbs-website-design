@@ -10,19 +10,38 @@ export interface ConfigItem {
   updated_at: string
 }
 
+// Consulta pública sin cookies (mismo patrón que lib/public-content.ts): esta
+// función la usa components/footer.tsx, presente en todas las páginas
+// públicas, así que depender de cookies() acá bloqueaba el ISR de esas
+// páginas. La tabla "configuracion" tiene RLS pública de solo lectura, no
+// depende de sesión, por eso puede resolverse con la anon key vía REST.
 export async function getConfiguracion(): Promise<Record<string, string>> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from("configuracion")
-    .select("id, valor")
-    .order("id")
+  try {
+    const url = new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/configuracion`)
+    url.searchParams.set("select", "id,valor")
+    url.searchParams.set("order", "id.asc")
 
-  if (error) {
+    const res = await fetch(url.toString(), {
+      next: { revalidate: 60 },
+      headers: {
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    })
+
+    if (!res.ok) {
+      console.error("[configuracion] Error al leer configuración:", await res.text())
+      return {}
+    }
+
+    const data = (await res.json()) as { id: string; valor: string }[]
+    return Object.fromEntries((data ?? []).map((r) => [r.id, r.valor]))
+  } catch (error) {
     console.error("[configuracion] Error al leer configuración:", error)
     return {}
   }
-
-  return Object.fromEntries((data ?? []).map((r) => [r.id, r.valor]))
 }
 
 export async function getConfiguracionCompleta(): Promise<ConfigItem[]> {

@@ -40,21 +40,37 @@ export async function getHorarios(): Promise<ReservationTime[]> {
   return data ?? []
 }
 
+// Consulta pública sin cookies (mismo patrón que lib/public-content.ts): esta
+// función alimenta /reservas (página pública) y quedaba bloqueada de ISR por
+// createClient()/cookies(). La tabla "reservation_times" tiene RLS pública de
+// solo lectura (scripts/008_create_reservation_times.sql), no depende de sesión.
 export async function getHorariosActivos(): Promise<ReservationTime[]> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from("reservation_times")
-    .select("*")
-    .eq("is_active", true)
-    .order("meal_type")
-    .order("sort_order")
-    .order("time")
+  try {
+    const url = new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/reservation_times`)
+    url.searchParams.set("select", "*")
+    url.searchParams.set("is_active", "eq.true")
+    url.searchParams.set("order", "meal_type.asc,sort_order.asc,time.asc")
 
-  if (error) {
+    const res = await fetch(url.toString(), {
+      next: { revalidate: 60 },
+      headers: {
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    })
+
+    if (!res.ok) {
+      console.error("[admin-horarios] getHorariosActivos error:", await res.text())
+      return []
+    }
+
+    return (await res.json()) as ReservationTime[]
+  } catch (error) {
     console.error("[admin-horarios] getHorariosActivos error:", error)
     return []
   }
-  return data ?? []
 }
 
 export async function createHorario(

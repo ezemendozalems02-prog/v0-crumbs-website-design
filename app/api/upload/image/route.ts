@@ -55,7 +55,9 @@ export async function POST(request: NextRequest) {
       .upload(filename, buffer, {
         contentType: file.type,
         upsert: false,
-        cacheControl: '3600',
+        // Nombres de archivo únicos (timestamp+uuid) + upsert:false → cada URL es
+        // efectivamente inmutable, es seguro cachear al máximo por 1 año.
+        cacheControl: '31536000, immutable',
       })
 
     if (uploadError) {
