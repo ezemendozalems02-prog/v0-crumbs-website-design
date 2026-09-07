@@ -5,7 +5,7 @@ import { X, Plus, Minus, ShoppingBag, MessageCircle, User, MapPin, Check, Truck,
 import { useState } from "react"
 import { whatsappUrl } from "@/lib/whatsapp"
 
-export function Cart() {
+export function Cart({ deliveryCost: DELIVERY_COST = 1000 }: { deliveryCost?: number }) {
   const { items, totalItems, totalPrice, isCartOpen, setIsCartOpen, updateQuantity, removeItem, clearCart } = useCart()
 
   const [nombre, setNombre] = useState("")
@@ -13,7 +13,6 @@ export function Cart() {
   const [deliveryType, setDeliveryType] = useState<"retiro" | "envio">("retiro")
   const [errors, setErrors] = useState<{ nombre?: string; direccion?: string }>({})
 
-  const DELIVERY_COST = 1000
   const deliveryCost = deliveryType === "envio" ? DELIVERY_COST : 0
   const finalTotal = totalPrice + deliveryCost
 

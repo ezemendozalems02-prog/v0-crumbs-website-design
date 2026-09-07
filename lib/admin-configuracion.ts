@@ -64,19 +64,21 @@ export async function updateConfiguracionBulk(
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
 
-  const updates = Object.entries(cambios).map(([id, valor]) =>
-    supabase
-      .from("configuracion")
-      .update({ valor: valor.trim(), updated_at: new Date().toISOString() })
-      .eq("id", id)
+  // upsert (no update): permite crear una clave nueva la primera vez que se
+  // guarda desde el admin (ej. costo_envio), no solo actualizar las ya
+  // existentes en la tabla.
+  const { error } = await supabase.from("configuracion").upsert(
+    Object.entries(cambios).map(([id, valor]) => ({
+      id,
+      valor: valor.trim(),
+      updated_at: new Date().toISOString(),
+    })),
+    { onConflict: "id" }
   )
 
-  const results = await Promise.all(updates)
-  const failed = results.find((r) => r.error)
-
-  if (failed?.error) {
-    console.error("[configuracion] Error en bulk update:", failed.error)
-    return { success: false, error: failed.error.message }
+  if (error) {
+    console.error("[configuracion] Error en bulk update:", error)
+    return { success: false, error: error.message }
   }
 
   // Revalidar todas las páginas del sitio ya que el footer con horarios está en todas

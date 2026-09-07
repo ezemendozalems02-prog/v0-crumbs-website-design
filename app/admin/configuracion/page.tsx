@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { getConfiguracionCompleta, updateConfiguracionBulk, type ConfigItem } from "@/lib/admin-configuracion"
-import { Clock, MapPin, Instagram, Phone, Mail, Save, CheckCircle, AlertCircle, Loader2, Settings } from "lucide-react"
+import { Clock, MapPin, Instagram, Phone, Mail, Save, CheckCircle, AlertCircle, Loader2, Settings, Truck } from "lucide-react"
 
-const GRUPOS = [
+type Campo = { id: string; label: string; placeholder: string; type?: "text" | "number" }
+
+const GRUPOS: { titulo: string; icono: typeof Clock; campos: Campo[] }[] = [
   {
     titulo: "Horarios",
     icono: Clock,
@@ -18,6 +20,13 @@ const GRUPOS = [
     icono: MapPin,
     campos: [
       { id: "direccion", label: "Dirección", placeholder: "Ej: Ciudad Jardín, Buenos Aires, Argentina" },
+    ],
+  },
+  {
+    titulo: "Delivery",
+    icono: Truck,
+    campos: [
+      { id: "costo_envio", label: "Costo de envío ($)", placeholder: "Ej: 1000", type: "number" as const },
     ],
   },
   {
@@ -168,11 +177,12 @@ export default function AdminConfiguracionPage() {
             <Icono className="w-4 h-4 text-primary" />
             <h2 className="text-sm font-semibold text-foreground">{titulo}</h2>
           </div>
-          {campos.map(({ id, label, placeholder }) => (
+          {campos.map(({ id, label, placeholder, type }) => (
             <div key={id}>
               <label className="text-xs font-medium text-foreground/60 block mb-1.5">{label}</label>
               <input
-                type="text"
+                type={type ?? "text"}
+                min={type === "number" ? 0 : undefined}
                 value={config[id] ?? ""}
                 onChange={(e) => handleChange(id, e.target.value)}
                 placeholder={placeholder}
